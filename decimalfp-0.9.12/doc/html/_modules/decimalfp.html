@@ -1,0 +1,461 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>decimalfp &mdash; decimalfp 0.9 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="decimalfp 0.9 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="../index.html" class="fa fa-home"> decimalfp</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../decimalfp.html">Decimal fixed-point arithmetic</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decimalfp.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decimalfp.html#computations">Computations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decimalfp.html#class-decimal">Class <cite>Decimal</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decimalfp.html#rounding-modes">Rounding modes</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">decimalfp</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>decimalfp</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>Source code for decimalfp</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">##----------------------------------------------------------------------------</span>
+<span class="c">## Name:        decimalfp</span>
+<span class="c">## Purpose:     Decimal fixed-point arithmetic</span>
+<span class="c">##</span>
+<span class="c">## Author:      Michael Amrhein (mamrhein@users.sourceforge.net)</span>
+<span class="c">##</span>
+<span class="c">## Copyright:   (c) 2014 Michael Amrhein</span>
+<span class="c">## License:     This program is free software. You can redistribute it, use it</span>
+<span class="c">##              and/or modify it under the terms of the 2-clause BSD license.</span>
+<span class="c">##              For license details please read the file LICENSE.TXT provided</span>
+<span class="c">##              together with the source code.</span>
+<span class="c">##----------------------------------------------------------------------------</span>
+<span class="c">## $Source: decimalfp.py $</span>
+<span class="c">## $Revision: 57be6576e3c7 2015-03-27 13:28 +0100 mamrhein $</span>
+
+
+<span class="sd">&quot;&quot;&quot;The module `decimalfp` provides a :class:`Decimal` number type which can</span>
+<span class="sd">represent decimal numbers of arbitrary magnitude and arbitrary precision, i.e.</span>
+<span class="sd">any number of fractional digits.</span>
+
+<span class="sd">Usage</span>
+<span class="sd">=====</span>
+
+<span class="sd">:class:`decimalfp.Decimal` instances are created by giving a `value` (default:</span>
+<span class="sd">0) and a `precision` (i.e the number of fractional digits, default: None).</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal()</span>
+<span class="sd">    Decimal(0)</span>
+
+<span class="sd">If `precision` is given, it must be of type `int` and &gt;= 0.</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal(5, 3)</span>
+<span class="sd">    Decimal(5, 3)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(5555, -3)</span>
+<span class="sd">    ValueError: Precision must be &gt;= 0.</span>
+
+<span class="sd">If `value` is given, it must either be a string (type `str` or `unicode` in</span>
+<span class="sd">Python 2.x, `bytes` or `str` in Python 3.x), an instance of `number.Integral`</span>
+<span class="sd">(for example `int` or `long` in Python 2.x, `int` in Python 3.x),</span>
+<span class="sd">`number.Rational` (for example `fractions.Fraction`), `decimal.Decimal` or</span>
+<span class="sd">`float` or be convertable to a `float` or an `int`.</span>
+
+<span class="sd">The value is always adjusted to the given precision or the precision is</span>
+<span class="sd">calculated from the given value, if no precision is given.</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal(b&#39;12.345&#39;)</span>
+<span class="sd">    Decimal(&#39;12.345&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(u&#39;12.345&#39;)</span>
+<span class="sd">    Decimal(&#39;12.345&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(u&#39;12.345&#39;, 5)</span>
+<span class="sd">    Decimal(&#39;12.345&#39;, 5)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(15, 4)</span>
+<span class="sd">    Decimal(15, 4)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(10 ** 23)</span>
+<span class="sd">    Decimal(100000000000000000000000)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(10 ** 48)</span>
+<span class="sd">    Decimal(1000000000000000000000000000000000000000000000000)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(2 ** 48)</span>
+<span class="sd">    Decimal(281474976710656)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(2 ** 98)</span>
+<span class="sd">    Decimal(316912650057057350374175801344)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(Fraction(7, 56))</span>
+<span class="sd">    Decimal(&#39;0.125&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(Fraction(8106479329266893, 4503599627370496), 7)</span>
+<span class="sd">    Decimal(&#39;1.8&#39;, 7)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(1.8, 7)</span>
+<span class="sd">    Decimal(&#39;1.8&#39;, 7)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(decimal.Decimal(&#39;-19.26&#39;, 5), 3)</span>
+<span class="sd">    Decimal(&#39;-19.26&#39;, 3)</span>
+
+<span class="sd">When the given `precision` is lower than the precision of the given `value`,</span>
+<span class="sd">the result is rounded, according to the rounding mode of the current context</span>
+<span class="sd">held by the standard module `decimal` (which defaults to ROUND_HALF_EVEN, in</span>
+<span class="sd">contrast to the `round` function in Python 2.x !!!).</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal(u&#39;12.345&#39;, 2)</span>
+<span class="sd">    Decimal(&#39;12.34&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(u&#39;12.3456&#39;, 3)</span>
+<span class="sd">    Decimal(&#39;12.346&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(0.2, 3)</span>
+<span class="sd">    Decimal(&#39;0.2&#39;, 3)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(0.2, 17)</span>
+<span class="sd">    Decimal(&#39;0.20000000000000001&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(0.2, 55)</span>
+<span class="sd">    Decimal(&#39;0.200000000000000011102230246251565404236316680908203125&#39;, 55)</span>
+
+<span class="sd">When no `precision` is given and the given `value` is a `float` or a</span>
+<span class="sd">`numbers.Rational` (but no :class:`Decimal`), the :class:`Decimal` constructor</span>
+<span class="sd">tries to convert `value` exactly. But, for performance reasons, this is done</span>
+<span class="sd">only up a fixed limit of fractional digits. This limit defaults to 32 and is</span>
+<span class="sd">accessible as `decimalfp.LIMIT_PREC`. If `value` can not be represented as a</span>
+<span class="sd">:class:`Decimal` within this limit, an exception is raised.</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal(0.2)</span>
+<span class="sd">    ValueError: Can&#39;t convert 0.2 exactly to Decimal.</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(Fraction(1, 7))</span>
+<span class="sd">    ValueError: Can&#39;t convert Fraction(1, 7) exactly to Decimal.</span>
+
+<span class="sd">:class:`Decimal` does not deal with infinity, division by 0 always raises a</span>
+<span class="sd">`ZeroDivisionError`. Likewise, infinite instances of type `float` or</span>
+<span class="sd">`decimal.Decimal` can not be converted to :class:`Decimal` instances. The same</span>
+<span class="sd">is true for the &#39;not a number&#39; instances of these types.</span>
+
+<span class="sd">Computations</span>
+<span class="sd">============</span>
+
+<span class="sd">When importing `decimalfp`, its :class:`Decimal` type is registered in Pythons</span>
+<span class="sd">numerical stack as `number.Rational`. It supports all operations defined for</span>
+<span class="sd">that base class and its instances can be mixed in computations with instances</span>
+<span class="sd">of all numeric types mentioned above.</span>
+
+<span class="sd">All numerical operations give an exact result, i.e. they are not automatically</span>
+<span class="sd">constraint to the precision of the operands or to a number of significant</span>
+<span class="sd">digits (like the floating-point `Decimal` type from the standard module</span>
+<span class="sd">`decimal`). When the result can not exactly be represented by a</span>
+<span class="sd">:class:`Decimal` instance within the limit given by `decimalfp.LIMIT_PREC`, an</span>
+<span class="sd">instance of `fractions.Fraction` is returned.</span>
+
+<span class="sd">Addition and subtraction</span>
+<span class="sd">------------------------</span>
+
+<span class="sd">Adding or subtracting :class:`Decimal` instances results in a :class:`Decimal`</span>
+<span class="sd">instance with a precision equal to the maximum of the precisions of the</span>
+<span class="sd">operands.</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal(&#39;7.3&#39;) + Decimal(&#39;8.275&#39;)</span>
+<span class="sd">    Decimal(&#39;15.575&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(&#39;-7.3&#39;, 4) + Decimal(&#39;8.275&#39;)</span>
+<span class="sd">    Decimal(&#39;0.975&#39;, 4)</span>
+
+<span class="sd">In operations with other numerical types the precision of the result is at</span>
+<span class="sd">least equal to the precision of the involved :class:`Decimal` instance, but</span>
+<span class="sd">may be greater, if neccessary. If the needed precision exceeds</span>
+<span class="sd">`decimalfp.LIMIT_PREC`, an instance of `fractions.Fraction` is returned.</span>
+
+<span class="sd">    &gt;&gt;&gt; 0.25 + Decimal(3)</span>
+<span class="sd">    Decimal(&#39;3.25&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; 0.25 - Decimal(-3, 5)</span>
+<span class="sd">    Decimal(&#39;3.25&#39;, 5)</span>
+<span class="sd">    &gt;&gt;&gt; 0.725 + Decimal(&#39;3&#39;)</span>
+<span class="sd">    Fraction(33551817223910195, 9007199254740992)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(&#39;3&#39;) + Fraction(1, 7)</span>
+<span class="sd">    Fraction(22, 7)</span>
+
+<span class="sd">Multiplication and division</span>
+<span class="sd">---------------------------</span>
+
+<span class="sd">Multiplying :class:`Decimal` instances results in a :class:`Decimal` instance</span>
+<span class="sd">with precision equal to the sum of the precisions of the operands.</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal(&#39;5.000&#39;) * Decimal(&#39;2.5&#39;)</span>
+<span class="sd">    Decimal(&#39;12.5&#39;, 4)</span>
+
+<span class="sd">Dividing :class:`Decimal` instances results in a :class:`Decimal` instance</span>
+<span class="sd">with precision at least equal to max(0, numerator.precision -</span>
+<span class="sd">denominator.precision), but may be greater, if needed.</span>
+
+<span class="sd">    &gt;&gt;&gt; Decimal(&#39;5.2000&#39;) / Decimal(&#39;2.5&#39;)</span>
+<span class="sd">    Decimal(&#39;2.08&#39;, 3)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(&#39;5.2003&#39;) / Decimal(&#39;2.5&#39;)</span>
+<span class="sd">    Decimal(&#39;2.08012&#39;)</span>
+
+<span class="sd">In operations with other numerical types the precision of the result is at</span>
+<span class="sd">least equal to the precision of the involved :class:`Decimal` instance, but</span>
+<span class="sd">may be greater, if neccessary. If the needed precision exceeds</span>
+<span class="sd">`decimalfp.LIMIT_PREC`, an instance of `fractions.Fraction` is returned.</span>
+
+<span class="sd">    &gt;&gt;&gt; 3 * Decimal(&#39;7.5&#39;)</span>
+<span class="sd">    Decimal(&#39;22.5&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(5) * 0.25</span>
+<span class="sd">    Decimal(&#39;1.25&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; Decimal(&#39;3&#39;) * Fraction(1, 7)</span>
+<span class="sd">    Fraction(3, 7)</span>
+
+<span class="sd">Rounding</span>
+<span class="sd">--------</span>
+
+<span class="sd">:class:`Decimal` supports rounding via the built-in function `round`.</span>
+
+<span class="sd">.. note::</span>
+<span class="sd">    In Python 2.x the function `round` uses the rounding mode ROUND_HALF_UP</span>
+<span class="sd">    and always returns a `float`, while in Python 3.x it rounds according to</span>
+<span class="sd">    ROUND_HALF_EVEN and returns an `int` when called with one argument,</span>
+<span class="sd">    otherwise the same type as the number to be rounded.</span>
+
+<span class="sd">Python 2.x:</span>
+
+<span class="sd">    &gt;&gt;&gt; round(Decimal(&#39;12.345&#39;))</span>
+<span class="sd">    12.0</span>
+<span class="sd">    &gt;&gt;&gt; round(Decimal(&#39;12.345&#39;), 2)</span>
+<span class="sd">    12.35</span>
+<span class="sd">    &gt;&gt;&gt; round(Decimal(&#39;1234.5&#39;), -2)</span>
+<span class="sd">    1200.0</span>
+
+<span class="sd">Python 3.x:</span>
+
+<span class="sd">    &gt;&gt;&gt; round(Decimal(&#39;12.345&#39;))</span>
+<span class="sd">    12</span>
+<span class="sd">    &gt;&gt;&gt; round(Decimal(&#39;12.345&#39;), 2)</span>
+<span class="sd">    Decimal(&#39;12.34&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; round(Decimal(&#39;1234.5&#39;), -2)</span>
+<span class="sd">    Decimal(1200)</span>
+
+<span class="sd">In addition, via the method :meth:`adjusted` a :class:`Decimal` with a</span>
+<span class="sd">different precision can be derived, supporting all rounding modes defined by</span>
+<span class="sd">the standard library module `decimal`.</span>
+
+<span class="sd">    &gt;&gt;&gt; d = Decimal(&#39;12.345&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; d.adjusted(2)           # default rounding mode is ROUND_HALF_EVEN !</span>
+<span class="sd">    Decimal(&#39;12.34&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; d.adjusted(2, ROUND_HALF_UP)</span>
+<span class="sd">    Decimal(&#39;12.35&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; d.adjusted(1, ROUND_UP)</span>
+<span class="sd">    Decimal(&#39;12.4&#39;)</span>
+
+<span class="sd">For the details of the different rounding modes see the documentation of the</span>
+<span class="sd">standard library module `decimal`.</span>
+
+<span class="sd">`round` and `adjusted` only allow to round to a quantum that&#39;s a power to 10.</span>
+<span class="sd">The method :meth:`quantize` can be used to round to any quantum and it does</span>
+<span class="sd">also support all rounding modes mentioned above.</span>
+
+<span class="sd">    &gt;&gt;&gt; d = Decimal(&#39;12.345&#39;)</span>
+<span class="sd">    &gt;&gt;&gt;# equivalent to round(d, 2) or d.adjusted(2)</span>
+<span class="sd">    &gt;&gt;&gt;# (default rounding mode ROUND_HALF_EVEN):</span>
+<span class="sd">    &gt;&gt;&gt; d.quantize(Decimal(&#39;0.01&#39;))</span>
+<span class="sd">    Decimal(&#39;12.34&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; d.quantize(Decimal(&#39;0.05&#39;))</span>
+<span class="sd">    Decimal(&#39;12.35&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; d.quantize(&#39;0.6&#39;)</span>
+<span class="sd">    Decimal(&#39;12.6&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; d.quantize(4)</span>
+<span class="sd">    Decimal(&#39;12&#39;)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="c"># rounding modes</span>
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">ROUND_DOWN</span><span class="p">,</span> <span class="n">ROUND_UP</span><span class="p">,</span> <span class="n">ROUND_HALF_DOWN</span><span class="p">,</span> <span class="n">ROUND_HALF_UP</span><span class="p">,</span>\
+    <span class="n">ROUND_HALF_EVEN</span><span class="p">,</span> <span class="n">ROUND_CEILING</span><span class="p">,</span> <span class="n">ROUND_FLOOR</span><span class="p">,</span> <span class="n">ROUND_05UP</span>
+<span class="c"># function to get context from decimal</span>
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">getcontext</span> <span class="k">as</span> <span class="n">_getcontext</span>
+
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span>
+
+<span class="n">__metaclass__</span> <span class="o">=</span> <span class="nb">type</span>
+
+
+<span class="c"># precision limit for division or conversion without explicitely given</span>
+<span class="c"># precision</span>
+<span class="n">LIMIT_PREC</span> <span class="o">=</span> <span class="mi">32</span>
+
+
+<span class="k">def</span> <span class="nf">_get_limit_prec</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">LIMIT_PREC</span>
+
+
+<span class="c"># functions to get / set rounding mode</span>
+<div class="viewcode-block" id="get_rounding"><a class="viewcode-back" href="../decimalfp.html#decimalfp.get_rounding">[docs]</a><span class="k">def</span> <span class="nf">get_rounding</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Return rounding mode from current context.&quot;&quot;&quot;</span>
+    <span class="n">ctx</span> <span class="o">=</span> <span class="n">_getcontext</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">rounding</span>
+
+</div>
+<div class="viewcode-block" id="set_rounding"><a class="viewcode-back" href="../decimalfp.html#decimalfp.set_rounding">[docs]</a><span class="k">def</span> <span class="nf">set_rounding</span><span class="p">(</span><span class="n">rounding</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set rounding mode in current context.&quot;&quot;&quot;</span>
+    <span class="n">ctx</span> <span class="o">=</span> <span class="n">_getcontext</span><span class="p">()</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">rounding</span> <span class="o">=</span> <span class="n">rounding</span>
+
+</div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># Cython / C implementation available?</span>
+    <span class="kn">from</span> <span class="nn">_cdecimalfp</span> <span class="kn">import</span> <span class="n">Decimal</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">_pydecimalfp</span> <span class="kn">import</span> <span class="n">Decimal</span>
+
+
+<span class="c"># define public namespace</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;Decimal&#39;</span><span class="p">,</span>
+    <span class="s">&#39;get_rounding&#39;</span><span class="p">,</span>
+    <span class="s">&#39;set_rounding&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_DOWN&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_UP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_HALF_DOWN&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_HALF_UP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_HALF_EVEN&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_CEILING&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_FLOOR&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ROUND_05UP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;LIMIT_PREC&#39;</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014 ff., Michael Amrhein.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+Version     Changes
+------------------------------------------------------------------------------
+0.9.12      Use Cython implementation only under CPython.
+
+0.9.11      Fixed bug in Cython implementation of method `quantize`.
+
+0.9.10      Added method `quantize`.
+
+0.9.9       Changed `magnitude`: return largest integer exp so that
+            10 ** exp <= self
+
+0.9.8       Fixed bug in __format__
+
+0.9.7       Restructured Python code, so that it follows the structure of the
+            Cython code. Results in a small performance gain.
+            Minimum precision of the quotient of two Decimals is now set to
+            max(0, numerator.precision - denominator.precision).
+
+0.9.6       Fixed bug in __trunc__ and __str__
+
+0.9.5       First public release

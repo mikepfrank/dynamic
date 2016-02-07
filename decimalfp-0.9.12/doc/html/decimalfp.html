@@ -1,0 +1,832 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Decimal fixed-point arithmetic &mdash; decimalfp 0.9 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="decimalfp 0.9 documentation" href="index.html"/>
+        <link rel="prev" title="Welcome to decimalfp’s documentation!" href="index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> decimalfp</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Decimal fixed-point arithmetic</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computations">Computations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#class-decimal">Class <cite>Decimal</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rounding-modes">Rounding modes</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">decimalfp</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Decimal fixed-point arithmetic</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="module-decimalfp">
+<span id="decimal-fixed-point-arithmetic"></span><h1>Decimal fixed-point arithmetic<a class="headerlink" href="#module-decimalfp" title="Permalink to this headline">¶</a></h1>
+<p>The module <cite>decimalfp</cite> provides a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> number type which can
+represent decimal numbers of arbitrary magnitude and arbitrary precision, i.e.
+any number of fractional digits.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">decimalfp.Decimal</span></code></a> instances are created by giving a <cite>value</cite> (default:
+0) and a <cite>precision</cite> (i.e the number of fractional digits, default: None).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">()</span>
+<span class="go">Decimal(0)</span>
+</pre></div>
+</div>
+<p>If <cite>precision</cite> is given, it must be of type <cite>int</cite> and &gt;= 0.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">Decimal(5, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">5555</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">ValueError: Precision must be &gt;= 0.</span>
+</pre></div>
+</div>
+<p>If <cite>value</cite> is given, it must either be a string (type <cite>str</cite> or <cite>unicode</cite> in
+Python 2.x, <cite>bytes</cite> or <cite>str</cite> in Python 3.x), an instance of <cite>number.Integral</cite>
+(for example <cite>int</cite> or <cite>long</cite> in Python 2.x, <cite>int</cite> in Python 3.x),
+<cite>number.Rational</cite> (for example <cite>fractions.Fraction</cite>), <cite>decimal.Decimal</cite> or
+<cite>float</cite> or be convertable to a <cite>float</cite> or an <cite>int</cite>.</p>
+<p>The value is always adjusted to the given precision or the precision is
+calculated from the given value, if no precision is given.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="n">b</span><span class="s">&#39;12.345&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.345&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">u&#39;12.345&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.345&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">u&#39;12.345&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.345&#39;, 5)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">Decimal(15, 4)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">23</span><span class="p">)</span>
+<span class="go">Decimal(100000000000000000000000)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">48</span><span class="p">)</span>
+<span class="go">Decimal(1000000000000000000000000000000000000000000000000)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">48</span><span class="p">)</span>
+<span class="go">Decimal(281474976710656)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">98</span><span class="p">)</span>
+<span class="go">Decimal(316912650057057350374175801344)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">56</span><span class="p">))</span>
+<span class="go">Decimal(&#39;0.125&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">8106479329266893</span><span class="p">,</span> <span class="mi">4503599627370496</span><span class="p">),</span> <span class="mi">7</span><span class="p">)</span>
+<span class="go">Decimal(&#39;1.8&#39;, 7)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mf">1.8</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="go">Decimal(&#39;1.8&#39;, 7)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;-19.26&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">Decimal(&#39;-19.26&#39;, 3)</span>
+</pre></div>
+</div>
+<p>When the given <cite>precision</cite> is lower than the precision of the given <cite>value</cite>,
+the result is rounded, according to the rounding mode of the current context
+held by the standard module <cite>decimal</cite> (which defaults to ROUND_HALF_EVEN, in
+contrast to the <cite>round</cite> function in Python 2.x !!!).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">u&#39;12.345&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.34&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">u&#39;12.3456&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.346&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">Decimal(&#39;0.2&#39;, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+<span class="go">Decimal(&#39;0.20000000000000001&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mi">55</span><span class="p">)</span>
+<span class="go">Decimal(&#39;0.200000000000000011102230246251565404236316680908203125&#39;, 55)</span>
+</pre></div>
+</div>
+<p>When no <cite>precision</cite> is given and the given <cite>value</cite> is a <cite>float</cite> or a
+<cite>numbers.Rational</cite> (but no <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>), the <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> constructor
+tries to convert <cite>value</cite> exactly. But, for performance reasons, this is done
+only up a fixed limit of fractional digits. This limit defaults to 32 and is
+accessible as <cite>decimalfp.LIMIT_PREC</cite>. If <cite>value</cite> can not be represented as a
+<a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> within this limit, an exception is raised.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="go">ValueError: Can&#39;t convert 0.2 exactly to Decimal.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="go">ValueError: Can&#39;t convert Fraction(1, 7) exactly to Decimal.</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> does not deal with infinity, division by 0 always raises a
+<cite>ZeroDivisionError</cite>. Likewise, infinite instances of type <cite>float</cite> or
+<cite>decimal.Decimal</cite> can not be converted to <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instances. The same
+is true for the &#8216;not a number&#8217; instances of these types.</p>
+</div>
+<div class="section" id="computations">
+<h2>Computations<a class="headerlink" href="#computations" title="Permalink to this headline">¶</a></h2>
+<p>When importing <cite>decimalfp</cite>, its <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> type is registered in Pythons
+numerical stack as <cite>number.Rational</cite>. It supports all operations defined for
+that base class and its instances can be mixed in computations with instances
+of all numeric types mentioned above.</p>
+<p>All numerical operations give an exact result, i.e. they are not automatically
+constraint to the precision of the operands or to a number of significant
+digits (like the floating-point <cite>Decimal</cite> type from the standard module
+<cite>decimal</cite>). When the result can not exactly be represented by a
+<a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance within the limit given by <cite>decimalfp.LIMIT_PREC</cite>, an
+instance of <cite>fractions.Fraction</cite> is returned.</p>
+<div class="section" id="addition-and-subtraction">
+<h3>Addition and subtraction<a class="headerlink" href="#addition-and-subtraction" title="Permalink to this headline">¶</a></h3>
+<p>Adding or subtracting <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instances results in a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>
+instance with a precision equal to the maximum of the precisions of the
+operands.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;7.3&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;8.275&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;15.575&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;-7.3&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;8.275&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;0.975&#39;, 4)</span>
+</pre></div>
+</div>
+<p>In operations with other numerical types the precision of the result is at
+least equal to the precision of the involved <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance, but
+may be greater, if neccessary. If the needed precision exceeds
+<cite>decimalfp.LIMIT_PREC</cite>, an instance of <cite>fractions.Fraction</cite> is returned.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="mf">0.25</span> <span class="o">+</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">Decimal(&#39;3.25&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">0.25</span> <span class="o">-</span> <span class="n">Decimal</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="go">Decimal(&#39;3.25&#39;, 5)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">0.725</span> <span class="o">+</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;3&#39;</span><span class="p">)</span>
+<span class="go">Fraction(33551817223910195, 9007199254740992)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;3&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="go">Fraction(22, 7)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiplication-and-division">
+<h3>Multiplication and division<a class="headerlink" href="#multiplication-and-division" title="Permalink to this headline">¶</a></h3>
+<p>Multiplying <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instances results in a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance
+with precision equal to the sum of the precisions of the operands.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;5.000&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;2.5&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.5&#39;, 4)</span>
+</pre></div>
+</div>
+<p>Dividing <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instances results in a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance
+with precision at least equal to max(0, numerator.precision -
+denominator.precision), but may be greater, if needed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;5.2000&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;2.5&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;2.08&#39;, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;5.2003&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;2.5&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;2.08012&#39;)</span>
+</pre></div>
+</div>
+<p>In operations with other numerical types the precision of the result is at
+least equal to the precision of the involved <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance, but
+may be greater, if neccessary. If the needed precision exceeds
+<cite>decimalfp.LIMIT_PREC</cite>, an instance of <cite>fractions.Fraction</cite> is returned.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="mi">3</span> <span class="o">*</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;7.5&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;22.5&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.25</span>
+<span class="go">Decimal(&#39;1.25&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;3&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="go">Fraction(3, 7)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rounding">
+<h3>Rounding<a class="headerlink" href="#rounding" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> supports rounding via the built-in function <cite>round</cite>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In Python 2.x the function <cite>round</cite> uses the rounding mode ROUND_HALF_UP
+and always returns a <cite>float</cite>, while in Python 3.x it rounds according to
+ROUND_HALF_EVEN and returns an <cite>int</cite> when called with one argument,
+otherwise the same type as the number to be rounded.</p>
+</div>
+<p>Python 2.x:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;12.345&#39;</span><span class="p">))</span>
+<span class="go">12.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;12.345&#39;</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">12.35</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;1234.5&#39;</span><span class="p">),</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">1200.0</span>
+</pre></div>
+</div>
+<p>Python 3.x:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;12.345&#39;</span><span class="p">))</span>
+<span class="go">12</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;12.345&#39;</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.34&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;1234.5&#39;</span><span class="p">),</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">Decimal(1200)</span>
+</pre></div>
+</div>
+<p>In addition, via the method <code class="xref py py-meth docutils literal"><span class="pre">adjusted()</span></code> a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> with a
+different precision can be derived, supporting all rounding modes defined by
+the standard library module <cite>decimal</cite>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;12.345&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>           <span class="c"># default rounding mode is ROUND_HALF_EVEN !</span>
+<span class="go">Decimal(&#39;12.34&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">ROUND_HALF_UP</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.35&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ROUND_UP</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.4&#39;)</span>
+</pre></div>
+</div>
+<p>For the details of the different rounding modes see the documentation of the
+standard library module <cite>decimal</cite>.</p>
+<p><cite>round</cite> and <cite>adjusted</cite> only allow to round to a quantum that&#8217;s a power to 10.
+The method <code class="xref py py-meth docutils literal"><span class="pre">quantize()</span></code> can be used to round to any quantum and it does
+also support all rounding modes mentioned above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;12.345&#39;</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;# equivalent to round(d, 2) or d.adjusted(2)</span>
+<span class="go">&gt;&gt;&gt;# (default rounding mode ROUND_HALF_EVEN):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;0.01&#39;</span><span class="p">))</span>
+<span class="go">Decimal(&#39;12.34&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;0.05&#39;</span><span class="p">))</span>
+<span class="go">Decimal(&#39;12.35&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="s">&#39;0.6&#39;</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12.6&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">Decimal(&#39;12&#39;)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-decimal">
+<h2>Class <cite>Decimal</cite><a class="headerlink" href="#class-decimal" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="decimalfp.Decimal">
+<em class="property">class </em><code class="descclassname">decimalfp.</code><code class="descname">Decimal</code><a class="headerlink" href="#decimalfp.Decimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decimal number with a given number of fractional digits.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>value</strong> (<em>see below</em>) &#8211; numerical value (default: 0)</li>
+<li><strong>precision</strong> (<em>int</em>) &#8211; number of fractional digits (default: None)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If <cite>value</cite> is given, it must either be a string (type <cite>str</cite> or <cite>unicode</cite>
+in Python 2.x, <cite>bytes</cite> or <cite>str</cite> in Python 3.x), an instance of
+<cite>number.Integral</cite> (for example <cite>int</cite> or <cite>long</cite> in Python 2.x, <cite>int</cite> in
+Python 3.x), <cite>number.Rational</cite> (for example <cite>fractions.Fraction</cite>),
+<cite>decimal.Decimal</cite> or <cite>float</cite> or be convertable to a <cite>float</cite> or an <cite>int</cite>.</p>
+<p>If a string is given as value, it must be a string in one of two formats:</p>
+<ul class="simple">
+<li>[+|-]&lt;int&gt;[.&lt;frac&gt;][&lt;e|E&gt;[+|-]&lt;exp&gt;] or</li>
+<li>[+|-].&lt;frac&gt;[&lt;e|E&gt;[+|-]&lt;exp&gt;].</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance derived from <cite>value</cite> according
+to <cite>precision</cite></td>
+</tr>
+</tbody>
+</table>
+<p>The value is always adjusted to the given precision or the precision is
+calculated from the given value, if no precision is given. For performance
+reasons, in the latter case the conversion of a <cite>numbers.Rational</cite> (like
+<cite>fractions.Fraction</cite>) or a <cite>float</cite> tries to give an exact result as a
+<a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> only up to a fixed limit of fractional digits. This limit
+defaults to 32 and is accessible as <cite>decimalfp.LIMIT_PREC</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">TypeError</span></code> &#8211; 
+<cite>precision</cite> is given, but not of type <cite>int</cite>.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">TypeError</span></code> &#8211; 
+<cite>value</cite> is not an instance of the types listed above and
+not convertable to <cite>float</cite> or <cite>int</cite>.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; 
+<cite>precision</cite> is given, but not &gt;= 0.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; 
+<cite>value</cite> can not be converted to a <cite>Decimal</cite> (with a number
+of fractional digits &lt;= <cite>LIMIT_PREC</cite> if no <cite>precision</cite> is given).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instances are immutable.</p>
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__abs__">
+<code class="descname">__abs__</code><a class="headerlink" href="#decimalfp.Decimal.__abs__" title="Permalink to this definition">¶</a></dt>
+<dd><p>abs(self)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__add__">
+<code class="descname">__add__</code><a class="headerlink" href="#decimalfp.Decimal.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x + y</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.__ceil__">
+<code class="descname">__ceil__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.__ceil__" title="Permalink to this definition">¶</a></dt>
+<dd><p>math.ceil(self)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__div__">
+<code class="descname">__div__</code><a class="headerlink" href="#decimalfp.Decimal.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x / y</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__eq__">
+<code class="descname">__eq__</code><a class="headerlink" href="#decimalfp.Decimal.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__eq__(y) &lt;==&gt; x==y</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.__floor__">
+<code class="descname">__floor__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.__floor__" title="Permalink to this definition">¶</a></dt>
+<dd><p>math.floor(self)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.__format__">
+<code class="descname">__format__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.__format__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>self</cite> converted to a string according to given format
+specifier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fmtSpec</strong> (<em>str</em>) &#8211; a standard format specifier for a number</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><cite>self</cite> converted to a string according to <cite>fmtSpec</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__ge__">
+<code class="descname">__ge__</code><a class="headerlink" href="#decimalfp.Decimal.__ge__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__ge__(y) &lt;==&gt; x&gt;=y</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__gt__">
+<code class="descname">__gt__</code><a class="headerlink" href="#decimalfp.Decimal.__gt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__gt__(y) &lt;==&gt; x&gt;y</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__hash__">
+<code class="descname">__hash__</code><a class="headerlink" href="#decimalfp.Decimal.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>hash(self)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__le__">
+<code class="descname">__le__</code><a class="headerlink" href="#decimalfp.Decimal.__le__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__le__(y) &lt;==&gt; x&lt;=y</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__lt__">
+<code class="descname">__lt__</code><a class="headerlink" href="#decimalfp.Decimal.__lt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__lt__(y) &lt;==&gt; x&lt;y</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__mul__">
+<code class="descname">__mul__</code><a class="headerlink" href="#decimalfp.Decimal.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x * y</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__neg__">
+<code class="descname">__neg__</code><a class="headerlink" href="#decimalfp.Decimal.__neg__" title="Permalink to this definition">¶</a></dt>
+<dd><p>-self</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__pos__">
+<code class="descname">__pos__</code><a class="headerlink" href="#decimalfp.Decimal.__pos__" title="Permalink to this definition">¶</a></dt>
+<dd><p>+self</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__pow__">
+<code class="descname">__pow__</code><a class="headerlink" href="#decimalfp.Decimal.__pow__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x ** y</p>
+<p>If y is an integer (or a Rational with denominator = 1), the
+result will be a Decimal. Otherwise, the result will be a float or
+complex since roots are generally irrational.</p>
+<p><cite>mod</cite> must always be None (otherwise a <cite>TypeError</cite> is raised).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__radd__">
+<code class="descname">__radd__</code><a class="headerlink" href="#decimalfp.Decimal.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__radd__(y) &lt;==&gt; y+x</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__rdiv__">
+<code class="descname">__rdiv__</code><a class="headerlink" href="#decimalfp.Decimal.__rdiv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__rdiv__(y) &lt;==&gt; y/x</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__repr__">
+<code class="descname">__repr__</code><a class="headerlink" href="#decimalfp.Decimal.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>repr(self)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__rmul__">
+<code class="descname">__rmul__</code><a class="headerlink" href="#decimalfp.Decimal.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__rmul__(y) &lt;==&gt; y*x</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.__round__">
+<code class="descname">__round__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.__round__" title="Permalink to this definition">¶</a></dt>
+<dd><p>round(self [, ndigits])</p>
+<p>Round <cite>self</cite> to a given precision in decimal digits (default 0).
+<cite>ndigits</cite> may be negative.</p>
+<p>Note: This method is called by the built-in <cite>round</cite> function only in
+Python 3.x! It returns an <cite>int</cite> when called with one argument,
+otherwise a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__rsub__">
+<code class="descname">__rsub__</code><a class="headerlink" href="#decimalfp.Decimal.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__rsub__(y) &lt;==&gt; y-x</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__rtruediv__">
+<code class="descname">__rtruediv__</code><a class="headerlink" href="#decimalfp.Decimal.__rtruediv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__rtruediv__(y) &lt;==&gt; y/x</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__str__">
+<code class="descname">__str__</code><a class="headerlink" href="#decimalfp.Decimal.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>str(self)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__sub__">
+<code class="descname">__sub__</code><a class="headerlink" href="#decimalfp.Decimal.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x - y</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.__truediv__">
+<code class="descname">__truediv__</code><a class="headerlink" href="#decimalfp.Decimal.__truediv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x / y</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.adjusted">
+<code class="descname">adjusted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.adjusted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return copy of <cite>self</cite>, adjusted to the given <cite>precision</cite>, using the
+given <cite>rounding</cite> mode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>precision</strong> (<em>int</em>) &#8211; number of fractional digits (default: None)</li>
+<li><strong>rounding</strong> (<em>str</em>) &#8211; rounding mode (default: None)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance derived from <cite>self</cite>, adjusted
+to the given <cite>precision</cite>, using the given <cite>rounding</cite> mode</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If no <cite>precision</cite> is given, the result is adjusted to the minimum
+precision preserving x == x.adjusted().</p>
+<p>If no <cite>rounding</cite> mode is given, the default mode from the current
+context (from module <cite>decimal</cite>) is used.</p>
+<p>If the given <cite>precision</cite> is less than the precision of <cite>self</cite>, the
+result is rounded and thus information may be lost.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.as_integer_ratio">
+<code class="descname">as_integer_ratio</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.as_integer_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the pair of numerator and denominator with the smallest
+positive denominator, whose ratio is equal to self.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.as_tuple">
+<code class="descname">as_tuple</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.as_tuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a tuple (sign, coeff, exp) so that
+self == (-1) ** sign * coeff * 10 ** exp.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.denominator">
+<code class="descname">denominator</code><a class="headerlink" href="#decimalfp.Decimal.denominator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the smallest positive denominator from the pairs of
+integers, whose ratio is equal to <cite>self</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.from_decimal">
+<code class="descname">from_decimal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.from_decimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a finite decimal number to a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>d</strong> (<em>see below</em>) &#8211; decimal number to be converted to a
+<a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a></td>
+</tr>
+</tbody>
+</table>
+<p><cite>d</cite> can be of type <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>, <cite>numbers.Integral</cite> or
+<cite>decimal.Decimal</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance derived from <cite>d</cite></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">TypeError</span></code> &#8211; 
+<cite>d</cite> is not an instance of the types listed above.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; 
+<cite>d</cite> can not be converted to a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.from_float">
+<code class="descname">from_float</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.from_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a finite float (or int) to a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> (<em>float or int</em>) &#8211; number to be converted to a <cite>Decimal</cite></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance derived from <cite>f</cite></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">TypeError</span></code> &#8211; 
+<cite>f</cite> is neither a <cite>float</cite> nor an <cite>int</cite>.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; 
+<cite>f</cite> can not be converted to a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> with
+a precision &lt;= <cite>LIMIT_PREC</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Beware that Decimal.from_float(0.3) != Decimal(&#8216;0.3&#8217;).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalfp.Decimal.from_real">
+<code class="descname">from_real</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#decimalfp.Decimal.from_real" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a Real number to a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>r</strong> (<cite>numbers.Real</cite>) &#8211; number to be converted to a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a></li>
+<li><strong>exact</strong> (<cite>bool</cite>) &#8211; <cite>True</cite> if <cite>r</cite> shall exactly be represented by
+the resulting <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> instance derived from <cite>r</cite></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">TypeError</span></code> &#8211; 
+<cite>r</cite> is not an instance of <cite>numbers.Real</cite>.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; 
+<cite>exact</cite> is <cite>True</cite> and <cite>r</cite> can not exactly be converted
+to a <a class="reference internal" href="#decimalfp.Decimal" title="decimalfp.Decimal"><code class="xref py py-class docutils literal"><span class="pre">Decimal</span></code></a> with a precision &lt;= <cite>LIMIT_PREC</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If <cite>exact</cite> is <cite>False</cite> and <cite>r</cite> can not exactly be represented by a
+<cite>Decimal</cite> with a precision &lt;= <cite>LIMIT_PREC</cite>, the result is rounded to a
+precision = <cite>LIMIT_PREC</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.imag">
+<code class="descname">imag</code><a class="headerlink" href="#decimalfp.Decimal.imag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The imaginary part of <cite>self</cite>.</p>
+<p>Returns 0 (Real numbers have no imaginary component).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.magnitude">
+<code class="descname">magnitude</code><a class="headerlink" href="#decimalfp.Decimal.magnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return magnitude of <cite>self</cite> in terms of power to 10, i.e. the
+smallest integer exp so that 10 ** exp &gt;= self.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.numerator">
+<code class="descname">numerator</code><a class="headerlink" href="#decimalfp.Decimal.numerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the numerator from the pair of integers with the smallest
+positive denominator, whose ratio is equal to <cite>self</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.precision">
+<code class="descname">precision</code><a class="headerlink" href="#decimalfp.Decimal.precision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return precision of <cite>self</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="decimalfp.Decimal.real">
+<code class="descname">real</code><a class="headerlink" href="#decimalfp.Decimal.real" title="Permalink to this definition">¶</a></dt>
+<dd><p>The real part of <cite>self</cite>.</p>
+<p>Returns <cite>self</cite> (Real numbers are their real component).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="rounding-modes">
+<h2>Rounding modes<a class="headerlink" href="#rounding-modes" title="Permalink to this headline">¶</a></h2>
+<p><cite>Decimal</cite> supports all rounding modes defined by the standard library module
+<cite>decimal</cite>: ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,
+ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR and ROUND_05UP. It uses the
+rounding mode set as default in that module.</p>
+<p>As shortcut to get or set the rounding mode, the module <cite>decimalfp</cite> provides
+the following two functions:</p>
+<dl class="function">
+<dt id="decimalfp.get_rounding">
+<code class="descclassname">decimalfp.</code><code class="descname">get_rounding</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/decimalfp.html#get_rounding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#decimalfp.get_rounding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return rounding mode from current context.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="decimalfp.set_rounding">
+<code class="descclassname">decimalfp.</code><code class="descname">set_rounding</code><span class="sig-paren">(</span><em>rounding</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/decimalfp.html#set_rounding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#decimalfp.set_rounding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set rounding mode in current context.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to decimalfp’s documentation!"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014 ff., Michael Amrhein.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
