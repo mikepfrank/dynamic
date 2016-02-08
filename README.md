@@ -25,7 +25,7 @@ The plan is for Dynamic to include (at least) the following core classes:
 
 * **Coordinate** - A generalized-position coordinate or degree of freedom.  Each position also has an associated velocity, an associated effective mass, and associated kinetic and potential energy terms in the system's Hamiltonian.  Positions and velocities are updated on alternate timesteps using a centered-difference algorithm.  A coordinate can be queried as to its value at any given time (in the past or the future), and the simulation will update its state to calculate this.
 
-* **PotentialFunction** - A potential-energy function of some set of coordinates.  This object can calculate its value, as well as the value of its partial derivative with respect to any of its coordinates.
+* **PotentialEnergyTerm** - A potential-energy function of some set of coordinates; a term in the system's Hamiltonian.  This object can calculate its value, as well as the value of its partial derivative with respect to any of its coordinates.
 
 * Classes for implementing particular "gates" as potential energy terms in the Hamiltonian.  More complex types of devices that also include internal state information may eventually be supported.
 
