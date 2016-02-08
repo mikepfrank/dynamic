@@ -5,7 +5,7 @@ A simple simulator for dynamical systems construed as computations.
 Dynamic is a framework for simulating simple models of (nonlinear, chaotic) dynamical systems, for the purpose of investigating to what extent such models can be used as the foundation for new computational paradigms.
 
 ## 2. Language
-The plan is to initially write Dynamic in Python, although we may eventually port it to C++ for better performance, and perhaps code a parallel version using MPI or OpenMP.
+The plan is to initially write Dynamic in Python (3.5.1 Windows 64-bit), although we may eventually port it to C++ for better performance, and perhaps code a parallel version using MPI or OpenMP.
 
 ## 3. Visualization
 We plan to support a variety of interactive, animated views of the data for visualization and analysis purposes.  Some possibilities for this may include: 
@@ -19,7 +19,7 @@ Dynamic can be configured to connect statistics about the trajectories of coordi
 ## 5. Key Classes
 The plan is for Dynamic to include (at least) the following core classes:
 
-* **FixedPoint** - A class for working with fixed-point numbers with specified precision.  The purpose of using fixed point in this application is to support invertible updates (without rounding).
+* **FixedPoint** - A class for working with fixed-point numbers with specified precision.  The purpose of using fixed point in this application is to support invertible updates (without rounding).  **NOTE:** Now using the existing class decimalfp.py.
 
 * **SimulationContext** - This structure holds global, constant parameters that apply to the whole simulation such as the timestep (∆*t*).
 
