@@ -35,13 +35,31 @@
 #|
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-from  decimalfp     import  *
+from fixed import *     # Defines the fixed-precision math class Fixed.
 
-import  hamiltonian
+import hamiltonian
 
 class Coordinate:
+
+    #-- Data members:
+    #
+    #       position [Fixed] - Generalized position of the coordinate
+    #       velocity [Fixed] - Generalized velocity of the coordinate
+    #
+    #       pos_t [Integral] - Time step index of cur. position coordinate.
+    #       vel_t [Integral] - Time step index of cur. velocity coordinate.
     
-    def __init__():     pass
+    def __init__(inst):
+
+        #-- Default the position,velocity to 0 until we know better.
+        inst.position = Fixed(0)
+        inst.velocity = Fixed(0)
+
+        #-- Also default the time step indices to 0 until a simulation is started.
+        inst.pos_t = 0
+        inst.vel_t = 0
+        
+
 
 
 

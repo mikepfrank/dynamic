@@ -1,0 +1,30 @@
+Notes.txt
+
+Informal notes about dynamic.
+
+Some concepts/classes:
+
+	* Node - Has one or more generalized coordinates, has links to ports of
+		components.  Has an associated kinetic energy function.
+	
+	* Link - Idealized wire connecting a port of a component to a node.  Can 
+		have an associated generalized coordinate representing a flow of
+		something (e.g. charge) down that link, with an associated kinetic  
+		energy function (e.g. corresponding to self-inductance).
+	
+	* Component - An icon, has associated ports, potential energy function.
+		Can also have one or more internal node(s).
+		
+	* SimpleNode - Has only one generalized coordinate, equipped with a basic
+		quadratic kinetic energy function.
+		
+	* SimpleLink - Has no associated generalized coordinates representing 
+		flows.  Implicitly, however, there can be a transfer of energy 
+		down any link, due to the interaction potential energy associated
+		with its connected component.
+		
+	* QuadraticKineticEnergyFunction - A basic quadratic kinetic energy
+		function.  Has an associated generalized mass parameter.  Knows
+		its partial derivative.
+		
+		

@@ -38,6 +38,12 @@ class PotentialEnergyTerm:
     #                   the degrees of freedom that appear in this
     #                   term of the system's Hamiltonian.
     #
+    #   .energyFunction - A differentiable function representing
+    #                   how the potential energy depends on the
+    #                   coordinate values.  Should be a subclass
+    #                   of BaseDifferentiableFunction.
+    
+    #
     #   .function - A lambda object that takes N numeric arguments
     #                   (where N is the length of the list of
     #                   .coordinates) and returns the value of the
