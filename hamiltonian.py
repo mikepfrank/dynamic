@@ -8,6 +8,16 @@
 #|          This module provides various classes related to a
 #|          Hamiltonian formulation of mechanics.
 #|
+#|          The main class is Hamiltonian, and its instances
+#|          are conceived as lists of HamiltonianTerms, which
+#|          may individually involve one or more Variables.
+#|          The Hamiltonian can give us its partial derivative
+#|          with respect to any of these Variables.
+#|
+#|          Typically, we build up a Hamiltonian describing
+#|          a complex system's dynamics by adding terms to it
+#|          one at a time, as needed.
+#|
 #|          The most important class is PotentialEnergyTerm,
 #|          which defines a class of potential energy function
 #|          that depends on a set of generalized coordinates
@@ -22,8 +32,6 @@
 #|          Additional classes will be defined as needed.
 #|
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-
-from    decimalfp       import  *
 
 import  coordinate
 

@@ -1,3 +1,5 @@
+# Base class from which to derive subclasses for particular types
+# of differentiable functions (of any number of variables).
 
 __all__ = ['BaseDifferentiableFunction']
 
@@ -5,21 +7,22 @@ class BaseDifferentiableFunction:
 
     # Data members:
     #   .argNames - list of argument names
-    #   .argIndex - map from argument names to indices
+    #   .argIndex - map from argument names to their indices
     #   .function - lambda from list of argument values to function value
     #   .partials - tuple of partial-derivative lambdas
 
     def __init__(inst):
         inst.argNames = []
 
-
-        # Add an argument named <argName> to this function's argument list.
+    # .addArg(argName) - Adds an argument named <argName> to this
+    #   function's argument list.
 
     def addArg(this, argName):
 
-            # The length of the list is the index of the new argument.
+            # The length of the existing list of arguments
+            # is the index of the new argument (0-based).
         
-        pos = len(this.nargs)
+        pos = len(this.argNames)
 
             # Add the argument's name to our list of argument names.
         
@@ -30,12 +33,21 @@ class BaseDifferentiableFunction:
         
         this.argIndex[argName] = pos
 
-    def evaluate(this, argVals):
-        return this.function(argVals)
+    # .setArgs(<arg1>[, <argi>]*) - Set the argument list of this
+    #   function to the given string(s).
 
-    def setArglist(this, names):
+    def setArgs(this, *names):
+        this.argNames = []
         foreach name in names:
-            this.addArg(name)
+            this.addArg(name)    
+
+    # Function application operator.
+    #   For applying a BaseDifferentiableFunction instance to a
+    #   list of arguments.
+
+    def __call__(this, *argVals):
+        return this.function.__call__(*argVals)
+
 
     # Public methods that derived classes should define:
     

@@ -1,4 +1,4 @@
-class FullAdder(Network):
+class FullAdder(DynamicNetwork):
 
     #---- This creator FullAdder(a,b,c) takes three nodes a,b,c that
     #       are three bits to be added together in the full adder.

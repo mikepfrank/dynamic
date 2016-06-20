@@ -4,6 +4,10 @@ Informal notes about dynamic.
 
 Some concepts/classes:
 
+	* Network - An interlinked set of nodes and components.
+
+	* Port - A named port of a component.
+	
 	* Node - Has one or more generalized coordinates, has links to ports of
 		components.  Has an associated kinetic energy function.
 	
@@ -12,8 +16,10 @@ Some concepts/classes:
 		something (e.g. charge) down that link, with an associated kinetic  
 		energy function (e.g. corresponding to self-inductance).
 	
-	* Component - An icon, has associated ports, potential energy function.
-		Can also have one or more internal node(s).
+	* BaseComponent - An icon, has associated ports, potential energy function.
+		Can also have one or more internal node(s).  This is an abstract base
+		class from which subclasses for specific types of components should be 
+		derived.
 		
 	* SimpleNode - Has only one generalized coordinate, equipped with a basic
 		quadratic kinetic energy function.
@@ -22,9 +28,31 @@ Some concepts/classes:
 		flows.  Implicitly, however, there can be a transfer of energy 
 		down any link, due to the interaction potential energy associated
 		with its connected component.
-		
+	
+	* BaseKineticEnergyFunction - Abstract class for kinetic energy functions.
+		Subclasses should know how to evaluate themselves and their partial
+		derivatives.
+	
 	* QuadraticKineticEnergyFunction - A basic quadratic kinetic energy
 		function.  Has an associated generalized mass parameter.  Knows
 		its partial derivative.
 		
+	* DynamicNOTGate - A "NOT gate" or logical inverter component implemented 
+		in the "dynamic" style; this works via a quadratic potential energy
+		function operating on one less than the sum of input and output node 
+		coordinates.
 		
+	* DynamicANDGate - An "AND gate" component implemented in the "dynamic"
+		style; this works via a quadratic potential energy function operating
+		on the difference between the output node coordinate and the product
+		of input node coordinates.
+		
+	* DynamicORGate - An "OR gate" ...
+	
+	* DynamicXORGate - An "XOR gate" ...
+	
+	* BaseDifferentiableFunction
+	
+	* DynamicNOTFunction
+
+	* PotentialEnergyTerm

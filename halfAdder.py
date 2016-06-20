@@ -1,4 +1,4 @@
-class HalfAdder(Network):
+class HalfAdder(DynamicNetwork):
 
     #-- This creator HalfAdder(a,b) takes two nodes a,b that
     #   are inputs to the half-adder.

@@ -1,5 +1,12 @@
+from port import Port
+from node import DynamicNode
+
+__all__ = ["Link"]
 
     # A Link connects a port (of a primitive component) to a node.
+    
+    # We could have called this "DynamicLink," but there isn't
+    # anything very dynamic about it.
 
 class Link:
 
@@ -7,11 +14,16 @@ class Link:
     #       .port - The component port that this link connects to.
     #       .node - The node that this link connects to.
 
-    def __init__(inst, port, node):
+    #-- Initializer.  Given a port and a node, first tells
+    #       the port that it's connected to this link, then
+    #       tells the node that we are one of its links.
+    #       These actions set our data members appropriately.
 
-        port.connect(inst)      # This also sets our port
+    def __init__(inst, port:Port, node:DynamicNode):
 
-        node.addLink(inst)      # This also sets our node
+        port.connect(inst)      # This also sets our .port
+
+        node.addLink(inst)      # This also sets our .node
 
         
         

@@ -12,7 +12,7 @@
 
 __all__ = ['BaseKineticEnergyFunction']
 
-class BaseKineticEnergyFunction:
+class BaseKineticEnergyFunction(BaseDifferentiableFunction):
 
         # Special methods.
 

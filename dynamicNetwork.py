@@ -2,8 +2,8 @@ import numbers  # Defines "Real" class.
 
 #-- In dynamic, a Network consists of:
 #
-#       A set of dynamic nodes (class Node)
-#       A set of component instances (gates and other devices).
+#       A set of named dynamic nodes (class Node)
+#       A set of primitive component instances (gates and other devices).
 #       A set of links connecting ports of components to nodes.
 #
 
@@ -11,11 +11,12 @@ class DynamicNetwork:
 
     #-- Data members:
     #
-    #       inst.nodes [list] - The set of nodes in this network.
+    #       inst.nodes [dict] - Map from node names to objects in this network.
     #       inst.components [list] - The set of components in this network.
     #       inst.links [list] - The set of links in this network.
     
-    def __init__(inst): pass
+    def __init__(inst):
+        
     
     #== Public instance functions.
 

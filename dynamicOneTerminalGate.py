@@ -1,11 +1,13 @@
+from baseComponent import BaseComponent
 
 #-- A DynamicOneTerminalGate has one node called "output"
-#   together with a single built-in potential function.
+#   together with a single built-in potential energy function.
+#   It may also have internal coordinates, but is not required to.
 
 class DynamicOneTerminalGate(BaseComponent):
 
     #-- Data members:
-    #       potential [UnaryPotentialEnergyTerm] -
+    #       potential [BaseDifferentiableFunction] -
     #           Potential energy function for the
     #           output node's coordinate x.
 
@@ -21,7 +23,7 @@ class DynamicOneTerminalGate(BaseComponent):
 
             # Create and remember our output node.
 
-        inst.outputNode = SimpleNode()
+        inst.outputNode = DynamicNode()
 
             # Link our port named "output" to our output node.
 

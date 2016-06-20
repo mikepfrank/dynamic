@@ -1,7 +1,10 @@
 #|==============================================================================
 #|                                  TOP OF FILE
+#|------------------------------------------------------------------------------
 #|
-#|      File name:  QuadraticKineticEnergyFunction.py    [Python module source file]
+#|      File name:  QuadraticKineticEnergyFunction.py
+#|
+#|      File type:                                  [Python module source file]
 #|
 
 from BaseKineticEnergyFunction import *
