@@ -21,9 +21,9 @@ class QuadraticFunction(UnaryDifferentiableFunction):
 
         #-- Construct and remember our function.
 
-        inst.function = lambda x:  (c2 * x**2) + (c1 * x) + c0
+        inst._function = lambda x:  (c2 * x**2) + (c1 * x) + c0
 
         #-- Construct and remember our derivative.
 
-        inst.partials = [lambda x:  2*c2*x + c1]
+        inst._partials = [lambda x:  2*c2*x + c1]
         

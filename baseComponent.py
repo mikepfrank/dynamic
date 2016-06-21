@@ -2,10 +2,13 @@ from port        import Port
 from dynamicNode import DynamicNode
 
 #-- This is a base class from which to derive subclasses for specific
-#   Dynamic components.  The general features of a component are:
+#   types of Dynamic components.  The general features of a component
+#   are:
 #
 #       * It has a set of "ports," which are named interface
 #           points that can be linked up to external dynamic nodes.
+#
+#       * It has a set of
 
 class BaseComponent:
 

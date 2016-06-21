@@ -1,5 +1,6 @@
 from quadraticFunction          import QuadraticFunction
 from dynamicOneTerminalGate     import DynamicOneTerminalGate
+from dynamicNetwork             import DynamicNetwork
 
 class DynamicBiasFunction(QuadraticFunction):
 
@@ -32,7 +33,7 @@ class DynamicMemCell(DynamicOneTerminalGate):
     #   memory cell; the output node is also created.
     #   By default we have zero bias, and unit "stiffness."
 
-    def __init__(inst, inputNode, biasval = 0.0, stiffness = 1.0):
+    def __init__(inst, network:DynamicNetwork=None, biasval = 0.0, stiffness = 1.0):
 
             # Do generic initialization for dynamic one-terminal gates.
             # (Create port & output node, link it to our output port.)

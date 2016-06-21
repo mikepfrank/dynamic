@@ -8,5 +8,5 @@ class UnaryDifferentiableFunction(BaseDifferentiableFunction):
         
         inst.BaseDifferentiableFunction.__init__(inst)
         
-        inst.setArgs('x')   # Our single argument is called 'x'.
+        inst.setArgs('x')   # Our single argument is called 'x' by default.
         

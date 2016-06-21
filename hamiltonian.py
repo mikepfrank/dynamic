@@ -33,6 +33,8 @@
 #|
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
+from typing import Callable,Iterable
+
 import  coordinate
 
 class PotentialEnergyTerm:
@@ -84,3 +86,60 @@ class PotentialEnergyTerm:
     #
     #                   
 
+# A HamiltonianTerm is a primitive function (not expressed as a sum of
+# other functions) giving a Hamiltonian energy as a function of some set
+# of variables.  It should be differentiable with respect to all variables.
+
+class HamiltonianTerm:
+
+    # This initializer takes a list of the dynamic variables that this
+    # term involves, and a differentiable function giving the value of
+    # this term (given values of the variables).
+
+    def __init__(inst, varlist:Iterable[DynamicVariable],
+                 function:Callable[Iterable[Fixed],Fixed]):
+
+        
+
+# For our purposes, a Hamiltonian is most straightforwardly conceived
+# as a list of terms, each of which is a function of some variables.
+# For convenience, we also have the ability to quickly look up, for
+# a variable, what are the terms in the Hamiltonian that include that
+# variable.  Also, for each term we should be easily able to obtain
+# its partial derivative with respect to any variable.
+
+class Hamiltonian:
+
+    # Public member functions:
+    #
+    #   .partialDerivWRT(v:DynamicVariable) - Given the identification
+    #       of a particular dynamic variable mentioned in this Hamiltonian,
+    #       return an object with signature Callable[[int],Fixed] which
+    #       is a callable function that, given a point in time t, evaluates
+    #       the partial derivative of the Hamiltonian with respect to that
+    #       variable at that point in time (given the values that other
+    #       variables would have at that point in time).
+    #
+    #       To implement this efficiently, we pre-associate variables with
+    #
+    #   .termsContaining(v:DynamicVariable) - Returns a list of all the
+    #       terms within this Hamiltonian that involve the given variable.
+    #
+
+    def partialDerivWRT(self, v:DynamicVariable):
+
+        return lambda timestep:int:
+
+            cumulativeSum = Fixed(0)
+            
+            foreach term in self.termsContaining(v):
+
+                partial = term.partialDerivWRT(v)
+
+                cumulativeSum = cumulativeSum + partial(timestep)
+
+            return cumulativeSum
+
+    def termsContaining(self, v:DynamicVariable):
+
+        

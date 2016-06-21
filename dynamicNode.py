@@ -33,7 +33,7 @@ class DynamicNode:
         
         inst.links = []     # Node has an empty list of links initially.
 
-        inst.coord = Coordinate()   # Create the node's coordinate, initially (0,0).
+        inst.coord = DynamicCoordinate(name)   # Create the node's coordinate, initially (0,0).
 
     def addLink(this, link):
 

@@ -18,13 +18,13 @@ class DynamicTwoTerminalGate(BaseComponent):
 
     def __init__(inst, inputNode):
 
-            # Create our two ports, named "input" and "output."
+            # Create our two ports, named "input" and "output".
 
-        inst.addPorts(('input', 'output'))
+        inst.addPorts('input', 'output')
 
-            # Create and remember our output node.
+            # Create and remember our output node named "out".
 
-        inst.outputNode = SimpleNode()
+        inst.outputNode = DynamicNode('out')
 
             # Link our port named "output" to our output node.
 

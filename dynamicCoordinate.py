@@ -466,23 +466,39 @@ class CanonicalCoordinatePair:
 
 # (Not yet implemented.)
 
-# DynamicCoordinate class.  For our purposes here, a DynamicCoordinate always means
-# a canonical coordinate pair (q,p), where q is a generalized position
-# coordinate and p is its associated conjugate momentum coordinate.
-# Further, by default all coordinates come equipped with an associated
-# kinetic-energy Hamiltonian term of the form (1/2)m*v^2 = (1/2)p^2/m
-# where m is an effective mass associated with the coordinate.  Please
-# note that this is a simple nonrelativistic kinetic energy, and would
-# need to be modified for other scenarios.  The partial wrt p of this
-# term is just p/m=v and so that becomes the d/dt for the position q.
-# Meanwhile, a Coordinate can be decorated with additional potential
-# energy terms which depend upon the q of this (and possibly other)
-# coordinates in the system, the partial wrt q of these terms will
-# determine the force dp/dt that updates 
+# ReinitializationException - The semantics of this class of
+#   exceptions is that the program attempted to re-initialize
+#   some structure that was previously initialized, and where
+#   such reinitialization is not allowed.
+
+class ReinitializationException(Exception): pass
+
+# DynamicCoordinate class.  For our purposes here, a DynamicCoordinate
+# always means a canonical coordinate pair (q,p), where q is a
+# generalized position coordinate and p is its associated conjugate
+# momentum coordinate.  Further, by default all coordinates come
+# equipped with an associated kinetic-energy Hamiltonian term of the
+# form (1/2)m*v^2 = (1/2)p^2/m, where m is an effective mass associated
+# with the coordinate.  Please note that this is a simple nonrelativistic
+# expression for the kinetic energy, and would need to be modified for
+# other scenarios.  The partial wrt p of this term is just p/m=v, and so
+# that becomes the d/dt for the position q.  Meanwhile, a Coordinate can
+# be decorated with additional potential energy or interaction terms which
+# depend upon the q of this (and possibly other) coordinates in the system;
+# the partial wrt q of these terms will determine the force dp/dt that
+# updates the momentum variable.
 
 class DynamicCoordinate:
 
-    #-- Data members:
+    # Public properties:
+    #
+    #       .hamiltonian [Hamiltonian] - The overall Hamiltonian
+    #           for the system that this particular DynamicCoordinate
+    #           is a part of.  This is a "set-once" property.
+    #           (Subsequent attempts to set it after the first will
+    #           generate an exception.)
+
+    # Public data members:
     #
     #       name [str] - Name of this coordinate, as a string.  (For
     #           simple nodes, this will generally be the same as the
@@ -510,18 +526,42 @@ class DynamicCoordinate:
     #
     #       pos_t [Integral] - Time step index of cur. position coordinate.
     #       vel_t [Integral] - Time step index of cur. velocity coordinate.
+    #
+    # Private data members:
+    #
+    #       ._hamiltonian [Hamiltonian] - The overall Hamiltonian
+    #           for the system that this particular DynamicCoordinate
+    #           is a part of.
+    #
     
-    def __init__(inst):
+    def __init__(inst, name:str=None, hamiltonian:Hamiltonian=None):
 
-        #-- Default the position,velocity to 0 until we know better.
-        inst.position = Fixed(0)
-        inst.velocity = Fixed(0)
+        inst.hamiltonian = hamiltonian
 
-        #-- Also default the time step indices to 0 until a simulation is started.
-        inst.pos_t = 0
-        inst.vel_t = 0
+        # Create our dynamical guts, namely a CanonicalCoordinatePair (q,p).
+        inst.ccp = CanonicalCoordinatePair(name,)
+
         
+    @property
+    def hamiltonian(self):
 
+        if self.hasattr('_hamiltonian'):
+            return self._hamiltonian
+        else:
+            return None
+
+    @hamiltonian.setter
+    def hamiltonian(self, hamiltonian:Hamiltonian):
+
+        if hamiltonian != None:
+
+            if self.hamiltonian != None:
+
+                self._hamiltonian = hamiltonian
+                
+            else:
+
+                raise ReinitializationException()
 
 
 

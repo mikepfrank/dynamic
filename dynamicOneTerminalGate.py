@@ -1,10 +1,10 @@
-from baseComponent import BaseComponent
+from dynamicComponent import DynamicComponent
 
 #-- A DynamicOneTerminalGate has one node called "output"
 #   together with a single built-in potential energy function.
 #   It may also have internal coordinates, but is not required to.
 
-class DynamicOneTerminalGate(BaseComponent):
+class DynamicOneTerminalGate(DynamicComponent):
 
     #-- Data members:
     #       potential [BaseDifferentiableFunction] -
@@ -15,15 +15,15 @@ class DynamicOneTerminalGate(BaseComponent):
     #   create one port called "output," create a simple dynamic
     #   node to be our output node, and link it to our output port.
 
-    def __init__(inst, inputNode):
+    def __init__(inst, inputNode, potential:UnaryDifferentiableFunction=None):
 
             # Create our one port, named "output."
 
-        inst.addPorts(('output',))
+        inst.addPorts('output')
 
             # Create and remember our output node.
 
-        inst.outputNode = DynamicNode()
+        inst.outputNode = DynamicNode('q')
 
             # Link our port named "output" to our output node.
 
