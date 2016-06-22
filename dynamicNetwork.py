@@ -1,7 +1,7 @@
-from dynamicNode import DynamicNode
-from baseComponent import BaseComponent
-from link import Link 
-from numbers import Real    # Used by DynamicNetwork.thermalize().
+from dynamicNode        import DynamicNode
+from dynamicComponent   import DynamicComponent
+from linkport           import Link 
+from numbers            import Real    # Used by DynamicNetwork.thermalize().
 
 __all__ = ["DynamicNetwork"]
 
@@ -54,7 +54,7 @@ class DynamicNetwork:
     #       discrete component (and its connected nodes) to the
     #       network.
 
-    def addComponent(self, part:BaseComponent):
+    def addComponent(self, part:DynamicComponent):
         pass
     
     #-- inst.addNode(node:DynamicNode) - Adds the given node to the
@@ -70,6 +70,26 @@ class DynamicNetwork:
 
     def addLink(self, link:Link):
         pass
+
+    #-- inst.evolveTo() - Evolve the state of all generalized position
+    #       variables in the network forwards to the given timestep.
+
+    def evolveTo(self, timestep:int):
+        pass
+
+    #-- inst.test() - Test this network by initializing it and then
+    #       simulating it forwards in time a few steps.
+
+    def test(self):
+
+            # Initialize the network by thermalizing the
+            # generalized momenta of all coordinates.
+        
+        self.thermalize(1.0)    # Temperature units are arbitrary for now.
+
+            # Simulate the network forwards for a few time-steps.
+        
+        self.evolveTo(10)       # Just a few steps, to exercise things.
 
     #-- inst.thermalize() - This function randomizes the velocities
     #       of all generalized coordinates in the network according

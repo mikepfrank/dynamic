@@ -1,3 +1,5 @@
+from dynamicCoordinate import DynamicCoordinate
+
 #   In Dynamic, a (simple) "node" has the following features (at least):
 #
 #       * A name (optional)

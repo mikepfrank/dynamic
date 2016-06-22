@@ -1,6 +1,6 @@
-from types       import Iterable
-from port        import Port
-from dynamicNode import DynamicNode
+from typing         import Iterable
+from linkport       import Link,Port
+from dynamicNode    import DynamicNode
 
 #-- This is a base class from which to derive subclasses for specific
 #   types of Dynamic components.  The general features of a component
@@ -40,19 +40,20 @@ class DynamicComponent:
     #       named <portName>.  It's initially not linked to anything.
 
     def _addPort(this, portName:str):
-        this.ports[portName] = Port(this, portName)
+        this._ports[portName] = Port(this, portName)
 
     #-- inst._addPorts(nameList) - Creates new ports of this component
     #       with the names in <nameList>, which should be a list of strings.
 
-    def _addPorts(this, nameList:Iterable[str]):
+    def _addPorts(this, *nameList:Iterable[str]):
         for name in nameList:
-            this.addPort(name)
+            print("Adding port %s..."%name)
+            this._addPort(name)
 
     #-- .link(portName, node) - Links the port named <portName> of this
     #       component to the external node <node>.
 
     def link(this, portName:str, node:DynamicNode):
 
-        Link(this.port[portName], node)
+        Link(this._ports[portName], node)
         

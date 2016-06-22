@@ -35,7 +35,9 @@
 
 from typing import Callable,Iterable
 
-import  coordinate
+from fixed import Fixed
+
+from dynamicVariable import DynamicVariable
 
 class PotentialEnergyTerm:
     
@@ -97,9 +99,9 @@ class HamiltonianTerm:
     # this term (given values of the variables).
 
     def __init__(inst, varlist:Iterable[DynamicVariable],
-                 function:Callable[Iterable[Fixed],Fixed]):
+                 function:Callable[[Iterable[Fixed]],Fixed]):
 
-        
+        pass        
 
 # For our purposes, a Hamiltonian is most straightforwardly conceived
 # as a list of terms, each of which is a function of some variables.
@@ -120,26 +122,36 @@ class Hamiltonian:
     #       variable at that point in time (given the values that other
     #       variables would have at that point in time).
     #
-    #       To implement this efficiently, we pre-associate variables with
-    #
+    #       To implement this efficiently, we use a map to keep track of the
+    #       list of terms that mention a given variable.
+    #   
     #   .termsContaining(v:DynamicVariable) - Returns a list of all the
     #       terms within this Hamiltonian that involve the given variable.
     #
+    # Private data members:
+    #
+    #   inst._terms (list) - The list of Hamiltonian terms making up this
+    #       Hamiltonian.
+    #
+    #   inst._varTerms (dict) - Maps variables to the sub-list of terms of
+    #       this Hamiltonian that mention them.
 
+    
     def partialDerivWRT(self, v:DynamicVariable):
 
-        return lambda timestep:int:
-
-            cumulativeSum = Fixed(0)
-            
-            foreach term in self.termsContaining(v):
-
+        def termSummer(timestep:int):
+            cumulativeSum = Fixed(0)            
+            for term in self.termsContaining(v):
                 partial = term.partialDerivWRT(v)
-
                 cumulativeSum = cumulativeSum + partial(timestep)
-
             return cumulativeSum
+            
+        return termSummer
+
 
     def termsContaining(self, v:DynamicVariable):
 
-        
+        if self._varTerms.has_key(v):
+            return self._varTerms[v]
+        else:
+            return []

@@ -1,4 +1,4 @@
-from typing import Callable,Iterable
+from typing import Any,Callable,Iterable
 
 # Base class from which to derive subclasses for particular types
 # of differentiable functions (of any number of variables).
@@ -26,8 +26,8 @@ class BaseDifferentiableFunction:
     #       function to the given string(s).
 
     def __init__(inst, argNames:Iterable[str]=[],
-                 function:Callable[[Iterable,Any]=None,
-                 partials:Iterable[Callable[[Iterable[Any]],Any]]=[]):
+                 function:Callable[[Iterable],Any]=None,
+                 partials:Iterable[Callable[[Iterable],Any]]=[]):
 
         inst._setArgs(*argNames)
 
@@ -50,7 +50,7 @@ class BaseDifferentiableFunction:
             # The length of the existing list of arguments
             # is the index of the new argument (0-based).
         
-        pos = len(this.argNames)
+        pos = len(this._argNames)
 
             # Add the argument's name to our list of argument names.
         
@@ -66,8 +66,9 @@ class BaseDifferentiableFunction:
 
     def _setArgs(this, *names):
         this._argNames = []
-        foreach name in names:
-            this.addArg(name)    
+        this._argIndex = dict()
+        for name in names:
+            this._addArg(name)    
 
 
     # Public methods that derived classes should define:

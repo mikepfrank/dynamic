@@ -1,4 +1,4 @@
-from link import Link
+from link import *      # Link class name. ("*" avoids circularity.)
 
 __all__ = ["Port"]
 
