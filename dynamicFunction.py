@@ -1,3 +1,6 @@
+from abc    import *
+from typing import Any,Callable,Iterable
+
 from fixed import Fixed
 
 __all__ = ['BaseDynamicFunction',
@@ -16,9 +19,10 @@ class SummerDynamicFunction:    pass
 # A DynamicFunction is a function of time (specified by an integer time-step
 # number) that works by first updating some internal simulation state
 # information as necessary to move the simulation forwards or backwards in
-# time as needed, in order to be able to evaluate the function.
+# time as needed, in order to be able to evaluate the function.  This base
+# class is an abstract class, and cannot itself be instantiated directly.
 
-class BaseDynamicFunction(Callable[int,Any],meta=ABCmeta):
+class BaseDynamicFunction(metaclass=ABCMeta):
 
         # When initializing, can optionally provide an actual function
         # that will be called to implement our evaluateWith() method.
@@ -40,12 +44,13 @@ class BaseDynamicFunction(Callable[int,Any],meta=ABCmeta):
     def __neg__(inst):
         return NegatorDynamicFunction(inst)
 
-    def __add__(inst, other:DynamicFunction):
+    def __add__(inst, other:Callable[[int],Any]):
         return AdderDynamicFunction(inst,other)
 
     # Subclasses must define the evolveTo() method to define
     # how they accomplish evolving their state to the given
-    # time point.
+    # time point.  This base class does not define this
+    # method, so it cannot be directly instantiated.
 
     @abstractmethod
     def evolveTo(inst, timestep:int): pass
@@ -60,7 +65,7 @@ class BaseDynamicFunction(Callable[int,Any],meta=ABCmeta):
 
 # A special DynamicFunction that just always returns Fixed(0).
 
-class NullDynamicFunction(DynamicFunction):
+class NullDynamicFunction(BaseDynamicFunction):
     def evolveTo(inst, timestep:int): pass
     def evaluateWith(inst, *args, **kwargs):
         return Fixed(0)
@@ -70,9 +75,9 @@ nullDynamicFunction = NullDynamicFunction()
 # Given a DynamicFunction, constructs another one whose value is the
 # unary negation of it.
             
-class NegatorDynamicFunction(DynamicFunction):
+class NegatorDynamicFunction(BaseDynamicFunction):
 
-    def __init__(inst, f:DynamicFunction):
+    def __init__(inst, f:BaseDynamicFunction):
         inst._internalFunction = f
 
     def evolveTo(inst, timestep:int):
@@ -84,9 +89,9 @@ class NegatorDynamicFunction(DynamicFunction):
 # Given two DynamicFunctions, constructs another one whose value is
 # the sum of those two.
 
-class AdderDynamicFunction(DynamicFunction):
+class AdderDynamicFunction(BaseDynamicFunction):
 
-    def __init__(inst, f1:DynamicFunction, f2:DynamicFunction):
+    def __init__(inst, f1:BaseDynamicFunction, f2:BaseDynamicFunction):
         inst._augend = f1
         inst._addend = f2
 
@@ -102,9 +107,9 @@ class AdderDynamicFunction(DynamicFunction):
 # Given a list of DynamicFunction objects, constructs a new one whose
 # value is the sum of the values of those objects.
 
-class SummerDynamicFunction(DynamicFunction):
+class SummerDynamicFunction(BaseDynamicFunction):
 
-    def __init__(inst, terms:Iterable[DynamicFunction]):
+    def __init__(inst, terms:Iterable[BaseDynamicFunction]):
         inst._terms = terms
 
     def evolveTo(inst, timestep:int):

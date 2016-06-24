@@ -1,9 +1,9 @@
 from fixed  import Fixed     # Fixed-precision math class.
 from typing import Callable,Iterable
 
-from baseDifferentiableFunction import BaseDifferentiableFunction
-from partialEvalFunc import PartiallyEvaluatableFunction
-from dynamicFunction import DynamicFunction
+from differentiableFunction import BaseDifferentiableFunction
+from partialEvalFunc        import PartiallyEvaluatableFunction
+from dynamicFunction        import BaseDynamicFunction
 
 __all__ = ['SimulationException',
            'TimestepException',
@@ -71,7 +71,7 @@ class DynamicVariable(BaseDynamicFunction):
     #   .name [str]
     #
     #           The name of this variable, a string.  No default.
-    #           Names should be unique within a given simulation.
+    #           Variable names should be unique within a given simulation.
     #
     #   .value [Fixed]
     #
@@ -114,11 +114,11 @@ class DynamicVariable(BaseDynamicFunction):
     #   
 
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
-                 timeDeriv:DynamicFunction=None):
+                 timeDeriv:BaseDynamicFunction=None):
 
         if name != None:  inst.name = name
 
-        inst.timeDeriv = timeDeriv
+        if timeDeriv != None:  inst._timeDeriv = timeDeriv
 
         inst.value = value
         inst.time = time
@@ -130,10 +130,10 @@ class DynamicVariable(BaseDynamicFunction):
         else:
             return None
 
-    @timeDeriv.setter
-    def timeDeriv(self, timeDeriv:DynamicFunction):
-        if timeDeriv != None:
-            self._timeDeriv = timeDeriv
+##    @timeDeriv.setter
+##    def timeDeriv(self, timeDeriv:BaseDynamicFunction):
+##        if timeDeriv != None:
+##            self._timeDeriv = timeDeriv
 
     def evaluateWith(self, **args):
         return self.value               # Ignore any arguments provided.
@@ -244,6 +244,7 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
     #           These dynamic functions are the partial derivatives
     #           of this term with respect to its variables.  The key
     #           to this dict is the variable index in [0..nVars-1].
+    #           This is just a cache of partials computed elsewhere.
 
     # This initializer takes a list of the dynamic variables that this
     # term involves, and a differentiable function giving the value of
@@ -251,8 +252,8 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
     # in the given <varlist> must correspond (in the same order!) to the
     # arguments to the given function.
 
-    def __init__(inst, varlist:Iterable[DynamicVariable],
-                 function:BaseDifferentiableFunction):
+    def __init__(inst, varList:Iterable[DynamicVariable]=[],
+                 function:BaseDifferentiableFunction=None):
 
             # First do generic initialization for DerivedDynamicFunction instances.
             # This remembers our variable list and our associated evaluation function.
@@ -261,10 +262,12 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
             # Construct our map from variables to their indices.
 
-        for index in range(len(varlist)):
-            inst._varIndex[varlist[index]] = index
+        inst._varIndex = dict()
+        for index in range(len(varList)):
+            inst._varIndex[varList[index]] = index
 
-        inst._function = function       # Remember the function.
+        if function != None:
+            inst._function = function       # Remember the function, if provided.
 
         inst._partials = dict()         # Initially empty cache of partials.
 

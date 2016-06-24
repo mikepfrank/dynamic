@@ -1,11 +1,14 @@
 import logmaster
 
 from unaryDifferentiableFunction    import UnaryDifferentiableFunction
+from linkport                       import Link,Port
 from dynamicNode                    import DynamicNode
 from dynamicComponent               import DynamicComponent
 from dynamicNetwork                 import DynamicNetwork,netName
 
 logger = logmaster.getLogger(logmaster.sysName + '.network')
+
+class TooManyPortsException(Exception): pass
 
 #-- A DynamicOneTerminalGate has one node called "output"
 #   together with a single built-in potential energy function.
@@ -45,21 +48,21 @@ class DynamicOneTerminalGate(DynamicComponent):
 
         netname = netName(network)
 
-        logger.debug("Initializing a new DynamicOneTerminalGate named '%s' "
-                     + "with port name '%s' in network '%s'" %
+        logger.debug(("Initializing a new DynamicOneTerminalGate named '%s' "
+                     + "with port name '%s' in network '%s'") %
                      (str(name), portName, netname))
 
             # First do generic initialization for dynamic components.
 
         DynamicComponent.__init__(inst, name=name, network=network)
 
-            # Remember our port name for future reference.
-
-        inst.portName = portName
-
             # Create our one port named <portName>.
 
         inst._addPorts(portName)
+
+            # Remember our port name for future reference.
+
+        inst.portName = portName
 
             # Create and remember our output node, initially with the
             # same name as our output port that we'll connect it to.
@@ -90,11 +93,18 @@ class DynamicOneTerminalGate(DynamicComponent):
             this.potential.argName = portName   #   set its argument name.
 
     @property
-    def port(this):
+    def port(this) -> Port:
         ports = this.ports      # Get our ports.
+        #print("ports is %s" % (str(ports)))
         nPorts = len(ports)     # Count how many ports we have.
-        assert nPorts == 1      # We should have exactly one port.
-        return ports[0]         # Return the port.
+        if nPorts == 0:         # If we have zero ports,
+            return None         # return that our port is None.
+        #print("%d ports" % nPorts)
+        if nPorts > 1:
+            raise TooManyPortsException("One-terminal gate %s was found to have %d ports (%s)!" %
+                                        (this, nPorts, str(ports)))
+        assert nPorts == 1              # We should have exactly one port.
+        return list(ports.values())[0]  # Return that port.
 
     @property
     def potential(this):
@@ -120,7 +130,7 @@ class DynamicOneTerminalGate(DynamicComponent):
             if this.portName != None:
                 potential.argName = this.portName
             
-            inst._potential = potential
+            this._potential = potential
             
             this._addInteraction(this._potential)
                 # Add the potential to this component's interaction list.

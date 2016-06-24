@@ -1,22 +1,41 @@
-from baseDifferentiableFunction import BaseDifferentiableFunction
+from typing import Callable
+
+from differentiableFunction import BaseDifferentiableFunction
 
 __all__ = ['UnaryDifferentiableFunction']
 
 class UnaryDifferentiableFunction(BaseDifferentiableFunction):
     
-    def __init__(inst):
-        
-        BaseDifferentiableFunction.__init__(inst)
-        
-        inst._setArgs('x')   # Our single argument is called 'x' by default.
-            # Users can change this using the property setter method,
-            # inst.argName = <newName>, defined below.
+    def __init__(inst, name:str=None, argName:str=None,
+                 function:Callable=None, derivative:Callable=None):
 
+            # If no argument name or function was provided, then
+            # just use default name 'x' for the function argument.
+            # This can also be changed later, if desired, using
+            # the inst.argName property setter (defined below).
+
+        if name == None and function == None:    name = 'x'
+
+            # Turn the argument name and derivative, if known,
+            # into a singleton argument name list and partial
+            # derivative list, respectively.
+
+        argNames = [argName] if argName != None else None
+        partials = [derivative] if derivative != None else None
+
+            # Do generic initialization for differentiable functions.
+        
+        BaseDifferentiableFunction.__init__(inst, name, argNames,
+                                            function, partials)
+        
     @property
     def argName(this):
         return this.argNames[0]
 
-    @argName.setter(this, newName:str):
+    @argName.setter
+    def argName(this, newName:str):
         this.argNames[0] = newName
         
-        
+    @property
+    def derivative(this):
+        return this.partials[0]

@@ -33,13 +33,13 @@
 #|
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-from typing import Callable,Iterable
+from typing import Callable,Iterable,Iterator,Set
 
-from fixed                          import Fixed
-from partialEvalFunc                import PartiallyEvaluatableFunction
-from baseDifferentiableFunction     import BaseDifferentiableFunction
-from dynamicFunction                import SummerDynamicFunction
-from dynamicVariable                import DynamicVariable,DerivedDynamicFunction
+from fixed                      import Fixed
+from partialEvalFunc            import PartiallyEvaluatableFunction
+from differentiableFunction     import BaseDifferentiableFunction
+from dynamicFunction            import BaseDynamicFunction,SummerDynamicFunction
+from dynamicVariable            import DynamicVariable,DerivedDynamicFunction,DifferentiableDynamicFunction
 
 # A HamiltonianTerm is a primitive dynamic function (not expressed as
 # a sum of other functions) giving a Hamiltonian energy as a function
@@ -60,6 +60,9 @@ class HamiltonianTerm(DifferentiableDynamicFunction): pass
 # variable.  Also, for each term we should be easily able to obtain
 # its partial derivative with respect to any variable.
 
+    # Forward declaration for use by embedded class definitions.
+class Hamiltonian(DifferentiableDynamicFunction): pass
+
 class Hamiltonian(DifferentiableDynamicFunction):
 
     # Private data members:
@@ -73,7 +76,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
     #   inst._summer:SummerDynamicFunction - A dynamic function that just adds our
     #       terms together; this is used to evaluate the Hamiltonian.
     #
-    #   inst._partials:Dict[DynamicFunction] - These dynamic functions are the
+    #   inst._partials:Dict[DerivedDynamicFunction] - These dynamic functions are the
     #       partial derivatives of this Hamiltonian with respect to its variables.
     #       This is a cache which is incrementally computed.  This differs from
     #       the attribute of the same name in DifferentiableDynamicFunction in
@@ -107,7 +110,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
     # This public embedded class generates an Iterable for a given Hamiltonian
     # which provides an Iterator that can be used to iterate through our terms.
 
-    class TermsIterable(Iterable[DynamicFunction]):
+    class TermsIterable(Iterable[BaseDynamicFunction]):
         def __init__(inst, ham:Hamiltonian):
             inst._hamiltonian = ham
         def __iter__(inst):
@@ -132,7 +135,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
     # iterate through the partial derivatives of a Hamiltonian's terms with
     # respect to the given DynamicVariable.
 
-    class TermsPartialDerivIterator(Iterator[DynamicFunction]):
+    class TermsPartialDerivIterator(Iterator[BaseDynamicFunction]):
         def __init__(inst, termIter:Iterable[HamiltonianTerm], var:DynamicVariable):
             inst._termIter = iter(termIter)
             inst._variable = var
@@ -147,7 +150,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
     # with respect to the given DynamicVariable.  Automatically skips terms which
     # would be zero because they don't even contain the given variables.
 
-    class TermsPartialDerivIterable(Iterable[DynamicFunction]):
+    class TermsPartialDerivIterable(Iterable[BaseDynamicFunction]):
         def __init__(inst, ham:Hamiltonian, var:DynamicVariable):
             inst._termList = ham.termsContaining(v)
             inst._variable = var
@@ -173,23 +176,64 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
                 # For each of the new term's variables, remember that
                 # this term is in the set of terms that references
-                # that variable.
+                # that variable.  Also, if some of the variables are
+                # actually dynamic functions depending on yet other
+                # variables, then remember that this term is in the
+                # set of terms that references those other variables.
 
             for var in term._varList:
 
-                if term in inst._varTerms:
-                        # Get the set of terms already associated w. this variable.
-                    varTerms = set(inst._varTerms[var]) 
-                else:
-                    varTerms = set()    # Empty set of terms already associated with that variable.
+                inst._register(var, term)
 
-                varTerms |= {term}     # Union the new term into the variable's set.
 
-                inst._varTerms[var] = varTerms      # Store it back in the dict.
+        # Remember that the given variable influences the given Hamiltonian term.
+        # This updates data structures mapping variables to the set of terms that
+        # they influence.  As a side-effect, we forget the partial derivative of
+        # this Hamiltonian with respect to that variable since it may need to be
+        # recomputed.  For the case of "variables" that are actually derived
+        # dynamic functions, we also recursively register the variables that they
+        # depend on as also influencing the value of the given Hamiltonian term.
 
-                if var in inst._partials:
-                    del inst._partials[var]      # Clear any cached partial derivative info.
+    def _register(inst, var:BaseDynamicFunction, term:HamiltonianTerm):
 
+            # If we're already aware that this variable is associated
+            # with some set of terms that it influences, make note of
+            # that; otherwise, we're not yet aware that it influences
+            # any terms.
+
+        if term in inst._varTerms:
+                # Get the set of terms already associated w. this variable.
+            varTerms = set(inst._varTerms[var]) 
+        else:
+            varTerms = set()    # Empty set of terms already associated with that variable.
+
+            # Add the given term into the set of terms that we're aware
+            # that this variable influences, and remember that for
+            # future reference.
+
+        newVarTerms = varTerms | {term}     # Union the new term into the variable's set.
+
+            # If this knowledge is new (that this variable is influencing
+            # the value of this term), then the partial derivative of the
+            # Hamiltonian with respect to this variable probably needs to
+            # be recomputed, so clear our cache of that partial derivative.
+
+        if len(newVarTerms) > len(varTerms):    # Size of set grew?
+
+            inst._varTerms[var] = newVarTerms   # Store new set back in the dict.
+
+            if var in inst._partials:
+                del inst._partials[var]      # Clear any cached partial derivative info.
+
+            # If this "variable" is in fact a derived dynamic function,
+            # then go into *its* variables and register them as influencing
+            # the value of this term as well.  (Eventually, this recursive
+            # process should bottom out with some real dynamic variables.)
+
+        if isinstance(var, DerivedDynamicFunction):
+            moreVars = var.varList
+            for underlyingVar in moreVars:
+                inst._register(underlyingVar, term)
             
     # This implementation of the inst.dynPartialDerivWRT() method overrides
     # the one defined in our parent class DifferentiableDynamicFunction.  We
@@ -212,7 +256,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
     #       terms within this Hamiltonian that involve the given variable.
     #
     
-    def dynpartialDerivWRT(self, v:DynamicVariable) -> DynamicFunction:
+    def dynpartialDerivWRT(self, v:DynamicVariable) -> DerivedDynamicFunction:
 
         # If this Hamiltonian's partial derivative with respect to the
         # given variable has already been generated, don't bother generating

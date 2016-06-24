@@ -43,20 +43,23 @@ from abc import ABCMeta,abstractmethod      # Abstract base class support.
 from fixed  import Fixed     # Fixed-precision math class.
 from typing import Callable
 
-from dynamicVariable    import DynamicVariable
-from hamiltonian        import Hamiltonian
+from dynamicVariable        import DynamicVariable,DerivedDynamicFunction
+from hamiltonian            import HamiltonianTerm,Hamiltonian
+from kineticEnergyFunction  import SimpleQuadraticKineticEnergyFunction
 
-# Abstract class for a variable appearing in a Hamiltonian.
-# Abstract because the .setTimeDeriv() method can't be defined
-# without first knowing whether it's a generalized position or
-# a generalized momentum type of variable.
+# Base class for a dynamic variable appearing in a Hamiltonian.  Such variables
+# remember the Hamiltonian that they are associated with and their time derivative
+# can be inferred from it.  If their Hamiltonian is changed, then their time
+# derivative needs to be recomputed; the setTimeDeriv() method does this.
+#However, it is abstract and must be defined by subclasses.
 
 class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
 
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
                  hamiltonian:Hamiltonian=None):
 
-        inst.hamiltonian = hamiltonian
+        if hamiltonian != None:  inst.hamiltonian = hamiltonian
+            # Goes ahead and sets our time derivative as a side-effect.
 
         DynamicVariable.__init__(inst, name, value, time)
 
@@ -75,8 +78,6 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
 
             self._hamiltonian = hamiltonian
             self.setTimeDeriv()
-
-    # Subclasses must implement this method.
 
     @abstractmethod
     def setTimeDeriv(self): pass
@@ -116,18 +117,23 @@ class PositionVariable(HamiltonianVariable):
     #       Accessed through the .conjugateMomentum public @property.
     #
 
-
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
                  hamiltonian:Hamiltonian=None, conjugateMomentum:MomentumVariable=None):
 
-        #-- Remember our conjugate momentum variable.
+        # Remember our conjugate momentum variable.
 
         inst.conjugateMomentum  = conjugateMomentum
-        
-        #-- Complete default initialization for Hamiltonian variables.
+
+        # Do default initialization for Hamiltonian variables.
         
         HamiltonianVariable.__init__(inst, name, value, time, hamiltonian)
 
+        # If we know our Hamiltonian already, we can do ahead and set
+        # up the dynamic function for our time derivative.
+
+        if hamiltonian != None:
+            inst.setTimeDeriv()
+                                              
     @property
     def conjugateMomentum(self):
         
@@ -152,16 +158,15 @@ class PositionVariable(HamiltonianVariable):
 
             conjMom.conjugatePosition = self
 
-    #-- This causes our time derivative to be recalculated knowing
-    #   our Hamiltonian and the identity of our conjugate momentum.
-
     def setTimeDeriv(self):
+        if hasattr(self, '_hamiltonian'):
+                # Create the dynamic function representing our time derivative.
+                # This is just the partial derivative of the Hamiltonian with
+                # respect to our conjugate momentum variable, ∂q/∂t = ∂H/∂p.
+            posTimeDeriv = self.hamiltonian.dynPartialDerivWRT(conjugateMomentum)
+                # Store that thang for later reference.
+            self._timeDeriv = posTimeDeriv
 
-        if self.hamiltonian != None and self.conjugateMomentum != None:
-
-            #-- The lambda here is needed to negate the partial derivative.
-            self.timeDeriv = -self.hamiltonian.partialDerivWRT(self.conjugateMomentum)(timestep)
-           
     
 #  A (generalized) MomentumVariable is a variable whose time
 #  derivative is -∂H/∂q, where H is a Hamiltonian function, q is
@@ -190,7 +195,7 @@ class MomentumVariable(HamiltonianVariable):
 
         inst.conjugatePosition = conjugatePosition
 
-        # Complete default initialization for Hamiltonian variables.
+            # Do default initialization for Hamiltonian variables.
         HamiltonianVariable.__init__(inst, name, value, time, hamiltonian)
 
     @property
@@ -216,16 +221,50 @@ class MomentumVariable(HamiltonianVariable):
 
             conjPos.conjugateMomentum = self
 
-    #-- This causes our time derivative to be recalculated knowing
-    #   our Hamiltonian and the identity of our conjugate position.
-
     def setTimeDeriv(self):
+        if hasattr(self, '_hamiltonian'):
+            
+                # Create the dynamic function representing our time derivative.
+                # This is just the negative of the partial derivative of the
+                # Hamiltonian with respect to our conjugate position variable,
+                # ∂p/∂t = -∂H/∂q.
 
-        if self.hamiltonian != None and self.conjugatePosition != None:
+            dH_over_dq = self.hamiltonian.dynPartialDerivWRT(conjugatePosition)
+            momTimeDeriv = NegatorDynamicFunction(dH_over_dq)
+            
+                # Store that thang for later reference.
 
-            self.timeDeriv = self.hamiltonian.partialDerivWRT(self.conjugateMomentum)
+            inst._timeDeriv = momTimeDeriv            
 
-    
+        
+
+#  A VelocityVariable is a variable v that is related to a
+#  corresponding momentum variable p by the relation p=mv, where
+#  m is an effective mass which is normally a constant.  Note
+#  that this formulation does not encompass relativistic or
+#  quantum-mechanical concepts of momentum.  Momentum and
+#  velocity variables are normally closely locked together.
+
+# Here, we implement a VelocityVariable v as a DerivedDynamicFunction that is
+# derived from a corresponding MomentumVariable p.  Its value is defined
+# by v=p/m where m is a corresponding effective generalized mass.
+
+class VelocityVariable(DerivedDynamicFunction):
+
+    def __init__(inst, momVar:MomentumVariable, mass=None):
+
+        if mass == None:  mass = 1      # Default to unit mass.
+
+        inst._momVar = momVar
+        inst._mass = mass
+
+        velFunc = lambda p: p/mass
+
+        DerivedDynamicFunction.__init__(inst, [momVar], velFunc)
+
+    @property
+    def value(inst):
+        return inst()
 
 #  A CanonicalCoordinatePair object is essentially a pair of
 #  a generalized position coordinate and its corresponding
@@ -242,7 +281,7 @@ class MomentumVariable(HamiltonianVariable):
 class CanonicalCoordinatePair:
 
     def __init__(inst, name:str=None, posval:Fixed=Fixed(0),
-                 momval:Fixed=Fixed(0), postime:int=0,
+                 momval:Fixed=Fixed(0), postime:int=0, 
                  hamiltonian:Hamiltonian=None):
 
         inst.name = name
@@ -267,6 +306,19 @@ class CanonicalCoordinatePair:
 
         q.value = posval;   q.time = postime
         p.value = momval;   p.time = postime + 1
+
+        #-- Remember these dynamic variables internally for future reference.
+
+        inst._posVar = q
+        inst._momVar = p
+
+    @property
+    def positionVariable(self):
+        return self._posVar
+
+    @property
+    def momentumVariable(self):
+        return self._momVar
         
     @property
     def hamiltonian(self):
@@ -288,15 +340,6 @@ class CanonicalCoordinatePair:
             self.q.hamiltonian = hamiltonian
             self.p.hamiltonian = hamiltonian
 
-
-#  A VelocityVariable is a variable v that is related to a
-#  corresponding momentum variable p by the relation p=mv, where
-#  m is an effective mass which is normally a constant.  Note
-#  that this formulation does not encompass relativistic or
-#  quantum-mechanical concepts of momentum.  Momentum and
-#  velocity variables are normally closely locked together.
-
-# (Not yet implemented.)
 
 # ReinitializationException - The semantics of this class of
 #   exceptions is that the program attempted to re-initialize
@@ -323,6 +366,9 @@ class ReinitializationException(Exception): pass
 class DynamicCoordinate:
 
     # Public properties:
+    #
+    #       .mass [Real] - Effective mass value associated with
+    #           this dynamic coordinate.
     #
     #       .hamiltonian [Hamiltonian] - The overall Hamiltonian
     #           for the system that this particular DynamicCoordinate
@@ -366,13 +412,45 @@ class DynamicCoordinate:
     #           is a part of.
     #
     
-    def __init__(inst, name:str=None, hamiltonian:Hamiltonian=None):
+    def __init__(inst, name:str=None, mass=None, hamiltonian:Hamiltonian=None):
+
+            # Give a dynamical coordinate a unit mass by default.
+
+        if mass==None: mass = 1
+
+            # Remember how to get to our Hamiltonian.
 
         inst.hamiltonian = hamiltonian
 
-        # Create our dynamical guts, namely a CanonicalCoordinatePair (q,p).
-        inst.ccp = CanonicalCoordinatePair(name,)
+            # Create our dynamical guts, namely a CanonicalCoordinatePair (q,p).
+        
+        inst.ccp = CanonicalCoordinatePair(name, hamiltonian=hamiltonian)
 
+            # Next we need to create the kinetic energy term associated
+            # with this dynamical coordinate, and add it to the Hamiltonian.
+            # First we create a generic quadratic kinetic energy function.
+
+        KEfunc = SimpleQuadraticKineticEnergyFunction(m=mass)
+
+            # Generate the velocity "variable" (really, a derived function
+            # of momentum) for this coordinate.
+
+        v = VelocityVariable(inst.ccp._momVar, mass)
+        inst._velVar = v
+
+            # Put the velocity variable together with the kinetic energy
+            # function to generate a new Hamiltonian term.
+
+        KEHterm = HamiltonianTerm([v], KEfunc)
+        
+
+    @property
+    def positionVariable(self):
+        return self.ccp.positionVariable
+
+    @property
+    def momentumVariable(self):
+        return self.ccp.momentumVariable
         
     @property
     def hamiltonian(self):

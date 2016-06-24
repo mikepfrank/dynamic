@@ -32,7 +32,7 @@ class PartiallyEvaluatableFunction():   # Is callable().
 
         inst._name = name
 
-        if argList = None:
+        if argList == None:
             argList = getargspec(function).args
             
         inst._argList = list(argList)

@@ -28,7 +28,7 @@ class Port:
         inst.name      = name
         
     def connect(this, link:Link):
-        if link = None:
+        if link == None:
             this.disconnect()
         else:
             this.link = link
@@ -105,7 +105,7 @@ class Link:
             return None
 
     @node.setter
-    def node(this, node:Node):
+    def node(this, node:DynamicNode):
 
         # If we're already connected to some node, disconnect from it first.
 

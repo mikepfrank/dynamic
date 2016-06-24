@@ -10,6 +10,11 @@ class BaseDifferentiableFunction:
 
     # Instance public properties:
     #
+    #   .name:str - Name of this function.  Used for display purposes.
+    #                   NOTE: These names are not required or guaranteed
+    #                   to be unique for different instances of a given
+    #                   function.
+    #
     #   .argNames:list - Read-only property that is a list of
     #           formal argument names.
     #
@@ -33,18 +38,54 @@ class BaseDifferentiableFunction:
     #
     #       Instance initializer.
 
-    def __init__(inst, argNames:Iterable[str]=None,
+    def __init__(inst, name:str=None,
+                 argNames:Iterable[str]=None,
                  function:Callable=None,
                  partials:Iterable[Callable]=[]):
 
+        inst.name = name
+
+        # If the function was provided, remember it.
+        # And if the function name and argument names
+        # were not separately provided, get them by
+        # inspecting the function.
+
         if function != None:
+            
             inst.function = function
-            if argNames == None
+
+            # If the function was anonymous (a lambda), then
+            # it has no true name, so don't bother using it
+            # to extract a name.  Otherwise, use its name
+            # if the user isn't overriding it.
+
+            if function.__name__ != '<lambda>':
+                if name == None:
+                    name = function.__name__
+
+            # Use the function's list of formal arguments
+            # (other than *varargs or **kwargs arguments)
+            # as our list of argument names, unless the
+            # user is overriding it.
+
+            if argNames == None:
                 argNames = getargspec(function).args
 
+        # If the name is still unset at this point,
+        # default it to 'f' (for "function").
+
+        if name == None:
+            name = 'f'
+
+        # If the list of argument names is still unset
+        # at this point, default it to the empty list.
+        
+        if argNames == None:
+            argNames = []
+            
         inst._setArgs(*argNames)
 
-        if partials != None:  inst.partials = partials
+        if partials != None:  inst._partials = partials
 
     # Function application operator.
     #   For applying a BaseDifferentiableFunction instance to a

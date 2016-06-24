@@ -1,9 +1,11 @@
+from numbers            import Real    # Used by DynamicNetwork.thermalize().
+
 import logmaster
 
 from dynamicNode        import DynamicNode
 from dynamicComponent   import DynamicComponent
 from linkport           import Link 
-from numbers            import Real    # Used by DynamicNetwork.thermalize().
+from hamiltonian        import HamiltonianTerm,Hamiltonian
 
 __all__ = ['DynamicNetwork']
 
@@ -79,6 +81,25 @@ class DynamicNetwork:
         self._components.append(part)
         # Here we need to, like, also make sure that all of the component's connected nodes
         # (if any) are also in the network.
+
+    @property
+    def hamiltonian(self):
+        if hasattr(self,'_hamiltonian'):
+            return self._hamiltonian
+        else:
+            return None
+
+    def _addHamiltonianTerm(self, term:HamiltonianTerm):
+
+            # If this network does not even have any Hamiltonian
+            # yet, create an empty one to start with.
+
+        if self.hamiltonian == None:
+            self._hamiltonian = Hamiltonian()    # Create new empty Hamiltonian.
+
+            # Add the given term into the Hamiltonian.
+        
+        self.hamiltonian.addTerm(term)
     
     #-- inst.addNode(node:DynamicNode) - Adds the given node to the
     #       network (and its connected links).  If no name is provided,
@@ -86,6 +107,17 @@ class DynamicNetwork:
     #       a sequence number chosen to make it unique.
 
     def addNode(self, node:DynamicNode, nodeName:str=None):
+    
+        # First, make sure the given node is not already in the network.
+        # If it is already in the network, we just return without doing anything.
+        # (I suppose we could verify that its name is recorded correctly and that
+        # its connected links are also in the network, but really that should have
+        # been done earlier...)
+
+        if node in self._nodes.values():
+            return
+
+        # OK, it's not already in the network, so let's actually add it now.
 
         if nodeName == None:  nodeName = node.getName()
 
