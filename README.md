@@ -2,7 +2,7 @@
 A simple simulator for dynamical systems construed as computations.
 
 ## 1. Purpose
-Dynamic is a framework for simulating simple models of (nonlinear, chaotic) dynamical systems, for the purpose of investigating to what extent such models can be used as the foundation for new computational paradigms.
+Dynamic is a framework for simulating simple models of (nonlinear, generally chaotic) dynamical systems, for the purpose of investigating to what extent such models can be used as the foundation for new computational paradigms.
 
 ## 2. Language
 The plan is to initially write Dynamic in Python (3.5.1 Windows 64-bit), although we may eventually port it to C++ for better performance, and perhaps code a parallel version using MPI or OpenMP.
