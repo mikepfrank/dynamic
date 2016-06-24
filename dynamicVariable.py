@@ -1,14 +1,22 @@
 from fixed  import Fixed     # Fixed-precision math class.
 from typing import Callable,Iterable
 
+from baseDifferentiableFunction import BaseDifferentiableFunction
 from partialEvalFunc import PartiallyEvaluatableFunction
 from dynamicFunction import DynamicFunction
+
+__all__ = ['SimulationException',
+           'TimestepException',
+           'TimestepParity',
+
+           'DynamicVariable',
+           'DerivedDynamicFunction']
 
 class SimulationException(Exception): pass
 
 class TimestepException(SimulationException): pass
 
-class TimestepParity(TimestepException): pass
+class TimestepParityException(TimestepException): pass
 
 #   A dynamic variable (a.k.a., generalized coordinate, degree of freedom)
 #   could in general correspond to either a generalized position, or to a
@@ -140,9 +148,9 @@ class DynamicVariable(BaseDynamicFunction):
         # First, make sure that the time parities match.
         
         if (timestep - this.time)%2 != 0:
-            raise TimestepParity(("Can't get from time step %d to %d " +
-                                 "because parities don't match")%(this.time,
-                                                                  timestep))
+            raise TimestepParityException(("Can't get from time step %d to %d " +
+                                           "because parities don't match")%(this.time,
+                                                                            timestep))
 
         # Proceed either forward or backward as needed till we get there.
 
@@ -192,9 +200,10 @@ class DerivedDynamicFunction(BaseDynamicFunction):
 
     def evaluateWith(inst, *args, **kwargs):
 
-            # What argList to give here in the case of a Hamiltonian whose function
-            # doesn't have an explicit argument list?  Does it even make sense to
-            # partially evaluate a Hamiltonian?
+            # What argList to give here in the case of a Hamiltonian
+            # whose function doesn't have an explicit argument list?
+            # (In fact this will be the default.)  Does it even make
+            # sense to partially evaluate such a Hamiltonian?
         
         pef = PartiallyEvaluatableFunction(function=self._function)
 
@@ -204,3 +213,94 @@ class DerivedDynamicFunction(BaseDynamicFunction):
         
         return pef(*args, **kwargs)
 
+# A DifferentiableDynamicFunction is a DerivedDynamicFunction
+# (derived from a set of DynamicVariables) that also sports the
+# feature of being able to return, for any one of those variables,
+# another DerivedDynamicFunction which represents the partial
+# derivative of the original function with respect to the variables.
+
+class DifferentiableDynamicFunction(DerivedDynamicFunction):
+
+    # Instance private data members:
+    #
+    #       inst._varList:List[DynamicVariable]
+    #
+    #           The list of dynamical variables that the value of this
+    #           term depends on.
+    #
+    #       inst._varIndex:Dict[DynamicVariable,int]
+    #
+    #           Maps a dynamical variable to its index within our list.
+    #           This facilitates fast lookups of particular variables.
+    #
+    #       inst._function:BaseDifferentiableFunction
+    #           (Inherited from DerivedDynamicFunction.)
+    #
+    #           The function that computes the value of this term given
+    #           values for all of its variables.
+    #
+    #       inst._partials:Dict[BaseDynamicFunction]
+    #
+    #           These dynamic functions are the partial derivatives
+    #           of this term with respect to its variables.  The key
+    #           to this dict is the variable index in [0..nVars-1].
+
+    # This initializer takes a list of the dynamic variables that this
+    # term involves, and a differentiable function giving the value of
+    # this term (given values of the variables).  The dynamical variables
+    # in the given <varlist> must correspond (in the same order!) to the
+    # arguments to the given function.
+
+    def __init__(inst, varlist:Iterable[DynamicVariable],
+                 function:BaseDifferentiableFunction):
+
+            # First do generic initialization for DerivedDynamicFunction instances.
+            # This remembers our variable list and our associated evaluation function.
+
+        DerivedDynamicFunction.__init__(inst, varList, function)
+
+            # Construct our map from variables to their indices.
+
+        for index in range(len(varlist)):
+            inst._varIndex[varlist[index]] = index
+
+        inst._function = function       # Remember the function.
+
+        inst._partials = dict()         # Initially empty cache of partials.
+
+    # Instance public methods:
+    #
+    #   .dynPartialDerivWRT(v:DynamicVariable) - Given the identification
+    #       of one of the dynamic variables that this DerivedDynamicFunction
+    #       depends on, return another DerivedDynamicFunction which
+    #       is a callable function that, given a point in time t, evaluates
+    #       the partial derivative of the term with respect to that
+    #       variable at that point in time (given the values that other
+    #       variables would have at that point in time).
+
+    def dynPartialDerivWRT(self, v:DynamicVariable) -> DerivedDynamicFunction:
+
+        varIndex = self._varIndex[v]    # Look up this variable's index in our list.
+
+            # We may have previously constructed the dynamic function for
+            # this particular partial derivative.  If so, just look it up.
+
+        if varIndex in self._partials:
+            return self._partials[varIndex]
+
+            # Ask our BaseDifferentialFunction for its partial derivative
+            # with respect to the <varIndex>'th variable.  Note that at this
+            # point, this function is still unevaluated.
+
+        partial = self._function.partialDerivWRT(varIndex)
+
+            # Now construct a dynamic function corresponding to this partial
+            # derivative and remember it.
+
+        dynPartial = DerivedDynamicFunction(self.varList, partial)
+        self._partials[varIndex] = dynPartial
+
+            # Return that dude.
+
+        return dynPartial
+    
