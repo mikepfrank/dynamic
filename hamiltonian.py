@@ -35,73 +35,100 @@
 
 from typing import Callable,Iterable
 
-from fixed import Fixed
+from fixed                          import Fixed
+from partialEvalFunc                import PartiallyEvaluatableFunction
+from baseDifferentiableFunction     import BaseDifferentiableFunction
+from dynamicVariable                import DynamicVariable,DerivedDynamicFunction
 
-from dynamicVariable import DynamicVariable
+# A HamiltonianTerm is a primitive dynamic function (not expressed as
+# a sum of other functions) giving a Hamiltonian energy as a function
+# of some set of variables.  It should be differentiable with respect
+# to all variables.
 
-class PotentialEnergyTerm:
-    
-    def __init__():     pass
+class HamiltonianTerm(DerivedDynamicFunction):
 
-    # Instance attributes (once fully initialized):
-    # ---------------------------------------------
+    # Instance private data members:
     #
-    #   .coordinates - A tuple of Coordinate objects.  These are
-    #                   the degrees of freedom that appear in this
-    #                   term of the system's Hamiltonian.
+    #       inst._varList:List[DynamicVariable]
     #
-    #   .energyFunction - A differentiable function representing
-    #                   how the potential energy depends on the
-    #                   coordinate values.  Should be a subclass
-    #                   of BaseDifferentiableFunction.
-    
+    #           The list of dynamical variables that the value of this
+    #           term depends on.
     #
-    #   .function - A lambda object that takes N numeric arguments
-    #                   (where N is the length of the list of
-    #                   .coordinates) and returns the value of the
-    #                   energy function at those coordinates.
+    #       inst._varIndex:Dict[DynamicVariable,int]
     #
-    #   .partialDerivs - A tuple of N lambdas, where N is the length
-    #                   of the list of .coordinates).  The lambda
-    #                   for the i'th coordinate takes N arguments
-    #                   (current values of the N coordinates) and
-    #                   returns the value of the partial derivative
-    #                   of .function with respect to the i'th coor-
-    #                   dinate, at the given coordinates.
+    #           Maps a dynamical variable to its index within our list.
+    #           This facilitates fast lookups of particular variables.
     #
+    #       inst._function:BaseDifferentiableFunction
     #
-    # Public instance methods (available after initialization):
-    # ---------------------------------------------------------
+    #           The function that computes the value of this term given
+    #           values for all of its variables.
     #
-    #   .evaluate() - First, ensures that all constituent coordinates
-    #                   have been brought up to the same time point
-    #                   (advancing lagging ones as necessary).  Then
-    #                   evaluates the .function at those coordinates
-    #                   and returns the result.
+    #       inst._partials:Dict[BaseDynamicFunction]
     #
-    #   .partial_wrt() - First, ensures that all constituent coordinates
-    #                       have been brought up to the same time point
-    #                       advancing lagging ones as necessary).  Then,
-    #                       evaluates the partial derivative of .function
-    #                       with respect to the given Coordinate at that
-    #                       time point and returns the result.
-    #
-    #                   
-
-# A HamiltonianTerm is a primitive function (not expressed as a sum of
-# other functions) giving a Hamiltonian energy as a function of some set
-# of variables.  It should be differentiable with respect to all variables.
-
-class HamiltonianTerm:
+    #           These dynamic functions are the partial derivatives
+    #           of this term with respect to its variables.  The key
+    #           to this dict is the variable index in [0..nVars-1].
 
     # This initializer takes a list of the dynamic variables that this
     # term involves, and a differentiable function giving the value of
-    # this term (given values of the variables).
+    # this term (given values of the variables).  The dynamical variables
+    # in the <varlist> should correspond (in the same order!) to the
+    # arguments to the given function.
 
     def __init__(inst, varlist:Iterable[DynamicVariable],
-                 function:Callable[[Iterable[Fixed]],Fixed]):
+                 function:BaseDifferentiableFunction):
 
-        pass        
+            # First do generic initialization for DerivedDynamicFunction instances.
+            # This remembers our variable list and our associated evaluation function.
+
+        DerivedDynamicFunction.__init__(inst, varList, function)
+
+            # Construct our map from variables to their indices.
+
+        for index in range(len(varlist)):
+            inst._varIndex[varlist[index]] = index
+
+        inst._function = function       # Remember the function.
+
+        inst._partials = dict()         # Initially empty cache of partials.
+
+    # Instance public methods:
+    #
+    #   .dynPartialDerivWRT(v:DynamicVariable) - Given the identification
+    #       of a particular dynamic variable mentioned in this term,
+    #       return an object with signature Callable[[int],Fixed] which
+    #       is a callable function that, given a point in time t, evaluates
+    #       the partial derivative of the term with respect to that
+    #       variable at that point in time (given the values that other
+    #       variables would have at that point in time).
+
+    def dynPartialDerivWRT(self, v:DynamicVariable) -> DerivedDynamicFunction:
+
+        varIndex = self._varIndex[v]    # Look up this variable's index in our list.
+
+            # We may have previously constructed the dynamic function for
+            # this particular partial derivative.  If so, just look it up.
+
+        if varIndex in self._partials:
+            return self._partials[varIndex]
+
+            # Ask our BaseDifferentialFunction for its partial derivative
+            # with respect to the <varIndex>'th variable.  Note that at this
+            # point, this function is still unevaluated.
+
+        partial = self._function.partialDerivWRT(varIndex)
+
+            # Now construct a dynamic function corresponding to this partial
+            # derivative and remember it.
+
+        dynPartial = DerivedDynamicFunction(self.varList, partial)
+        self._partials[varIndex] = dynPartial
+
+            # Return that dude.
+
+        return dynPartial
+            
 
 # For our purposes, a Hamiltonian is most straightforwardly conceived
 # as a list of terms, each of which is a function of some variables.
@@ -110,14 +137,71 @@ class HamiltonianTerm:
 # variable.  Also, for each term we should be easily able to obtain
 # its partial derivative with respect to any variable.
 
-class Hamiltonian:
+class Hamiltonian(DerivedDynamicFunction):
+
+    # Private data members:
+    #
+    #   inst._terms:Set[HamiltonianTerms] - The set of Hamiltonian terms making up this
+    #       Hamiltonian.
+    #
+    #   inst._varTerms:Set[HamiltonianTerm] - Maps variables to the set of terms of
+    #       this Hamiltonian that mention them.
+
+    def __init__(inst):
+
+        DerivedDynamicFunction.__init__()   # Initializes ._varList and ._function to null values.
+        
+        inst._terms = set()         # Initially empty set of terms.
+        inst._varTerms = dict()     # Initially empty map from variables to terms.
+
+        inst._function = inst.hamFunction
+
+    def hamFunction(inst):  # Note: No explicit arguments here!
+        pass
 
     # Public member functions:
     #
-    #   .partialDerivWRT(v:DynamicVariable) - Given the identification
+    #   .addTerm(term:HamiltonianTerm) - Merges the given term to this
+    #       Hamiltonian.  Merges its variable list into ours.
+
+    def addTerm(inst, term:HamiltonianTerm):
+
+        if term not in inst._terms:
+            
+            inst._terms |= {term}
+
+                # Merge the variable list for the new term into that
+                # for the overall Hamiltonian.
+
+            inst._varList = list(set(inst._varList) | set(term._varList))
+
+                # For each of the new term's variables, remember that
+                # this term is in the set of terms that references
+                # that variable.
+
+            for var in term._varList:
+
+                if term in inst._varTerms:
+                        # Get the set of terms already associated w. this variable.
+                    varTerms = set(inst._varTerms[var]) 
+                else:
+                    varTerms = set()    # Empty set of terms already associated with that variable.
+
+                varTerms |= {term}     # Union the new term into the variable's set.
+
+                inst._varTerms[var] = varTerms      # Store it back in the dict.
+
+            # Since our set of variables and terms will in general have changed,
+            # recalculate our 
+
+        inst.recalculateFunction()
+            
+    
+    #
+    #   .dynPartialDerivWRT(v:DynamicVariable) - Given the identification
     #       of a particular dynamic variable mentioned in this Hamiltonian,
-    #       return an object with signature Callable[[int],Fixed] which
-    #       is a callable function that, given a point in time t, evaluates
+    #       return a DerivedDynamicFunction object which is a callable
+    #       function that, given a point in time t, evaluates
     #       the partial derivative of the Hamiltonian with respect to that
     #       variable at that point in time (given the values that other
     #       variables would have at that point in time).
@@ -128,16 +212,12 @@ class Hamiltonian:
     #   .termsContaining(v:DynamicVariable) - Returns a list of all the
     #       terms within this Hamiltonian that involve the given variable.
     #
-    # Private data members:
-    #
-    #   inst._terms (list) - The list of Hamiltonian terms making up this
-    #       Hamiltonian.
-    #
-    #   inst._varTerms (dict) - Maps variables to the sub-list of terms of
-    #       this Hamiltonian that mention them.
-
     
     def partialDerivWRT(self, v:DynamicVariable):
+
+        relevantTerms = self.termsContaining(v)
+
+        
 
         def termSummer(timestep:int):
             cumulativeSum = Fixed(0)            

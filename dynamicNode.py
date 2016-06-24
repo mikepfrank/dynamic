@@ -32,10 +32,31 @@ class DynamicNode:
     #   node has an empty list of links.
 
     def __init__(inst, name=None):
+
+        if name != None:  inst.name = name
         
         inst.links = []     # Node has an empty list of links initially.
 
         inst.coord = DynamicCoordinate(name)   # Create the node's coordinate, initially (0,0).
+
+    def getName(this):      # Get something that can be used as a node name.
+        if hasattr(this,'name'):
+            return this.name
+        else:
+            return 'node'
+
+    def renameTo(this, name:str):
+
+        if not hasattr(this, 'name') or this.name != name:
+            logger.debug("Renaming node '%s' to '%s'" % (str(this), name))
+            inst.name = name
+
+    def __str__(this):
+
+        if hasattr(this,'name'):
+            return str(this.name)
+        else:
+            return '(unnamed node)'
 
     def addLink(this, link):
 

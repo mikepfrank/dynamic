@@ -1,5 +1,8 @@
 from fixed  import Fixed     # Fixed-precision math class.
-from typing import Callable
+from typing import Callable,Iterable
+
+from partialEvalFunc import PartiallyEvaluatableFunction
+from dynamicFunction import DynamicFunction
 
 class SimulationException(Exception): pass
 
@@ -53,7 +56,7 @@ class TimestepParity(TimestepException): pass
 #   to explore that possibility at present.
 #
 
-class DynamicVariable:
+class DynamicVariable(BaseDynamicFunction):
 
     # Public data members:
     #
@@ -103,7 +106,7 @@ class DynamicVariable:
     #   
 
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
-                 timeDeriv:Callable[[int],Fixed]=None):
+                 timeDeriv:DynamicFunction=None):
 
         if name != None:  inst.name = name
 
@@ -120,21 +123,12 @@ class DynamicVariable:
             return None
 
     @timeDeriv.setter
-    def timeDeriv(self, timeDeriv:Callable[[int],Fixed]):
+    def timeDeriv(self, timeDeriv:DynamicFunction):
         if timeDeriv != None:
             self._timeDeriv = timeDeriv
 
-    # Calling a variable returns its current value, or its
-    # value at a given timestep (if specified).  NOTE:
-    # The latter may change the state of the simulation!
-
-    def __call__(self, timestep:int = None):
-
-        if timestep != None:
-
-            self.evolveTo(timestep)
-
-        return self.value
+    def evaluateWith(self, **args):
+        return self.value               # Ignore any arguments provided.
 
     # Cause the variable to update itself to the given point
     # in time (specified as an integer time-step number).  If
@@ -171,4 +165,42 @@ class DynamicVariable:
 
         this.value = this.value - this.timeDeriv(this.time - 1)
         this.time  = this.time - 2
-            
+
+# This is a general class for dynamic functions that are expressed as some
+# arbitrary derived function of some list of underlying dynamic variables.
+# NOTE: We assume the given list of N variables will supply the first N
+# arguments of the given function.  The function may have other arguments.
+
+class DerivedDynamicFunction(BaseDynamicFunction):
+
+    # At whatever point it's provided, the <function> should take at
+    # least as many arguments as there are variables in <varList>.
+
+    def __init__(self, varList:Iterable[DynamicVariable]=[], function:Callable=None):
+        self._varList = list(varList)
+        self._function = function
+
+    @property
+    def varList(self): return self._varList
+
+    @property
+    def function(self): return self._function
+
+    def evolveTo(inst, timestep:int):
+        for var in inst._varList:
+            var.evolveTo(timestep)
+
+    def evaluateWith(inst, *args, **kwargs):
+
+            # What argList to give here in the case of a Hamiltonian whose function
+            # doesn't have an explicit argument list?  Does it even make sense to
+            # partially evaluate a Hamiltonian?
+        
+        pef = PartiallyEvaluatableFunction(function=self._function)
+
+            # Prepend the values of our variables to the list of actual arguments provided.
+        
+        args = map(lambda v: v(), self._varList) + args
+        
+        return pef(*args, **kwargs)
+

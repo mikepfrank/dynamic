@@ -1,6 +1,10 @@
+import logmaster
+
 from quadraticFunction          import QuadraticFunction
 from dynamicOneTerminalGate     import DynamicOneTerminalGate
-from dynamicNetwork             import DynamicNetwork
+from dynamicNetwork             import DynamicNetwork,netName
+
+logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 class DynamicBiasFunction(QuadraticFunction):
 
@@ -33,15 +37,23 @@ class DynamicMemCell(DynamicOneTerminalGate):
     #   memory cell; the output node is also created.
     #   By default we have zero bias, and unit "stiffness."
 
-    def __init__(inst, network:DynamicNetwork=None, biasval = 0.0, stiffness = 1.0):
+    def __init__(inst, name:str=None, network:DynamicNetwork=None, biasval = 0.0, stiffness = 1.0):
+
+        netname = netName(network)
+
+        logger.debug("Initializing a new DynamicMemCell named '%s' in network '%s'" %
+                     (str(name), netname))
 
             # Do generic initialization for dynamic one-terminal gates.
             # (Create port & output node, link it to our output port.)
 
-        DynamicOneTerminalGate.__init__(inst)
+        DynamicOneTerminalGate.__init__(inst, name=name, network=network)
 
             # Create the potential energy function relating the input
             # and output nodes.
+
+        logger.debug("Setting up %s's dynamic bias function with bias value %f and stiffness %f..." %
+                     (str(inst), biasval, stiffness))
 
         biasFunc = DynamicBiasFunction(biasval, stiffness)
 

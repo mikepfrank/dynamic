@@ -1,9 +1,13 @@
+import logmaster
+
 from dynamicNode        import DynamicNode
 from dynamicComponent   import DynamicComponent
 from linkport           import Link 
 from numbers            import Real    # Used by DynamicNetwork.thermalize().
 
-__all__ = ["DynamicNetwork"]
+__all__ = ['DynamicNetwork']
+
+logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 #   DynamicNetwork class.  In Dynamic, a Network conceptually consists of:
 #
@@ -27,6 +31,11 @@ __all__ = ["DynamicNetwork"]
 
 class DynamicNetwork:
 
+    #-- Public data members:
+    #
+    #       inst.name [str] - Concise name for this network.
+    #       inst.title [str] - More verbose title of this network (for display).
+    #
     #-- Private data members:
     #
     #       inst._nodes [dict] - Map from node names to objects in this network.
@@ -38,7 +47,15 @@ class DynamicNetwork:
     #       inst._seqno [int] - Sequence number used internally to generate
     #                               new unique node names as needed.
     
-    def __init__(inst):
+    def __init__(inst, name:str=None, title:str=None):
+
+        if name != None:    inst.name = name
+        if title != None:   inst.title = title
+
+        netname = netName(inst)
+
+        logger.info("Initializing a new DynamicNetwork named '%s' (\"%s\")..." %
+                    (netname, str(title)))
 
         inst._nodes = dict()    # Initially empty set of nodes.
         inst._components = []   # Initially empty list of components.
@@ -47,6 +64,9 @@ class DynamicNetwork:
         inst._hamiltonian = None    # Initially null Hamiltonian.
 
         inst._seqno = 0     # Initial sequence number for node names is 0.
+
+    def __str__(self):
+        return netName(self)
     
     #== Public instance methods.
 
@@ -55,7 +75,10 @@ class DynamicNetwork:
     #       network.
 
     def addComponent(self, part:DynamicComponent):
-        pass
+        logger.debug("Adding component '%s' into network '%s'..." % (str(part), str(self)))
+        self._components.append(part)
+        # Here we need to, like, also make sure that all of the component's connected nodes
+        # (if any) are also in the network.
     
     #-- inst.addNode(node:DynamicNode) - Adds the given node to the
     #       network (and its connected links).  If no name is provided,
@@ -63,24 +86,51 @@ class DynamicNetwork:
     #       a sequence number chosen to make it unique.
 
     def addNode(self, node:DynamicNode, nodeName:str=None):
-        pass
+
+        if nodeName == None:  nodeName = node.getName()
+
+        if nodeName in self._nodes:     # Name is not unique in this network!  Make it unique...
+
+            self._seqno = self._seqno + 1
+
+            newName = "%s%d" % (nodeName, self._seqno)
+
+            logger.debug("Renaming node '%s' to '%s' for uniqueness within network '%s'..." %
+                         (nodeName, newName, str(self)))
+
+            nodeName = newName
+        
+        node.renameTo(nodeName)     # Does nothing if node already had that name.
+
+        logger.debug("Adding node '%s' to network '%s'" % (nodename, str(self)))
+
+        self._nodes[nodeName] = node
 
     #-- inst.addLink(link:Link) - Add the given link to the network
     #       (and its connected items).
 
     def addLink(self, link:Link):
+        self._links.append(link)
+
+    # Assuming the network is already constructed but has no associated Hamiltonian yet,
+    # constructs its Hamiltonian.  Does it make more sense to create it all at once, or
+    # incrementally???
+
+    def constructHamiltonian(self):
         pass
 
     #-- inst.evolveTo() - Evolve the state of all generalized position
     #       variables in the network forwards to the given timestep.
 
     def evolveTo(self, timestep:int):
-        pass
+        pass    # To be implemented!
 
     #-- inst.test() - Test this network by initializing it and then
     #       simulating it forwards in time a few steps.
 
     def test(self):
+
+        logger.info("Thermalizing network '%s' to unit temperature..." % str(self))
 
             # Initialize the network by thermalizing the
             # generalized momenta of all coordinates.
@@ -88,6 +138,8 @@ class DynamicNetwork:
         self.thermalize(1.0)    # Temperature units are arbitrary for now.
 
             # Simulate the network forwards for a few time-steps.
+
+        logger.info("Evolving network '%s' forwards ten time-steps..." % str(self))
         
         self.evolveTo(10)       # Just a few steps, to exercise things.
 
@@ -97,4 +149,23 @@ class DynamicNetwork:
     #       degree of freedom of kT.
 
     def thermalize(inst, temperature:Real):
-        pass
+
+        # Really we need to pick gaussian-distributed velocities, but
+        # for initial debugging purposes maybe we will just pick uniformly
+        # distributed velocities within some range
+        
+        pass    # To be implemented!
+
+# Module-level helper function to return a string representation of the name
+# of a given network, or a string indicating an error if it's not a network!
+
+def netName(obj):
+    if obj == None:
+        netname = '(no network)'
+    elif not isinstance(obj,DynamicNetwork):
+        netname = '[ERROR: NOT A NETWORK!]'
+    elif not hasattr(obj, 'name'):
+        netname = '(unnamed network)'
+    else:
+        netname = obj.name
+    return netname

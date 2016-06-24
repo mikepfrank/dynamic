@@ -160,7 +160,7 @@ class PositionVariable(HamiltonianVariable):
         if self.hamiltonian != None and self.conjugateMomentum != None:
 
             #-- The lambda here is needed to negate the partial derivative.
-            self.timeDeriv = lambda timestep: -self.hamiltonian.partialDerivWRT(self.conjugateMomentum)(timestep)
+            self.timeDeriv = -self.hamiltonian.partialDerivWRT(self.conjugateMomentum)(timestep)
            
     
 #  A (generalized) MomentumVariable is a variable whose time

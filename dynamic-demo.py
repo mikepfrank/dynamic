@@ -76,6 +76,9 @@ from exampleNetworks import ExampleNetwork_MemCell
     # used for development and testing.  ExampleNetwork_MemCell is a minimally-
     # simple example network to be used for initial development purposes.
 
+import logmaster
+from logmaster import configLogMaster,appLogger,info,normal
+
     #|==========================================================================
     #|
     #|   Globals					    [code section]
@@ -120,14 +123,37 @@ def _main():
         print("__main__.main(): Entered application's main routine...",
               file=stderr)
 
+    if RAW_DEBUG:
+        print("__main__.main(): Configuring the 'logmaster' logging module...",
+              file=stderr)
+
+    configLogMaster(consdebug = True, logdebug = True,
+                    role = 'startup', component = 'dynamicApp')
+
+    logger = appLogger  # Get our application logger.
+
+    logger.info('')
+    logger.info('='*80)
+    logger.info("Dynamic demo application is starting up...")
+
+    print()
+    logger.normal("Welcome to the Dynamic demo program, v0.0.")
+    logger.normal("Copyright (c)2016 by Michael P. Frank.")
+    logger.normal("All Rights Reserved.")
+    print()
+
     # Fill in main code of application below...
 
         # Create an extremely simple example network for initial
         # testing during development.
-        
+
+    logger.info("Creating an ExampleNetwork_MemCell instance...")                
     net = ExampleNetwork_MemCell()
-    
+
+    logger.info("Testing the ExampleNetwork_MemCell instance...")
     net.test()  # This method exercises some basic simulation capabilities.
+
+    logger.info("Dynamic demo application is shutting down...")
     
     if RAW_DEBUG:
         print("__main__.main(): Exiting from main()...", file=stderr)
