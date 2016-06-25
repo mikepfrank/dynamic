@@ -35,11 +35,16 @@
 
 from typing import Callable,Iterable,Iterator,Set
 
+import logmaster
+
 from fixed                      import Fixed
 from partialEvalFunc            import PartiallyEvaluatableFunction
 from differentiableFunction     import BaseDifferentiableFunction
 from dynamicFunction            import BaseDynamicFunction,SummerDynamicFunction
 from dynamicVariable            import DynamicVariable,DerivedDynamicFunction,DifferentiableDynamicFunction
+
+logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+    # The hamiltonian module is part of our core simulation component.
 
 # A HamiltonianTerm is a primitive dynamic function (not expressed as
 # a sum of other functions) giving a Hamiltonian energy as a function
@@ -165,7 +170,12 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
     def addTerm(inst, term:HamiltonianTerm):
 
+        logger.debug("Adding term %s to Hamiltonian %s..." %
+                     (str(term), str(inst)))
+
         if term not in inst._terms:
+
+            logger.debug("This is a new term, really adding it...")
             
             inst._terms |= {term}
 
@@ -195,6 +205,9 @@ class Hamiltonian(DifferentiableDynamicFunction):
         # depend on as also influencing the value of the given Hamiltonian term.
 
     def _register(inst, var:BaseDynamicFunction, term:HamiltonianTerm):
+
+        logger.debug("Registering that variable %s influences term %s..." %
+                     (str(var), str(term)))
 
             # If we're already aware that this variable is associated
             # with some set of terms that it influences, make note of

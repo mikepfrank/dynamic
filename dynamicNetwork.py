@@ -89,15 +89,25 @@ class DynamicNetwork:
         else:
             return None
 
+    # If this network doesn't already have a Hamiltonian structure attached
+    # to it, reate an initial (empty) Hamiltonian that we can build upon.
+
+    def initHamiltonian(self):
+        if self.hamiltonian == None:
+            self._hamiltonian = Hamiltonian()
+
     def _addHamiltonianTerm(self, term:HamiltonianTerm):
 
-            # If this network does not even have any Hamiltonian
-            # yet, create an empty one to start with.
+        logger.debug("Adding term %s to network %s's Hamiltonian..." %
+                     (str(term), str(self)))
 
-        if self.hamiltonian == None:
-            self._hamiltonian = Hamiltonian()    # Create new empty Hamiltonian.
+            # First make sure this network's Hamiltonian structure
+            # has been initialized, so we can start adding terms to it.
+            # (This does nothing if it was already initialized earlier.)
 
-            # Add the given term into the Hamiltonian.
+        self.initHamiltonian()
+
+            # Now add the given term into the Hamiltonian.
         
         self.hamiltonian.addTerm(term)
     
@@ -149,13 +159,13 @@ class DynamicNetwork:
     # incrementally???
 
     def constructHamiltonian(self):
-        pass
+        logger.fatal("DynamicNetwork.constructHamiltonian() not yet implemented!")
 
     #-- inst.evolveTo() - Evolve the state of all generalized position
     #       variables in the network forwards to the given timestep.
 
     def evolveTo(self, timestep:int):
-        pass    # To be implemented!
+        self.hamiltonian.evolveTo(timestep)
 
     #-- inst.test() - Test this network by initializing it and then
     #       simulating it forwards in time a few steps.

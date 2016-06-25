@@ -52,8 +52,9 @@ class DynamicMemCell(DynamicOneTerminalGate):
             # Create the potential energy function relating the input
             # and output nodes.
 
-        logger.debug("Setting up %s's dynamic bias function with bias value %f and stiffness %f..." %
-                     (str(inst), biasval, stiffness))
+        logger.debug(("Setting up %s's dynamic bias function with bias "+
+                      "value %f and stiffness %f...") %
+                          (str(inst), biasval, stiffness))
 
         biasFunc = DynamicBiasFunction(biasval, stiffness)
 

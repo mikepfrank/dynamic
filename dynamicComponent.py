@@ -190,6 +190,9 @@ class DynamicComponent:
 
     def _addInteraction(this, potential:BaseDifferentiableFunction):
 
+        logger.debug("Adding interaction function %s to component %s..." %
+                     (str(potential), this.name))
+
         interactionIndex = len(this._interactions)
 
         # Add the given potential to our list.  (Note that even if it was already
@@ -203,6 +206,8 @@ class DynamicComponent:
 
         if this.interactionPortsLinked(interactionIndex):
 
+            logger.debug("Interaction ports are linked; adding term to network's Hamiltonian...")
+
                 # This returns the Hamiltonian term for this interaction if we haven't
                 # previously constructed it.
             
@@ -211,6 +216,9 @@ class DynamicComponent:
                 # Add this new term to the network's Hamiltonian.
 
             this.network._addHamiltonianTerm(term)
+
+        else:
+            logger.warn("Interaction ports not yet linked; can't create Hamiltonian term yet...")
 
     # Removes a given interaction function from this component's list of interactions functions.
 

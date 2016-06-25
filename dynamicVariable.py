@@ -1,6 +1,8 @@
 from fixed  import Fixed     # Fixed-precision math class.
 from typing import Callable,Iterable
 
+import logmaster
+
 from differentiableFunction import BaseDifferentiableFunction
 from partialEvalFunc        import PartiallyEvaluatableFunction
 from dynamicFunction        import BaseDynamicFunction
@@ -12,11 +14,16 @@ __all__ = ['SimulationException',
            'DynamicVariable',
            'DerivedDynamicFunction']
 
+logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+    # The dynamicVariable module is part of our core simulation component.
+
 class SimulationException(Exception): pass
 
 class TimestepException(SimulationException): pass
 
 class TimestepParityException(TimestepException): pass
+
+class UnsetTimeDerivativeException(TimestepException): pass
 
 #   A dynamic variable (a.k.a., generalized coordinate, degree of freedom)
 #   could in general correspond to either a generalized position, or to a
@@ -116,6 +123,8 @@ class DynamicVariable(BaseDynamicFunction):
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
                  timeDeriv:BaseDynamicFunction=None):
 
+        logger.debug("Initializing the DynamicVariable named %s..." % name)
+
         if name != None:  inst.name = name
 
         if timeDeriv != None:  inst._timeDeriv = timeDeriv
@@ -125,7 +134,7 @@ class DynamicVariable(BaseDynamicFunction):
 
     @property
     def timeDeriv(self):
-        if self.hasattr('_timeDeriv'):
+        if hasattr(self,'_timeDeriv'):
             return self._timeDeriv
         else:
             return None
@@ -146,11 +155,12 @@ class DynamicVariable(BaseDynamicFunction):
     def evolveTo(this, timestep:int):
 
         # First, make sure that the time parities match.
-        
+
         if (timestep - this.time)%2 != 0:
-            raise TimestepParityException(("Can't get from time step %d to %d " +
-                                           "because parities don't match")%(this.time,
-                                                                            timestep))
+            errStr = ("Can't get from time step %d to %d " +
+                      "because parities don't match")%(this.time,timestep)
+            logger.error("DynamicVariable.evolveTo: "+errStr)
+            raise TimestepParityException(errStr)
 
         # Proceed either forward or backward as needed till we get there.
 
@@ -164,8 +174,23 @@ class DynamicVariable(BaseDynamicFunction):
 
     def stepForward(this):
 
+        # print("value=%s, timeDeriv=%s" % (str(this.value), str(this.timeDeriv)))
+
+            # If this dynamic variable's time-derivative function has not yet
+            # been defined, then of course we can't step it forwards in time yet.
+            # Severe bug in program logic!  Log an error an raise an exception.
+
+        if this.timeDeriv == None:
+            errStr = "Variable %s's time derivative is not yet defined!" % this.name
+            logger.error("DynamicVariable.stepForward: " + errStr)
+            raise UnsetTimeDerivativeException(errStr)
+
+
         this.value = this.value + this.timeDeriv(this.time + 1)
         this.time  = this.time + 2
+
+        logger.debug("Stepped variable %s forward to time %d..." %
+                     (this.name, this.time))
 
     # Steps backwards in time by one minimal time increment (-2 units).
 
@@ -282,6 +307,9 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
     #       variables would have at that point in time).
 
     def dynPartialDerivWRT(self, v:DynamicVariable) -> DerivedDynamicFunction:
+
+        logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
+                     "Looking up the index of DynamicVariable %s..." % str(v))
 
         varIndex = self._varIndex[v]    # Look up this variable's index in our list.
 

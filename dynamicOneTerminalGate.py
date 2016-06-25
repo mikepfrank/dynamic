@@ -67,7 +67,7 @@ class DynamicOneTerminalGate(DynamicComponent):
             # Create and remember our output node, initially with the
             # same name as our output port that we'll connect it to.
 
-        inst.outputNode = DynamicNode(portName)
+        inst.outputNode = DynamicNode(network, name=portName)
 
             # Link our port named <portName> to our output node.
 
@@ -115,6 +115,9 @@ class DynamicOneTerminalGate(DynamicComponent):
 
     @potential.setter
     def potential(this, potential:UnaryDifferentiableFunction):
+
+        logger.debug("Setting %s's potential function to %s..." %
+                     (this.name, str(potential)))
 
         # If the potential was previously set to something else, delete the old potential first.
         

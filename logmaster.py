@@ -1041,6 +1041,18 @@ class NormalLoggerAdapter(logging.LoggerAdapter):
             caller = mainLogger.logger.findCaller()
         self.logger.critical(msg, *args, caller=caller, **kwargs)
 
+    def exception(self, msg, *args, caller=None, **kwargs):
+        msg, kwargs = self.process(msg, kwargs)
+        if caller==None:                                
+            caller = mainLogger.logger.findCaller()
+        self.logger.exception(msg, *args, caller=caller, **kwargs)
+
+    def FATAL(self, msg, *args, caller=None, **kwargs):
+        msg, kwargs = self.process(msg, kwargs)
+        if caller==None:                                
+            caller = mainLogger.logger.findCaller()
+        self.logger.fatal(msg, *args, caller=caller, **kwargs)
+
     # Set up a handy shorter name for the warning method.
 NormalLoggerAdapter.warn = NormalLoggerAdapter.warning
 

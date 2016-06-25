@@ -1,4 +1,8 @@
+import logmaster
+
 from dynamicCoordinate import DynamicCoordinate
+
+logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 #   In Dynamic, a (simple) "node" has the following features (at least):
 #
@@ -31,11 +35,24 @@ class DynamicNode:
     #   to initialize the node's .name data member.  Initially the
     #   node has an empty list of links.
 
-    def __init__(inst, name=None):
+    def __init__(inst, network, name:str=None):
+
+        logmaster.debug("Creating a new dynamic node named %s in network %s..." %
+                        (name, str(network)))
+        
         if name != None:  inst.name = name
         inst.links = []     # Node has an empty list of links initially.
-            # Create the node's coordinate, initially having (p,q)=(0,0) at timestep 0.
-        inst.coord = DynamicCoordinate(name)   
+
+        # Next we create the node's dynamical coordinate, initially
+        # having (p,q)=(0,0) at timestep 0.
+
+            # First make sure the network has a Hamiltonian structure
+            # attached to it, or else we can't usually start creating
+            # dynamical coordinates associated with our nodes.
+
+        network.initHamiltonian()
+            
+        inst.coord = DynamicCoordinate(network.hamiltonian, name)   
 
     def getName(this):      # Get something that can be used as a node name.
         if hasattr(this,'name'):

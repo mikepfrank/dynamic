@@ -43,9 +43,21 @@ from abc import ABCMeta,abstractmethod      # Abstract base class support.
 from fixed  import Fixed     # Fixed-precision math class.
 from typing import Callable
 
+import logmaster
+
 from dynamicVariable        import DynamicVariable,DerivedDynamicFunction
 from hamiltonian            import HamiltonianTerm,Hamiltonian
 from kineticEnergyFunction  import SimpleQuadraticKineticEnergyFunction
+
+logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+    # The dynamicCoordinate module is part of our core simulator component.
+
+class HamiltonianException(Exception): pass
+
+class UnsetHamiltonianException(HamiltonianException): pass
+class UnsetMomentumException(HamiltonianException): pass
+class UnsetPositionException(HamiltonianException): pass
+
 
 # Base class for a dynamic variable appearing in a Hamiltonian.  Such variables
 # remember the Hamiltonian that they are associated with and their time derivative
@@ -58,6 +70,8 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
                  hamiltonian:Hamiltonian=None):
 
+        logger.debug("Initializing the HamiltonianVariable named %s..." % name)
+
         if hamiltonian != None:  inst.hamiltonian = hamiltonian
             # Goes ahead and sets our time derivative as a side-effect.
 
@@ -65,7 +79,6 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
 
     @property
     def hamiltonian(self):
-
         if hasattr(self,'_hamiltonian'):
             return self._hamiltonian
         else:
@@ -73,9 +86,7 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
 
     @hamiltonian.setter
     def hamiltonian(self, hamiltonian:Hamiltonian):
-
         if hamiltonian != None:
-
             self._hamiltonian = hamiltonian
             self.setTimeDeriv()
 
@@ -120,6 +131,8 @@ class PositionVariable(HamiltonianVariable):
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
                  hamiltonian:Hamiltonian=None, conjugateMomentum:MomentumVariable=None):
 
+        logger.debug("Creating a new PositionVariable named %s..." % name)
+
         # Remember our conjugate momentum variable.
 
         inst.conjugateMomentum  = conjugateMomentum
@@ -136,7 +149,6 @@ class PositionVariable(HamiltonianVariable):
                                               
     @property
     def conjugateMomentum(self):
-        
         if hasattr(self,'_conjugateMomentum'):
             return self._conjugateMomentum
         else:
@@ -159,11 +171,33 @@ class PositionVariable(HamiltonianVariable):
             conjMom.conjugatePosition = self
 
     def setTimeDeriv(self):
-        if hasattr(self, '_hamiltonian'):
+
+        if self.hamiltonian != None and self.conjugateMomentum != None:
+        
+##        if self.hamiltonian == None:
+##
+##            errStr = ("Can't get %s's time derivative because its Hamiltonian hasn't been set." %
+##                         str(self))
+##            
+##            logger.exception("PositionVariable.setTimeDeriv: " + errStr)
+##
+##            raise UnsetHamiltonianException(errStr)
+##            
+##        elif self.conjugateMomentum == None:
+##
+##            errStr = ("Can't get %s's time derivative because its conjugate momentum hasn't been set." %
+##                         str(self))
+##            
+##            logger.exception("PositionVariable.setTimeDeriv: " + errStr)
+##
+##            raise UnsetMomentumException(errStr)
+##            
+##        else:
+        
                 # Create the dynamic function representing our time derivative.
                 # This is just the partial derivative of the Hamiltonian with
                 # respect to our conjugate momentum variable, ∂q/∂t = ∂H/∂p.
-            posTimeDeriv = self.hamiltonian.dynPartialDerivWRT(conjugateMomentum)
+            posTimeDeriv = self.hamiltonian.dynPartialDerivWRT(self.conjugateMomentum)
                 # Store that thang for later reference.
             self._timeDeriv = posTimeDeriv
 
@@ -192,6 +226,8 @@ class MomentumVariable(HamiltonianVariable):
     def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
                  hamiltonian:Hamiltonian=None,
                  conjugatePosition:PositionVariable=None):
+
+        logger.debug("Creating a new MomentumVariable named %s..." % name)
 
         inst.conjugatePosition = conjugatePosition
 
@@ -222,14 +258,15 @@ class MomentumVariable(HamiltonianVariable):
             conjPos.conjugateMomentum = self
 
     def setTimeDeriv(self):
-        if hasattr(self, '_hamiltonian'):
+
+        if self.hamiltonian != None and self.conjugatePosition != None:
             
                 # Create the dynamic function representing our time derivative.
                 # This is just the negative of the partial derivative of the
                 # Hamiltonian with respect to our conjugate position variable,
                 # ∂p/∂t = -∂H/∂q.
 
-            dH_over_dq = self.hamiltonian.dynPartialDerivWRT(conjugatePosition)
+            dH_over_dq = self.hamiltonian.dynPartialDerivWRT(self.conjugatePosition)
             momTimeDeriv = NegatorDynamicFunction(dH_over_dq)
             
                 # Store that thang for later reference.
@@ -412,13 +449,16 @@ class DynamicCoordinate:
     #           is a part of.
     #
     
-    def __init__(inst, name:str=None, mass=None, hamiltonian:Hamiltonian=None):
+    def __init__(inst, hamiltonian:Hamiltonian, name:str=None, mass=None):
 
-            # Give a dynamical coordinate a unit mass by default.
+            # Give a new dynamical coordinate a unit mass by default.
 
         if mass==None: mass = 1
 
-            # Remember how to get to our Hamiltonian.
+        logger.debug("Creating a new dynamical coordinate named %s with effective mass %f..."
+                     % (name, mass))
+
+            # Remember how to get to our Hamiltonian for future reference.
 
         inst.hamiltonian = hamiltonian
 
@@ -442,7 +482,10 @@ class DynamicCoordinate:
             # function to generate a new Hamiltonian term.
 
         KEHterm = HamiltonianTerm([v], KEfunc)
-        
+
+            # Introduce this new kinetic energy term into the Hamiltonian.
+
+        hamiltonian.addTerm(KEHterm)
 
     @property
     def positionVariable(self):
@@ -454,23 +497,21 @@ class DynamicCoordinate:
         
     @property
     def hamiltonian(self):
-
-        if self.hasattr('_hamiltonian'):
-            return self._hamiltonian
+        #logger.debug("Retrieving %s's Hamiltonian..." % (str(self)))
+        if hasattr(self,'_hamiltonian'):
+            hamiltonian = self._hamiltonian
         else:
-            return None
+            hamiltonian = None
+        #logger.debug("It looks like %s's Hamiltonian is %s." % (str(self), str(hamiltonian)))
+        return hamiltonian
 
     @hamiltonian.setter
     def hamiltonian(self, hamiltonian:Hamiltonian):
-
+        #logger.debug("Setting %s's Hamiltonian to %s" % (str(self), str(hamiltonian)))
         if hamiltonian != None:
-
-            if self.hamiltonian != None:
-
+            if self.hamiltonian == None:
                 self._hamiltonian = hamiltonian
-                
             else:
-
                 raise ReinitializationException()
 
 
