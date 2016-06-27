@@ -120,9 +120,11 @@ class Hamiltonian(DifferentiableDynamicFunction):
             inst._hamiltonian = ham
         def __iter__(inst):
             return iter(ham._terms)
+        def __len__(inst):
+            return len(ham._terms)
 
     def __iter__(inst):
-        return TermsIterable(inst)
+        return Hamiltonian.TermsIterable(inst)
 
     # Set the set of terms of this Hamiltonian to the given set.  Please note
     # that doing this entirely replaces the existing set of terms (if any).
@@ -157,11 +159,15 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
     class TermsPartialDerivIterable(Iterable[BaseDynamicFunction]):
         def __init__(inst, ham:Hamiltonian, var:DynamicVariable):
-            inst._termList = ham.termsContaining(v)
+            inst._termList = ham.termsContaining(var)
             inst._variable = var
         def __iter__(inst):
-            return TermsPartialDerivIterator(inst._termList, inst._variable)
+            return Hamiltonian.TermsPartialDerivIterator(inst._termList, inst._variable)
+        def __len__(inst):
+            return len(inst._termList)
 
+    def _iter_partials(inst, var:DynamicVariable):
+        return Hamiltonian.TermsPartialDerivIterable(inst, var)
 
     # Public member functions:
     #
@@ -269,7 +275,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
     #       terms within this Hamiltonian that involve the given variable.
     #
     
-    def dynpartialDerivWRT(self, v:DynamicVariable) -> DerivedDynamicFunction:
+    def dynPartialDerivWRT(self, v:DynamicVariable) -> DerivedDynamicFunction:
 
         # If this Hamiltonian's partial derivative with respect to the
         # given variable has already been generated, don't bother generating
@@ -285,12 +291,12 @@ class Hamiltonian(DifferentiableDynamicFunction):
         # the dynamic partial derivatives of our terms with respect to
         # the given variable.  It skips terms not including the variable.
 
-        dynPartialDerivIterable = TermsPartialDerivIterable(self, v)
+        dynPartialDerivIterable = self._iter_partials(v)
 
         # Now we generate a SummerDynamicFunction object which will sum
         # over those partial derivative terms.
 
-        dynPartialsSummmer = SummerDynamicFunction(dynPartialDerivIterable)
+        dynPartialsSummer = SummerDynamicFunction(dynPartialDerivIterable)
 
         # Cache the result so we don't have to keep regenerating it.
 
@@ -303,7 +309,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
     def termsContaining(self, v:DynamicVariable):
 
-        if self._varTerms.has_key(v):
+        if v in self._varTerms:
             return self._varTerms[v]
         else:
             return []

@@ -165,6 +165,8 @@ class DynamicNetwork:
     #       variables in the network forwards to the given timestep.
 
     def evolveTo(self, timestep:int):
+        logger.debug(("DynamicNetwork.evolveTo(): Requesting our Hamiltonian %s "
+                      "to evolve to time-step %d...") % (str(self.hamiltonian), timestep))
         self.hamiltonian.evolveTo(timestep)
 
     #-- inst.test() - Test this network by initializing it and then

@@ -9,10 +9,13 @@ from dynamicFunction        import BaseDynamicFunction
 
 __all__ = ['SimulationException',
            'TimestepException',
-           'TimestepParity',
+           'TimestepParityException',
+           'UnsetTimeDerivativeException',
+           'UnindexedVariableException',
 
            'DynamicVariable',
-           'DerivedDynamicFunction']
+           'DerivedDynamicFunction',
+           'DifferentiableDynamicFunction']
 
 logger = logmaster.getLogger(logmaster.sysName + '.simulator')
     # The dynamicVariable module is part of our core simulation component.
@@ -24,6 +27,8 @@ class TimestepException(SimulationException): pass
 class TimestepParityException(TimestepException): pass
 
 class UnsetTimeDerivativeException(TimestepException): pass
+
+class UnindexedVariableException(SimulationException): pass
 
 #   A dynamic variable (a.k.a., generalized coordinate, degree of freedom)
 #   could in general correspond to either a generalized position, or to a
@@ -154,13 +159,23 @@ class DynamicVariable(BaseDynamicFunction):
 
     def evolveTo(this, timestep:int):
 
-        # First, make sure that the time parities match.
+        # First, make sure that the time parities match.  If they don't, then
+        # we can't actually get to the time requested.  In that case, just get
+        # as close as we can instead (without going over).
 
         if (timestep - this.time)%2 != 0:
-            errStr = ("Can't get from time step %d to %d " +
-                      "because parities don't match")%(this.time,timestep)
-            logger.error("DynamicVariable.evolveTo: "+errStr)
-            raise TimestepParityException(errStr)
+
+                # Nudge timestep one unit closer to the current time.
+
+            if timestep > this.time:
+                timestep -= 1
+            else:
+                timestep += 1
+            
+##            errStr = ("Can't evolve dynamic variable %s from time step %d to %d " +
+##                      "because parities don't match")%(str(this), this.time, timestep)
+##            logger.error("DynamicVariable.evolveTo: "+errStr)
+##            raise TimestepParityException(errStr)
 
         # Proceed either forward or backward as needed till we get there.
 
@@ -185,8 +200,17 @@ class DynamicVariable(BaseDynamicFunction):
             logger.error("DynamicVariable.stepForward: " + errStr)
             raise UnsetTimeDerivativeException(errStr)
 
+        logger.debug(("DynamicVariable.stepForward():  " +
+                      "Attempt to evaluate time derivative function %s at time step %d...")
+                     % (str(this.timeDeriv), (this.time + 1)))
 
-        this.value = this.value + this.timeDeriv(this.time + 1)
+        derivVal = this.timeDeriv(this.time + 1)
+
+        logger.debug(("DynamicVariable.stepForward():  " +
+                      "Got the time derivative value %f...")
+                     % float(derivVal))
+
+        this.value = this.value + derivVal
         this.time  = this.time + 2
 
         logger.debug("Stepped variable %s forward to time %d..." %
@@ -219,11 +243,27 @@ class DerivedDynamicFunction(BaseDynamicFunction):
     @property
     def function(self): return self._function
 
+##    def evaluator(inst, *args, **kwargs):
+##
+##        logger.debug("DerivedDynamicFunction.evaluator(): Evaluating derived dynamic function %s..." % str(inst))
+##        
+####        if len(args) == 0 and len(kwargs) == 0:
+####            return inst         # No arguments provided: Leave the function unevaluated.
+####        else:
+##            
+##        return inst.evaluateWith(*args, **kwargs)     # Needs further processing.
+
     def evolveTo(inst, timestep:int):
+
+        logger.debug("DerivedDynamicFunction.evolveTo():  Evolving internal variables to timestep %d..." % timestep)
+        
         for var in inst._varList:
             var.evolveTo(timestep)
 
     def evaluateWith(inst, *args, **kwargs):
+
+        logger.debug("DerivedDynamicFunction.evaluateWith():  Evaluating function %s with arguments: %s %s" %
+                     (str(self._function), str(args), str(kwargs)))
 
             # What argList to give here in the case of a Hamiltonian
             # whose function doesn't have an explicit argument list?
@@ -285,16 +325,55 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
         DerivedDynamicFunction.__init__(inst, varList, function)
 
-            # Construct our map from variables to their indices.
+            # Add all the given variables to our list of variables we can
+            # be differentiated by.
 
-        inst._varIndex = dict()
-        for index in range(len(varList)):
-            inst._varIndex[varList[index]] = index
+        for var in varList:
+            inst.addVariable(var)
+
+        logger.debug(("DifferentiableDynamicFunction.__init__(): "
+                      "Setting ._function attribute of DDF %s to %s")
+                     % (inst, function))
 
         if function != None:
             inst._function = function       # Remember the function, if provided.
 
         inst._partials = dict()         # Initially empty cache of partials.
+
+    # Adds a variable to the list of variables we can be differentiated by.
+    # Doesn't attempt to figure out what our partial is WRT the new variable yet.
+
+    def addVariable(inst, var:DynamicVariable):
+
+        logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                      "Adding variable %s to the list of variables that " +
+                      "function %s can be differentiated by...") % (var, inst))
+
+            # Create our variable list if it doesn't exist yet.
+
+        if not hasattr(inst, '_varList'):
+            inst._varList = []
+
+            # Create our variable index if it doesn't exist yet.
+
+        if not hasattr(inst, '_varIndex'):
+            inst._varIndex = dict()
+
+            # If the variable isn't already in the variable list, add it.
+
+        if var not in inst._varIndex:
+
+                # Figure out what this new variable's index is in the last.
+
+            index = len(inst._varList)
+
+                # Add the new variable to the list.
+
+            inst._varList.append(var)
+
+                # Add the new variable's index to the index.
+
+            inst._varIndex[var] = index
 
     # Instance public methods:
     #
@@ -310,6 +389,12 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
         logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
                      "Looking up the index of DynamicVariable %s..." % str(v))
+
+        if v not in self._varIndex:
+            errmsg = ("DyanmicVariable %s not found in _varIndex{} of " +
+                      "DifferentiableDynamicFunction %s!") % (str(v), str(self))
+            logger.exception("DifferentiableDynamicFunction.dynPartialDerivWRT(): " + errmsg)
+            raise 
 
         varIndex = self._varIndex[v]    # Look up this variable's index in our list.
 

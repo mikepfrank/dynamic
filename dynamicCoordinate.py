@@ -45,6 +45,7 @@ from typing import Callable
 
 import logmaster
 
+from dynamicFunction        import NegatorDynamicFunction
 from dynamicVariable        import DynamicVariable,DerivedDynamicFunction
 from hamiltonian            import HamiltonianTerm,Hamiltonian
 from kineticEnergyFunction  import SimpleQuadraticKineticEnergyFunction
@@ -87,7 +88,16 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
     @hamiltonian.setter
     def hamiltonian(self, hamiltonian:Hamiltonian):
         if hamiltonian != None:
+            
             self._hamiltonian = hamiltonian
+
+                # Add this variable to the list of variables that the Hamiltonian can be
+                # differentiated by.
+
+            hamiltonian.addVariable(self)
+
+                # Automatically set up our time-derivative in reference to that Hamiltonian.
+
             self.setTimeDeriv()
 
     @abstractmethod
@@ -271,7 +281,7 @@ class MomentumVariable(HamiltonianVariable):
             
                 # Store that thang for later reference.
 
-            inst._timeDeriv = momTimeDeriv            
+            self._timeDeriv = momTimeDeriv            
 
         
 

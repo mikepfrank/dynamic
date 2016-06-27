@@ -3,6 +3,10 @@ import numbers      # Defines the Rational abstract class.
 import operator     # Module defining standard arithmetic operators
 import fractions    # Includes the Fraction class.
 
+import logmaster
+
+logger = logmaster.getLogger(logmaster.sysName + '.fixed')
+
 __all__ = ['Fixed']
 
 #-- Class for fixed-point numbers with a specific fractional quantum.
@@ -62,6 +66,7 @@ class Fixed(numbers.Rational):
 
     def __add__(x,y):
         result = Fixed(x)
+        logger.debug("Fixed.__add__(): Attempting to convert addend %s to Fixed..." % y)
         yfixed = Fixed(y)
         result._numerator = result._numerator + yfixed._numerator
         return result

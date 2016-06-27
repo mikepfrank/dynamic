@@ -3,6 +3,10 @@ from typing import Any,Callable,Iterable
 
 from fixed import Fixed
 
+import logmaster
+
+logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+
 __all__ = ['BaseDynamicFunction',
            'NullDynamicFunction',
            'NegatorDynamicFunction',
@@ -31,15 +35,23 @@ class BaseDynamicFunction(metaclass=ABCMeta):
         inst._function = function
 
     def __call__(inst, timestep:int=None, *args, **kwargs):
+
+        logger.debug("BaseDynamicFunction.__call__(): Evaluating dynamic function %s at timestep %s..."
+                     % (str(inst), str(timestep)))
+        
         if timestep != None:
             inst.evolveTo(timestep)
-        return evaluator(*args, **kwargs)
+            
+        return inst.evaluator(*args, **kwargs)
 
     def evaluator(inst, *args, **kwargs):
-        if len(args) == 0 and len(kwargs) == 0:
-            return inst         # No arguments provided: Leave the function unevaluated.
-        else:
-            return inst.evaluateWith(*args, **kwargs)     # Needs further processing.
+
+        logger.debug("BaseDynamicFunction.evaluator(): Evaluating dynamic function %s with arguments %s %s..." % (str(inst), str(args), str(kwargs)))
+        
+##        if len(args) == 0 and len(kwargs) == 0:
+##            return inst         # No arguments provided: Leave the function unevaluated.
+##        else:
+        return inst.evaluateWith(*args, **kwargs)     # Needs further processing.
 
     def __neg__(inst):
         return NegatorDynamicFunction(inst)
@@ -81,9 +93,17 @@ class NegatorDynamicFunction(BaseDynamicFunction):
         inst._internalFunction = f
 
     def evolveTo(inst, timestep:int):
+
+        logger.debug("NegatorDynamicFunction.evolveTo(): Evolving internal dynamic function %s to timestep %d..." %
+                     (str(inst._internalFunction), timestep))
+        
         inst._internalFunction.evolveTo(timestep)
 
     def evaluateWith(inst, *args, **kwargs):
+        
+        logger.debug("NegatorDynamicFunction.evaluateWith(): Evaluating negator on internal function %s with arguments: %s %s" %
+                     (str(inst._internalFunction), str(args), str(kwargs)))
+        
         return -inst._internalFunction(*args, **kwargs)
 
 # Given two DynamicFunctions, constructs another one whose value is
@@ -113,13 +133,21 @@ class SummerDynamicFunction(BaseDynamicFunction):
         inst._terms = terms
 
     def evolveTo(inst, timestep:int):
+        
+        logger.debug("SummerDynamicFunction.evolveTo(): Evolving terms to timestep %d..." % timestep)
+        
         for term in inst._terms:
             term.evolveTo(timestep)
 
     def evaluateWith(inst, *args, **kwargs):
+
+        logger.debug("SummerDynamicFunction.evaluateWith(): Evaluating summer with arguments: %s %s" %
+                     (str(args), str(kwargs)))
+        
         if len(inst._terms) == 0:
             return Fixed(0)
         cumSum = inst._terms[0].evaluateWith(*args, **kwargs)
         for term in inst._terms[1:]:
             cumSum = cumSum + term.evaluateWith(*args, **kwargs)
+        return cumSum
 
