@@ -1,15 +1,17 @@
 from numbers            import Real    # Used by DynamicNetwork.thermalize().
 
 import logmaster
+logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 from dynamicNode        import DynamicNode
 from dynamicComponent   import DynamicComponent
 from linkport           import Link 
 from hamiltonian        import HamiltonianTerm,Hamiltonian
 
+class SimulationContext: pass
+
 __all__ = ['DynamicNetwork']
 
-logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 #   DynamicNetwork class.  In Dynamic, a Network conceptually consists of:
 #
@@ -48,8 +50,11 @@ class DynamicNetwork:
     #
     #       inst._seqno [int] - Sequence number used internally to generate
     #                               new unique node names as needed.
+    #
+    #       inst._context:SimulationContext - The simulation context that
+    #           will be used for simulating this network.
     
-    def __init__(inst, name:str=None, title:str=None):
+    def __init__(inst, name:str=None, title:str=None, context:SimulationContext=None):
 
         if name != None:    inst.name = name
         if title != None:   inst.title = title
@@ -67,8 +72,37 @@ class DynamicNetwork:
 
         inst._seqno = 0     # Initial sequence number for node names is 0.
 
+        inst.context = context      # Also points context at us as a side-effect.
+
     def __str__(self):
         return netName(self)
+
+    @property
+    def context(self):
+        if hasattr(self,'_context'):
+            return self._context
+        else:
+            return None
+
+    @context.setter
+    def context(self, context:SimulationContext=None):
+        if context is None:
+            if hasattr(self,'_context'):
+                del self.context
+        else:
+            self._context = context
+            
+                # Tell the simulation context that we were just given that,
+                # "Hey, buddy, looks like we are the network that you are
+                # supposed to be simulating here."
+            context.network = self
+
+    @context.deleter
+    def context(self):
+        if hasattr(self,'_context'):
+            if self._context is not None:
+                self._context.network = None    # Tell our context to ditch us.
+            del self._context
     
     #== Public instance methods.
 
@@ -169,10 +203,16 @@ class DynamicNetwork:
         logger.info("Dynamic network is going to evolve to timestep %d..." % timestep)
 
         if len(self._nodes) == 0:
-            logger.warn("Dynamic network has no nodes!!!")
+            logger.debug("Debug warning: Dynamic network has no nodes!!!")
 
         for node in self._nodes.values():
+            
             node.evolveTo(timestep)
+
+##            logger.normal("%s, %.9f, %.9f" %
+##                          (str(node),
+##                           node.coord.ccp._posVar.value,
+##                           node.coord.ccp._momVar.value))
         
 # We used to do this by just updating the Hamiltonian but it was harder to understand the sequencing... :/
 
@@ -195,8 +235,9 @@ class DynamicNetwork:
             # Simulate the network forwards for a few time-steps.
 
         logger.info("Evolving network '%s' forwards ten time-steps..." % str(self))
-        
-        self.evolveTo(10)       # Just a few steps, to exercise things.
+
+        for t in range(10):
+            self.evolveTo(t)       # Just a few steps, to exercise things.
 
     #-- inst.thermalize() - This function randomizes the velocities
     #       of all generalized coordinates in the network according

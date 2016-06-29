@@ -34,7 +34,7 @@
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global RAW_DEBUG    # Declare this to be a module-level global.
-RAW_DEBUG = True    # Turn it on temporarily during initial development.
+RAW_DEBUG = False   # Change this to True as needed during initial development.
 
 if RAW_DEBUG:
     print("Turned on raw debugging...")
@@ -71,13 +71,21 @@ if __name__ == "__main__":
     if RAW_DEBUG:
         print("__main__: Importing custom application modules...", file=stderr)
 
+import logmaster
+from logmaster import configLogMaster,appLogger,info,normal
+    # The logmaster module defines our logging framework; we import
+    # several definitions that we need from it.
+
+from appdefs import appName
+    # Name of the present application.
+
+from simulationContext import SimulationContext
+    # Used for tracking global state of the simulation.
+
 from exampleNetworks import ExampleNetwork_MemCell
     # The exampleNetworks module defines various simple example modules to be
     # used for development and testing.  ExampleNetwork_MemCell is a minimally-
     # simple example network to be used for initial development purposes.
-
-import logmaster
-from logmaster import configLogMaster,appLogger,info,normal
 
     #|==========================================================================
     #|
@@ -127,8 +135,10 @@ def _main():
         print("__main__.main(): Configuring the 'logmaster' logging module...",
               file=stderr)
 
-    configLogMaster(consinfo = True, logdebug = True,
-                    role = 'startup', component = 'dynamicApp')
+    configLogMaster(loginfo = True, role = 'startup', component = appName)
+        # Configure the logger to turn on log-file info output, set this
+        # main thread's role to "startup" and set the thread component to
+        # "demoApp".
 
     logger = appLogger  # Get our application logger.
 
@@ -142,21 +152,32 @@ def _main():
     logger.normal("All Rights Reserved.")
     print()
 
-    # Fill in main code of application below...
+    # Below follows the main code of the demo application.
+
+        # First create a new simulation context object, initially empty.
+        # This stores global parameters of the simulation (such as the
+        # time delta value) and tracks global variables of the simulation
+        # (such as the current time-step number).  We'll let it take its
+        # default values for now.  At this point, the network to be
+        # simulated has not been created yet.
+
+    sc = SimulationContext()
 
         # Create an extremely simple example network for initial
-        # testing during development.
+        # testing during development.  Tell it that it's going to
+        # be using that simulation context that we just created.
 
-    logger.info("Creating an ExampleNetwork_MemCell instance...")                
-    net = ExampleNetwork_MemCell()
+    logger.normal("Creating an ExampleNetwork_MemCell instance...")                
+    net = ExampleNetwork_MemCell(context=sc)
 
-    logger.normal("Initial node q momentum is: %f" % 
+    logger.info("Initial node q momentum is: %f" % 
                   net._nodes['q'].coord.ccp._momVar.value)
 
-    logger.info("Testing the ExampleNetwork_MemCell instance...")
-    net.test()  # This method exercises some basic simulation capabilities.
+    logger.normal("Requesting simulator to run a simple test...")
+    
+    sc.test()  # This method exercises some basic simulation capabilities.
 
-    logger.info("Dynamic demo application is shutting down...")
+    logger.normal("Dynamic demo application is shutting down...")
     
     if RAW_DEBUG:
         print("__main__.main(): Exiting from main()...", file=stderr)

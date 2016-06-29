@@ -1,14 +1,14 @@
 import logmaster
+logger = logmaster.getLogger(logmaster.sysName + '.examples')
 
-from dynamicNetwork import DynamicNetwork,netName
-from dynamicMemCell import DynamicMemCell
+from dynamicNetwork     import DynamicNetwork,netName
+from dynamicMemCell     import DynamicMemCell
+from simulationContext  import SimulationContext
 
 __all__ = [
     'ExampleNetwork_MemCell',
     'ExampleNetwork_FullAdder',
     ]
-
-logger = logmaster.getLogger(logmaster.sysName + '.examples')
     
 # ExampleNetwork_MemCell class.  This example network (pretty much the
 # simplest possible non-empty network) includes just a single dynamic
@@ -16,15 +16,17 @@ logger = logmaster.getLogger(logmaster.sysName + '.examples')
 
 class ExampleNetwork_MemCell(DynamicNetwork):
 
-    def __init__(inst):
+    def __init__(inst, context:SimulationContext=None):
 
-        logger.info("Initializing a new ExampleNetwork_MemCell...")
+        logger.info(("Initializing a new ExampleNetwork_MemCell in " +
+                     "simulation context %s...") % str(context))
 
         # First do generic initialization for dynamic networks.
 
         DynamicNetwork.__init__(inst,
                                 name='exampleNet_dynMemCell',
-                                title="Example network: Dynamic memory cell")
+                                title="Example network: Dynamic memory cell",
+                                context=context)
 
         #-- Create the single dynamic memory cell and add it to the network.
 

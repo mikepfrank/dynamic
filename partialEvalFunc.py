@@ -4,20 +4,20 @@ from inspect    import getargspec
 
 import logmaster
 
-__all__ = ['FunctionNotDefinedException',
-           'TooManyArgumentsException',
-           'UnknownArgumentsException',
+__all__ = ['FunctionNotDefinedError',
+           'TooManyArgumentsError',
+           'UnknownArgumentsError',
            'PartiallyEvaluatableFunction']
 
-logger = logmaster.getLogger(logmaster.sysName + '.parialeval')
+logger = logmaster.getLogger(logmaster.sysName + '.partialEval')
 
-class FunctionNotDefinedException(Exception): pass
+class FunctionNotDefinedError(Exception): pass
     # At final-evaluation time, the actual function was still not defined.
 
-class TooManyArgumentsException(Exception): pass
+class TooManyArgumentsError(Exception): pass
     # Too many actual arguments were supplied to a partially-evaluatable function.
 
-class UnknownArgumentsException(Exception): pass
+class UnknownArgumentsError(Exception): pass
     # A keyword argument with an unexpected name was supplied to a partially-evaluatable function.
 
 class PartiallyEvaluatableFunction():   # Is callable().
@@ -68,14 +68,14 @@ class PartiallyEvaluatableFunction():   # Is callable().
     def __call__(inst, *args, **kwargs) -> Any:
 
         if inst._internalFunc == None:
-            raise FunctionNotDefinedException("Can't call a PartiallyEvaluatableFunction before defining its function!")
+            raise FunctionNotDefinedError("Can't call a PartiallyEvaluatableFunction before defining its function!")
 
         totArgs = len(args) + len(kwargs)
 
             # Make sure user didn't supply us with too many actual arguments.
 
 ##        if len(args) + len(kwargs) > len(inst._argList):
-##            raise TooManyArgumentsException("Tried to call %s with too many (%d) arguments, %s!" % (str(inst), totArgs, str(args)+str(kwargs)))
+##            raise TooManyArgumentsError("Tried to call %s with too many (%d) arguments, %s!" % (str(inst), totArgs, str(args)+str(kwargs)))
 
         argDefs = dict(inst._argDefs)   # List of pairs (arg, val) giving initial argument values.
 
@@ -87,7 +87,7 @@ class PartiallyEvaluatableFunction():   # Is callable().
                 argName = inst._argList[argIndex]
                 argDefs[argName] = argVal
             else:
-                logger.warn("Ignoring extra argument %s to %s..." % (str(argVal), str(inst)))
+                logger.debug("Debug warning: Ignoring extra argument %s to %s..." % (str(argVal), str(inst)))
             argIndex = argIndex + 1
 
             # OK, let's get our remaining list of formal argument names, if any.
@@ -116,7 +116,7 @@ class PartiallyEvaluatableFunction():   # Is callable().
         if len(remkwargs) > 0:
             logger.warn("Ignoring unexpected keyword arguments %s supplied to PartiallyEvaluatableFunction %s" %
                         (str(kwargs), str(inst)))
-##            raise UnknownArgumentsException("Unknown keyword arguments %s were supplied to PartiallyEvaluatableFunction %s" %
+##            raise UnknownArgumentsError("Unknown keyword arguments %s were supplied to PartiallyEvaluatableFunction %s" %
 ##                                            (str(kwargs), str(inst)))
 
         if len(finArgs) == 0:   # All arguments were supplied!!

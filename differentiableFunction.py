@@ -97,7 +97,7 @@ class BaseDifferentiableFunction:
 
     def __call__(this, *argVals):
         value = this.function(*argVals) 
-        logger.normal(("BaseDifferentiableFunction.__call__(): Evaluated " +
+        logger.debug(("BaseDifferentiableFunction.__call__(): Evaluated " +
                        "%s (%s) on %s to get %s") %
                       (str(this), str(this.function), str(argVals), str(value)))
         return value

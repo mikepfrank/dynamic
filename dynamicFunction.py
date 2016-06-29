@@ -158,7 +158,7 @@ class MultiplierDynamicFunction(BaseDynamicFunction):
         multiplicand = inst._multiplicand.evaluateWith(*args, **kwargs)
         product = multiplier * multiplicand
 
-        logger.normal("MultiplierDynamicFunction.evaluateWith(): Multiplied %f x %f = %f" % (multiplier,multiplicand,product))
+        logger.debug("MultiplierDynamicFunction.evaluateWith(): Multiplied %f x %f = %f" % (multiplier,multiplicand,product))
 
         return product
 

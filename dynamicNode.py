@@ -52,9 +52,10 @@ class DynamicNode:
 
         network.initHamiltonian()
             
-        inst.coord = DynamicCoordinate(network.hamiltonian, name)
+        inst.coord = DynamicCoordinate(network.hamiltonian, name,
+                                       context=network.context)
 
-        logger.normal("DynamicNode.__init__(): Coordinate momentum is %f" %
+        logger.debug("DynamicNode.__init__(): Coordinate momentum is %f" %
                       inst.coord.ccp._momVar.value)
 
     def evolveTo(inst, timestep:int):

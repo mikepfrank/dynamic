@@ -36,24 +36,22 @@
 from typing import Callable,Iterable,Iterator,Set
 
 import logmaster
-
-from fixed                      import Fixed
-from partialEvalFunc            import PartiallyEvaluatableFunction
-from differentiableFunction     import BaseDifferentiableFunction
-from dynamicFunction            import BaseDynamicFunction,SummerDynamicFunction
-from dynamicVariable            import DynamicVariable,DerivedDynamicFunction,DifferentiableDynamicFunction
-
 logger = logmaster.getLogger(logmaster.sysName + '.simulator')
     # The hamiltonian module is part of our core simulation component.
 
-# A HamiltonianTerm is a primitive dynamic function (not expressed as
+from dynamicFunction                import BaseDynamicFunction,SummerDynamicFunction
+from dynamicVariable                import DynamicVariable
+from derivedDynamicFunction         import DerivedDynamicFunction
+from differentiableDynamicFunction  import DifferentiableDynamicFunction
+
+# A HamiltonianTerm is a primitive dynamic function (not broken down as
 # a sum of other functions) giving a Hamiltonian energy as a function
 # of some set of variables.  It should be differentiable with respect
 # to all variables.  At the moment it has no features that a general
 # DifferentiableDynamicFunction does not have, although implicitly it
-# is built from a set of DynamicVariables whose time-derivatives are
-# derived from the partial derivative of the Hamiltonian we are a part
-# of with respect to the conjugate momentum variables.
+# is built from a set of HamiltonianVariables whose time-derivatives are
+# derived from the partial derivatives of the Hamiltonian we are a part
+# of with respect to their conjugate position/momentum variables.
 
 class HamiltonianTerm(DifferentiableDynamicFunction): pass
 

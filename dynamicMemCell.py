@@ -63,7 +63,7 @@ class DynamicMemCell(DynamicOneTerminalGate):
 
         inst.potential = biasFunc
 
-        logger.normal("DynamicMemCell.__init__(): Output node momentum is: %f" % 
+        logger.debug("DynamicMemCell.__init__(): Output node momentum is: %f" % 
                       inst.outputNode.coord.ccp._momVar.value)
 
         
