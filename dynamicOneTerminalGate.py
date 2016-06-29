@@ -69,6 +69,9 @@ class DynamicOneTerminalGate(DynamicComponent):
 
         inst.outputNode = DynamicNode(network, name=portName)
 
+        logger.normal("DynamicOneTerminalGate.__init__(): "+
+                      "Output node momentum is %f" % inst.outputNode.coord.ccp._momVar.value)
+
             # Link our port named <portName> to our output node.
 
         inst.link(portName, inst.outputNode)
@@ -76,6 +79,10 @@ class DynamicOneTerminalGate(DynamicComponent):
             # Set our potential energy function to the given function.
 
         if potential != None:  inst.potential = potential
+
+            # Add our output node to the network.
+
+        network.addNode(inst.outputNode)
 
     @property
     def portName(this):

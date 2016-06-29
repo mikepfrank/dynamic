@@ -26,7 +26,7 @@ class QuadraticFunction(UnaryDifferentiableFunction):
 
             # Construct our derivative.
 
-        derivative = [lambda x:  2*c2*x + c1]
+        derivative = lambda x:  2*c2*x + c1
 
             # Do generic initialization for unary differentiable
             # functions.

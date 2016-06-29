@@ -5,7 +5,7 @@ import logmaster
 
 from differentiableFunction import BaseDifferentiableFunction
 from partialEvalFunc        import PartiallyEvaluatableFunction
-from dynamicFunction        import BaseDynamicFunction
+from dynamicFunction        import BaseDynamicFunction,MultiplierDynamicFunction
 
 __all__ = ['SimulationException',
            'TimestepException',
@@ -29,6 +29,8 @@ class TimestepParityException(TimestepException): pass
 class UnsetTimeDerivativeException(TimestepException): pass
 
 class UnindexedVariableException(SimulationException): pass
+
+class NoIntermediateVariableException(SimulationException): pass
 
 #   A dynamic variable (a.k.a., generalized coordinate, degree of freedom)
 #   could in general correspond to either a generalized position, or to a
@@ -125,10 +127,24 @@ class DynamicVariable(BaseDynamicFunction):
     #
     #   
 
-    def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
+    def __init__(inst, name:str=None, value:Fixed=None, time:int=0,
                  timeDeriv:BaseDynamicFunction=None):
 
         logger.debug("Initializing the DynamicVariable named %s..." % name)
+
+            # Do default initialization for BaseDynamicFunctions.
+            # We don't specify an underlying function here, since
+            # our job as a dynamic variable is to track our current
+            # value via dynamical simulation instead.
+
+        BaseDynamicFunction.__init__(inst, name)
+
+            # If no initial value was specified for this dynamic
+            # variable, just default its initial value to (fixed-point)
+            # zero.
+
+        if value is None:
+            value = Fixed(0)
 
         if name != None:  inst.name = name
 
@@ -189,6 +205,9 @@ class DynamicVariable(BaseDynamicFunction):
 
     def stepForward(this):
 
+        logger.info("Stepping variable %s forward from time step %d..." %
+                    (this.name, this.time))
+
         # print("value=%s, timeDeriv=%s" % (str(this.value), str(this.timeDeriv)))
 
             # If this dynamic variable's time-derivative function has not yet
@@ -206,15 +225,20 @@ class DynamicVariable(BaseDynamicFunction):
 
         derivVal = this.timeDeriv(this.time + 1)
 
-        logger.debug(("DynamicVariable.stepForward():  " +
-                      "Got the time derivative value %f...")
+        logger.info(("DynamicVariable.stepForward():  " +
+                     "Got the time derivative value %f...")
                      % float(derivVal))
+
+        logger.normal("Stepping variable %s from %f @ time %d to %f @ time %d (delta = %f)" %
+                      (this.name, this.value, this.time,
+                       this.value + derivVal, this.time + 2,
+                       derivVal))
 
         this.value = this.value + derivVal
         this.time  = this.time + 2
 
-        logger.debug("Stepped variable %s forward to time %d..." %
-                     (this.name, this.time))
+        logger.info("Stepped variable %s forward to value %f at time %d..." %
+                    (this.name, float(this.value), this.time))
 
     # Steps backwards in time by one minimal time increment (-2 units).
 
@@ -233,9 +257,11 @@ class DerivedDynamicFunction(BaseDynamicFunction):
     # At whatever point it's provided, the <function> should take at
     # least as many arguments as there are variables in <varList>.
 
-    def __init__(self, varList:Iterable[DynamicVariable]=[], function:Callable=None):
+    def __init__(self, name:str=None, varList:Iterable[DynamicVariable]=[], function:Callable=None):
+
         self._varList = list(varList)
-        self._function = function
+
+        BaseDynamicFunction.__init__(self, name, function)
 
     @property
     def varList(self): return self._varList
@@ -262,21 +288,30 @@ class DerivedDynamicFunction(BaseDynamicFunction):
 
     def evaluateWith(inst, *args, **kwargs):
 
-        logger.debug("DerivedDynamicFunction.evaluateWith():  Evaluating function %s with arguments: %s %s" %
-                     (str(self._function), str(args), str(kwargs)))
+        logger.normal("DerivedDynamicFunction.evaluateWith():  Evaluating function %s (%s) with arguments: %s %s" %
+                     (str(inst), str(inst._function), str(args), str(kwargs)))
 
             # What argList to give here in the case of a Hamiltonian
             # whose function doesn't have an explicit argument list?
             # (In fact this will be the default.)  Does it even make
             # sense to partially evaluate such a Hamiltonian?
         
-        pef = PartiallyEvaluatableFunction(function=self._function)
+        pef = PartiallyEvaluatableFunction(function=inst._function)
 
             # Prepend the values of our variables to the list of actual arguments provided.
+
+        logger.info("DerivedDynamicFunction.evaluateWith(): Extending argument list with values of variables: %s"
+                    % str(inst._varList))
         
-        args = map(lambda v: v(), self._varList) + args
+        args = list(map(lambda v: v(), inst._varList)) + list(args)
+
+        logger.info("DerivedDynamicFunction.evaluateWith(): Evaluating %s with extended argument list: %s %s" %
+                    (str(inst), str(args), str(kwargs)))
+
+        value = pef(*args, **kwargs)
+        logger.normal("DerivedDynamicFunction.evaluateWith():  Got value %s = %s." % (str(inst), str(value)))
         
-        return pef(*args, **kwargs)
+        return value
 
 # A DifferentiableDynamicFunction is a DerivedDynamicFunction
 # (derived from a set of DynamicVariables) that also sports the
@@ -286,6 +321,10 @@ class DerivedDynamicFunction(BaseDynamicFunction):
 
 class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
+    # Instance public data members:
+    #
+    #       inst.name:str  -  A human-readable name of this function, as a string.
+    #
     # Instance private data members:
     #
     #       inst._varList:List[DynamicVariable]
@@ -317,37 +356,60 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
     # in the given <varlist> must correspond (in the same order!) to the
     # arguments to the given function.
 
-    def __init__(inst, varList:Iterable[DynamicVariable]=[],
+    def __init__(inst, name:str=None, varList:Iterable[DynamicVariable]=[],
                  function:BaseDifferentiableFunction=None):
 
             # First do generic initialization for DerivedDynamicFunction instances.
             # This remembers our variable list and our associated evaluation function.
 
-        DerivedDynamicFunction.__init__(inst, varList, function)
+        DerivedDynamicFunction.__init__(inst, name, varList, function)
+
+        inst.initializeVarIndex()
 
             # Add all the given variables to our list of variables we can
-            # be differentiated by.
+            # be differentiated by.  NOTE: If one of those "variables" is iself
+            # actually a DifferentiableDynamicFunction of some other varibles,
+            # we can go on and add the variables that it depends on as well!
 
         for var in varList:
             inst.addVariable(var)
 
+            # The following is kind of clumsy; it won't work if there is more
+            # than one level of nested sub-variables.  Fix this at some point.
+
+        for var in varList:
+            if isinstance(var, DifferentiableDynamicFunction):
+                logger.debug(("DifferentiableDynamicFunction.__init__(): " +
+                              "Variable %s of %s is itself a DifferentiableDynamicFunction " +
+                              "so let's also add the variables it depends on.") %
+                             (str(var), str(inst)))
+                for subvar in var.varList:
+                    inst.addVariable(subvar)
+
         logger.debug(("DifferentiableDynamicFunction.__init__(): "
                       "Setting ._function attribute of DDF %s to %s")
-                     % (inst, function))
+                     % (str(inst), str(function)))
 
         if function != None:
             inst._function = function       # Remember the function, if provided.
 
         inst._partials = dict()         # Initially empty cache of partials.
 
+    def initializeVarIndex(inst):
+        inst._varIndex = dict()
+        if hasattr(inst, '_varList'):
+            for var in inst._varList:
+                index = inst._varList.index(var)
+                inst._varIndex[var] = index
+
     # Adds a variable to the list of variables we can be differentiated by.
     # Doesn't attempt to figure out what our partial is WRT the new variable yet.
 
     def addVariable(inst, var:DynamicVariable):
 
-        logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+        logger.info(("DifferentiableDynamicFunction.addVariable():  " +
                       "Adding variable %s to the list of variables that " +
-                      "function %s can be differentiated by...") % (var, inst))
+                      "function %s can be differentiated by...") % (str(var), str(inst)))
 
             # Create our variable list if it doesn't exist yet.
 
@@ -363,6 +425,11 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
         if var not in inst._varIndex:
 
+            logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                          "Previously %s's variable list was %s.") % (str(var), str(inst._varList)))
+            logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                          "Previously %s's variable index was %s.") % (str(var), str(inst._varIndex)))
+            
                 # Figure out what this new variable's index is in the last.
 
             index = len(inst._varList)
@@ -374,6 +441,10 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
                 # Add the new variable's index to the index.
 
             inst._varIndex[var] = index
+
+            logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                          "Added variable %s to %s's variable list in the " +
+                          "%d'th position.") % (str(var), str(inst), index))
 
     # Instance public methods:
     #
@@ -387,36 +458,118 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
     def dynPartialDerivWRT(self, v:DynamicVariable) -> DerivedDynamicFunction:
 
-        logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
-                     "Looking up the index of DynamicVariable %s..." % str(v))
-
         if v not in self._varIndex:
-            errmsg = ("DyanmicVariable %s not found in _varIndex{} of " +
-                      "DifferentiableDynamicFunction %s!") % (str(v), str(self))
-            logger.exception("DifferentiableDynamicFunction.dynPartialDerivWRT(): " + errmsg)
-            raise 
 
-        varIndex = self._varIndex[v]    # Look up this variable's index in our list.
+            # If we can't do df/dv directly, search for another variable v' such
+            # that we can compute df/dv = df/dv' * dv'/dv.  NOTE: This is presently
+            # limited to only one level of chaining.
+            
+            dynPartial = self.chainRuleSearch(v)
 
-            # We may have previously constructed the dynamic function for
-            # this particular partial derivative.  If so, just look it up.
+            if dynPartial == None:        
+                errmsg = ("Could not find any intermediate variable for chain rule when " +
+                          "attempting to differentiate %s with respect to %s.")%(str(self),str(v))
 
-        if varIndex in self._partials:
-            return self._partials[varIndex]
+                logger.critical("DifferentiableDynamicFunction.chainRuleSearch: " + errmsg)
+        
+                raise NoIntermediateVariableException(errmsg)
 
-            # Ask our BaseDifferentialFunction for its partial derivative
-            # with respect to the <varIndex>'th variable.  Note that at this
-            # point, this function is still unevaluated.
+##            errmsg = ("DyanmicVariable %s not found in _varIndex{} of " +
+##                      "DifferentiableDynamicFunction %s!") % (str(v), str(self))
+##            logger.exception("DifferentiableDynamicFunction.dynPartialDerivWRT(): " + errmsg)
+##            raise 
 
-        partial = self._function.partialDerivWRT(varIndex)
+        else:
 
-            # Now construct a dynamic function corresponding to this partial
-            # derivative and remember it.
+            logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
+                         "Looking up the index of DynamicVariable %s..." % str(v))
 
-        dynPartial = DerivedDynamicFunction(self.varList, partial)
+            logger.debug("The ._varIndex dict of %s is %s." % (str(self), str(self._varIndex)))
+
+            varIndex = self._varIndex[v]    # Look up this variable's index in our list.
+
+            logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
+                         "The index of DynamicVariable %s is %d..." % (str(v), varIndex))
+
+                # We may have previously constructed the dynamic function for
+                # this particular partial derivative.  If so, just look it up.
+
+            if varIndex in self._partials:
+                return self._partials[varIndex]
+
+                # Check to see if this is a case where we can use the chain rule.
+
+            dynPartial = self.chainRuleSearch(v)
+
+            if dynPartial == None:
+
+                    # Ask our BaseDifferentiableFunction for its partial derivative
+                    # with respect to the <varIndex>'th variable.  Note that at this
+                    # point, this function is still unevaluated.
+
+                try:
+                    try:
+                        partial = self._function.partialDerivWRT(varIndex)
+                    except IndexError as e:
+                        logger.exception(("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
+                                          "IndexError exception in %s trying to find the partial derivative of %s " +
+                                          "with respect to %s!") % (str(self), str(self._function), str(v)))
+                        raise e
+                    
+                    # Now construct a dynamic function corresponding to this partial
+                    # derivative and remember it.
+
+                    dynPartial = DerivedDynamicFunction("d%s_over_d%s"%(self.name,v.name), self.varList, partial)
+                    
+                except TypeError as e:
+                    logger.exception(("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
+                                      "TypeError exception in %s trying to find the partial derivative of %s " +
+                                      "with respect to %s!") % (str(self), str(self._function), str(v)))
+                    raise e
+
+            # Cache this result so we don't have to recalculate it each time.
+            
         self._partials[varIndex] = dynPartial
 
             # Return that dude.
 
         return dynPartial
     
+    def chainRuleSearch(self, v:DynamicVariable) -> DerivedDynamicFunction:
+
+        # Search all possible intermediate variables.
+
+        for var in self._varIndex:
+
+            if isinstance(var, DifferentiableDynamicFunction):
+                
+                if v in var._varIndex:
+
+                    # First, find the partial of self with respect to var.
+
+                    leftPartial = self.dynPartialDerivWRT(var)
+
+                    logger.info("The partial of %s with respect to %s is %s..." %
+                                (str(self), str(var), str(leftPartial)))
+
+                    # Next, find the partial of var with respect to v.
+
+                    rightPartial = var.dynPartialDerivWRT(v)
+
+                    logger.info("The partial of %s with respect to %s is %s..." %
+                                (str(var), str(v), str(rightPartial)))
+
+                    # Now multiply them.
+
+                    overallPartial = leftPartial * rightPartial
+
+                    # Remember that, yes, we are a function of v.
+
+                    self.addVariable(v)
+
+                    return overallPartial
+
+        return None
+
+
+            

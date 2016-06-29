@@ -127,7 +127,7 @@ def _main():
         print("__main__.main(): Configuring the 'logmaster' logging module...",
               file=stderr)
 
-    configLogMaster(consdebug = True, logdebug = True,
+    configLogMaster(consinfo = True, logdebug = True,
                     role = 'startup', component = 'dynamicApp')
 
     logger = appLogger  # Get our application logger.
@@ -149,6 +149,9 @@ def _main():
 
     logger.info("Creating an ExampleNetwork_MemCell instance...")                
     net = ExampleNetwork_MemCell()
+
+    logger.normal("Initial node q momentum is: %f" % 
+                  net._nodes['q'].coord.ccp._momVar.value)
 
     logger.info("Testing the ExampleNetwork_MemCell instance...")
     net.test()  # This method exercises some basic simulation capabilities.

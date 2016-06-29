@@ -1,10 +1,14 @@
 from typing     import Callable,Iterable
 from inspect    import getargspec
 
+import logmaster
+
 # Base class from which to derive subclasses for particular types
 # of differentiable functions (of any number of variables).
 
 __all__ = ['BaseDifferentiableFunction']
+
+logger = logmaster.getLogger(logmaster.sysName + '.functions')
 
 class BaseDifferentiableFunction:
 
@@ -92,7 +96,11 @@ class BaseDifferentiableFunction:
     #   list of arguments.
 
     def __call__(this, *argVals):
-        return this.function(*argVals)
+        value = this.function(*argVals) 
+        logger.normal(("BaseDifferentiableFunction.__call__(): Evaluated " +
+                       "%s (%s) on %s to get %s") %
+                      (str(this), str(this.function), str(argVals), str(value)))
+        return value
 
     # Returns the partial derivative of this differentiable
     # function with respect to its <argumentIndex>th argument.
@@ -101,8 +109,16 @@ class BaseDifferentiableFunction:
     # and the return value is the value of the partial derivative
     # evaluated at that point.
 
-    def partialDerivWRT(argumentIndex:int):
-        return this._partials[argumentIndex]
+    def partialDerivWRT(this, argumentIndex:int):
+        try:
+            return this._partials[argumentIndex]
+        except IndexError as e:
+            logger.exception(("BaseDifferentiableFunction.partialDerivWRT():  Attempted to " +
+                              "take the partial derivative of %s with respect to its %d'th " +
+                              "argument, but it only has %d arguments.") % (str(this),
+                                                                            argumentIndex,
+                                                                            len(this._partials)))
+            raise e
 
     # ._addArg(argName) - Adds an argument named <argName> to this
     #   function's argument list.

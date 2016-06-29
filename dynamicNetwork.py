@@ -144,7 +144,7 @@ class DynamicNetwork:
         
         node.renameTo(nodeName)     # Does nothing if node already had that name.
 
-        logger.debug("Adding node '%s' to network '%s'" % (nodename, str(self)))
+        logger.info("Adding node '%s' to network '%s'" % (nodeName, str(self)))
 
         self._nodes[nodeName] = node
 
@@ -165,9 +165,20 @@ class DynamicNetwork:
     #       variables in the network forwards to the given timestep.
 
     def evolveTo(self, timestep:int):
-        logger.debug(("DynamicNetwork.evolveTo(): Requesting our Hamiltonian %s "
-                      "to evolve to time-step %d...") % (str(self.hamiltonian), timestep))
-        self.hamiltonian.evolveTo(timestep)
+
+        logger.info("Dynamic network is going to evolve to timestep %d..." % timestep)
+
+        if len(self._nodes) == 0:
+            logger.warn("Dynamic network has no nodes!!!")
+
+        for node in self._nodes.values():
+            node.evolveTo(timestep)
+        
+# We used to do this by just updating the Hamiltonian but it was harder to understand the sequencing... :/
+
+##        logger.debug(("DynamicNetwork.evolveTo(): Requesting our Hamiltonian %s "
+##                      "to evolve to time-step %d...") % (str(self.hamiltonian), timestep))
+##        self.hamiltonian.evolveTo(timestep)
 
     #-- inst.test() - Test this network by initializing it and then
     #       simulating it forwards in time a few steps.

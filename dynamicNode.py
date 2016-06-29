@@ -52,7 +52,14 @@ class DynamicNode:
 
         network.initHamiltonian()
             
-        inst.coord = DynamicCoordinate(network.hamiltonian, name)   
+        inst.coord = DynamicCoordinate(network.hamiltonian, name)
+
+        logger.normal("DynamicNode.__init__(): Coordinate momentum is %f" %
+                      inst.coord.ccp._momVar.value)
+
+    def evolveTo(inst, timestep:int):
+        logmaster.info("Node %s is going to evolve to timestep %d...", inst.name, timestep)
+        inst.coord.evolveTo(timestep)
 
     def getName(this):      # Get something that can be used as a node name.
         if hasattr(this,'name'):

@@ -1258,6 +1258,11 @@ def setLogLevels(verbose=False):
             print("logmaster.setLogLevels(): Turning on detailed debug messages on console...",
                   file=sys.stderr)
         console_level = logging.DEBUG
+    elif CONS_INFO:
+        if verbose:
+            print("logmaster.setLogLevels(): Turning on informational messages on console...",
+                  file=sys.stderr)
+        console_level = logging.INFO
     else:
         if not CONS_WARN:
             if verbose:

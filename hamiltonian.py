@@ -159,9 +159,13 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
     class TermsPartialDerivIterable(Iterable[BaseDynamicFunction]):
         def __init__(inst, ham:Hamiltonian, var:DynamicVariable):
-            inst._termList = ham.termsContaining(var)
+            inst._hamiltonian = ham
             inst._variable = var
         def __iter__(inst):
+            inst._termList = inst._hamiltonian.termsContaining(inst._variable)
+            if len(inst._termList) == 0:
+                logger.warn("Hamiltonian.TermsPartialDerivIterable.__iter__(): " + 
+                            "This Hamiltonian has no terms containing variable %s!" % str(var)) 
             return Hamiltonian.TermsPartialDerivIterator(inst._termList, inst._variable)
         def __len__(inst):
             return len(inst._termList)
@@ -189,6 +193,9 @@ class Hamiltonian(DifferentiableDynamicFunction):
                 # for the overall Hamiltonian.
 
             inst._varList = list(set(inst._varList) | set(term._varList))
+
+            logger.debug("Set ._varList of %s to %s." %
+                         (str(inst), str(inst._varList)))
 
                 # For each of the new term's variables, remember that
                 # this term is in the set of terms that references

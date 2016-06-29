@@ -9,6 +9,15 @@ logger = logmaster.getLogger(logmaster.sysName + '.fixed')
 
 __all__ = ['Fixed']
 
+class InitialValueError(Exception):
+    """An initial value passed to a constructor in this module was unaccaptable."""
+    pass
+
+class NoInitialValueError(InitialValueError):
+    """No initial value or an initial value of None was provided to a
+        constructor, but a value other than None was required."""
+    pass
+
 #-- Class for fixed-point numbers with a specific fractional quantum.
 #   NOTE: To simplify code, all instances of Fixed have the same quantum!
 
@@ -22,7 +31,11 @@ class Fixed(numbers.Rational):
     #-- Instance data members.
     #       inst._numerator - The numerator N of the fixed value N/D.
 
-    def __init__(inst, value=0, denom=None):
+    def __init__(inst, value=None, denom=None):
+
+        if value is None:
+            raise NoInitialValueError("Fixed.__init__(): Creating a Fixed " +
+                                      "with no initial value is not supported.")
 
         #-- If no denominator is specified, then take the value to be
         #   the full numeric value.  Else, take the value to be a numerator.

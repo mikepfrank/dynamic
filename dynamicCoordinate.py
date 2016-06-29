@@ -45,8 +45,9 @@ from typing import Callable
 
 import logmaster
 
+from linearFunction         import ProportionalFunction
 from dynamicFunction        import NegatorDynamicFunction
-from dynamicVariable        import DynamicVariable,DerivedDynamicFunction
+from dynamicVariable        import DynamicVariable,DerivedDynamicFunction,DifferentiableDynamicFunction
 from hamiltonian            import HamiltonianTerm,Hamiltonian
 from kineticEnergyFunction  import SimpleQuadraticKineticEnergyFunction
 
@@ -68,7 +69,7 @@ class UnsetPositionException(HamiltonianException): pass
 
 class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
 
-    def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
+    def __init__(inst, name:str=None, value:Fixed=None, time:int=0,
                  hamiltonian:Hamiltonian=None):
 
         logger.debug("Initializing the HamiltonianVariable named %s..." % name)
@@ -138,7 +139,7 @@ class PositionVariable(HamiltonianVariable):
     #       Accessed through the .conjugateMomentum public @property.
     #
 
-    def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
+    def __init__(inst, name:str=None, value:Fixed=None, time:int=0,
                  hamiltonian:Hamiltonian=None, conjugateMomentum:MomentumVariable=None):
 
         logger.debug("Creating a new PositionVariable named %s..." % name)
@@ -172,6 +173,8 @@ class PositionVariable(HamiltonianVariable):
 
         if conjMom != None and conjMom != self.conjugateMomentum:
         
+            logger.info("Setting conjugate momentum of %s to %s..." % (self, conjMom))
+
             self._conjugateMomentum = conjMom
             self.setTimeDeriv()
 
@@ -207,9 +210,9 @@ class PositionVariable(HamiltonianVariable):
                 # Create the dynamic function representing our time derivative.
                 # This is just the partial derivative of the Hamiltonian with
                 # respect to our conjugate momentum variable, ∂q/∂t = ∂H/∂p.
-            posTimeDeriv = self.hamiltonian.dynPartialDerivWRT(self.conjugateMomentum)
+            dH_over_dp = self.hamiltonian.dynPartialDerivWRT(self.conjugateMomentum)
                 # Store that thang for later reference.
-            self._timeDeriv = posTimeDeriv
+            self._timeDeriv = dH_over_dp
 
     
 #  A (generalized) MomentumVariable is a variable whose time
@@ -233,11 +236,12 @@ class MomentumVariable(HamiltonianVariable):
     #   .hamiltonian - The Hamiltonian energy function of the system
     #       that this momentum variable is a part of.
 
-    def __init__(inst, name:str=None, value:Fixed=Fixed(0), time:int=0,
+    def __init__(inst, name:str=None, value:Fixed=None, time:int=0,
                  hamiltonian:Hamiltonian=None,
                  conjugatePosition:PositionVariable=None):
 
-        logger.debug("Creating a new MomentumVariable named %s..." % name)
+        logger.debug("Creating a new MomentumVariable named %s with initial value %f..."
+                     % (name,value))
 
         inst.conjugatePosition = conjugatePosition
 
@@ -259,6 +263,8 @@ class MomentumVariable(HamiltonianVariable):
 
         if conjPos != None and conjPos != self.conjugatePosition:
             
+            logger.info("Setting conjugate position of %s to %s..." % (self, conjPos))
+
             self._conjugatePosition = conjPos
             self.setTimeDeriv()
 
@@ -277,7 +283,7 @@ class MomentumVariable(HamiltonianVariable):
                 # ∂p/∂t = -∂H/∂q.
 
             dH_over_dq = self.hamiltonian.dynPartialDerivWRT(self.conjugatePosition)
-            momTimeDeriv = NegatorDynamicFunction(dH_over_dq)
+            momTimeDeriv = -dH_over_dq
             
                 # Store that thang for later reference.
 
@@ -292,11 +298,11 @@ class MomentumVariable(HamiltonianVariable):
 #  quantum-mechanical concepts of momentum.  Momentum and
 #  velocity variables are normally closely locked together.
 
-# Here, we implement a VelocityVariable v as a DerivedDynamicFunction that is
-# derived from a corresponding MomentumVariable p.  Its value is defined
+# Here, we implement a VelocityVariable v as a DifferentiableDynamicFunction
+# that is derived from a corresponding MomentumVariable p.  Its value is defined
 # by v=p/m where m is a corresponding effective generalized mass.
 
-class VelocityVariable(DerivedDynamicFunction):
+class VelocityVariable(DifferentiableDynamicFunction):
 
     def __init__(inst, momVar:MomentumVariable, mass=None):
 
@@ -305,13 +311,18 @@ class VelocityVariable(DerivedDynamicFunction):
         inst._momVar = momVar
         inst._mass = mass
 
-        velFunc = lambda p: p/mass
+        velFunc = ProportionalFunction('v', momVar.name, 1/mass)
 
-        DerivedDynamicFunction.__init__(inst, [momVar], velFunc)
+        #velFunc = lambda p: p/mass
+
+        velVarName = 'v' + momVar.name[1:]
+
+        DifferentiableDynamicFunction.__init__(inst, velVarName, [momVar], velFunc)
 
     @property
     def value(inst):
         return inst()
+
 
 #  A CanonicalCoordinatePair object is essentially a pair of
 #  a generalized position coordinate and its corresponding
@@ -327,8 +338,8 @@ class VelocityVariable(DerivedDynamicFunction):
 
 class CanonicalCoordinatePair:
 
-    def __init__(inst, name:str=None, posval:Fixed=Fixed(0),
-                 momval:Fixed=Fixed(0), postime:int=0, 
+    def __init__(inst, name:str=None, posval:Fixed=None,
+                 momval:Fixed=None, postime:int=0, 
                  hamiltonian:Hamiltonian=None):
 
         inst.name = name
@@ -340,8 +351,11 @@ class CanonicalCoordinatePair:
 
         #-- Create the position and momentum variables.
             
-        q = PositionVariable(name, hamiltonian=hamiltonian)
-        p = MomentumVariable(pname, hamiltonian=hamiltonian)
+        q = PositionVariable(name, value=posval, hamiltonian=hamiltonian)
+        p = MomentumVariable(pname, value=momval, hamiltonian=hamiltonian)
+
+        logger.normal("CanonicalCoordinatePair.__init__(): Just after creating " + 
+                      "momentum variable, its value is %f" % p.value)
 
         #-- Tie those two lil' guys together.  They'll
         #   respond by automatically setting up their time
@@ -349,15 +363,24 @@ class CanonicalCoordinatePair:
         
         q.conjugateMomentum = p
 
-        #-- Set up initial position and momentum values.
+        #-- Set up initial position and momentum time step numbers..
 
-        q.value = posval;   q.time = postime
-        p.value = momval;   p.time = postime + 1
+        q.time = postime
+        p.time = postime + 1
 
         #-- Remember these dynamic variables internally for future reference.
 
         inst._posVar = q
         inst._momVar = p
+
+        logger.normal("CanonicalCoordinatePair.__init__(): Just before exiting, " + 
+                      "momentum value is %f" % inst._momVar.value)
+
+    # When we talk about evolving a CCP to a specific timestep, what we mean by this
+    # is to evolve its position variable to that timestep.
+
+    def evolveTo(inst, timestep:int):
+        inst._posVar.evolveTo(timestep)
 
     @property
     def positionVariable(self):
@@ -474,7 +497,7 @@ class DynamicCoordinate:
 
             # Create our dynamical guts, namely a CanonicalCoordinatePair (q,p).
         
-        inst.ccp = CanonicalCoordinatePair(name, hamiltonian=hamiltonian)
+        inst.ccp = CanonicalCoordinatePair(name, momval=Fixed(0.001), hamiltonian=hamiltonian)
 
             # Next we need to create the kinetic energy term associated
             # with this dynamical coordinate, and add it to the Hamiltonian.
@@ -491,11 +514,15 @@ class DynamicCoordinate:
             # Put the velocity variable together with the kinetic energy
             # function to generate a new Hamiltonian term.
 
-        KEHterm = HamiltonianTerm([v], KEfunc)
+        termName = KEfunc.name + '(' + v.name + ')'
+        KEHterm = HamiltonianTerm(termName, [v], KEfunc)
 
             # Introduce this new kinetic energy term into the Hamiltonian.
 
         hamiltonian.addTerm(KEHterm)
+
+    def evolveTo(inst, timestep:int):
+        inst.ccp.evolveTo(timestep)
 
     @property
     def positionVariable(self):

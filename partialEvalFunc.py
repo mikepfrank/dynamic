@@ -2,10 +2,14 @@ from typing     import Any,Callable,Iterable
 from functools  import partial
 from inspect    import getargspec
 
+import logmaster
+
 __all__ = ['FunctionNotDefinedException',
            'TooManyArgumentsException',
            'UnknownArgumentsException',
            'PartiallyEvaluatableFunction']
+
+logger = logmaster.getLogger(logmaster.sysName + '.parialeval')
 
 class FunctionNotDefinedException(Exception): pass
     # At final-evaluation time, the actual function was still not defined.
@@ -58,7 +62,8 @@ class PartiallyEvaluatableFunction():   # Is callable().
     # some of its arguments, then you get back a new partially-evaluatable
     # function object representing the partial evaluation of the original
     # function with only those arguments specified.  If you supply all of
-    # its arguments, you get back its value.
+    # its arguments, you get back its value.  If you supply too many
+    # arguments, any extra ones are ignored.
 
     def __call__(inst, *args, **kwargs) -> Any:
 
@@ -69,8 +74,8 @@ class PartiallyEvaluatableFunction():   # Is callable().
 
             # Make sure user didn't supply us with too many actual arguments.
 
-        if len(args) + len(kwargs) > len(inst._argList):
-            raise TooManyArgumentsException("Tried to call %s with too many (%d) arguments!" % (str(inst), totArgs))
+##        if len(args) + len(kwargs) > len(inst._argList):
+##            raise TooManyArgumentsException("Tried to call %s with too many (%d) arguments, %s!" % (str(inst), totArgs, str(args)+str(kwargs)))
 
         argDefs = dict(inst._argDefs)   # List of pairs (arg, val) giving initial argument values.
 
@@ -78,36 +83,49 @@ class PartiallyEvaluatableFunction():   # Is callable().
 
         argIndex = 0
         for argVal in args:
-            argName = inst._argList[argIndex]
-            argDefs[argName] = argVal
+            if argIndex < len(inst._argList):
+                argName = inst._argList[argIndex]
+                argDefs[argName] = argVal
+            else:
+                logger.warn("Ignoring extra argument %s to %s..." % (str(argVal), str(inst)))
             argIndex = argIndex + 1
 
-            # OK, let's get our remaining list of formal argument names.
-            
-        nArgs = len(args)
-        remArgs = inst._argList[nArgs:]
-
-            # Final argument list consists of remaining arguments
-            # that don't appear in the supplied keyword arguments.
-            # Shouln't there be an easier way to do this???
+            # OK, let's get our remaining list of formal argument names, if any.
 
         finArgs = []
         remkwargs = dict(kwargs)
-        for arg in remArgs:
-            if not arg in remkwargs:
-                finArgs.append(arg)
-            else:
-                argDefs[arg] = remkwargs[arg]
-                del remkwargs[arg]             # We used that keyword already; delete it!
+        
+        if len(inst._argList) > len(args):
+        
+            nArgs = len(args)
+            remArgs = inst._argList[nArgs:]
+
+                # Final argument list consists of remaining arguments
+                # that don't appear in the supplied keyword arguments.
+                # Shouln't there be an easier way to do this???
+
+            for arg in remArgs:
+                if not arg in remkwargs:
+                    finArgs.append(arg)
+                else:
+                    argDefs[arg] = remkwargs[arg]
+                    del remkwargs[arg]             # We used that keyword already; delete it!
 
             # If there are any extra keyword arguments left, they don't belong!
 
         if len(remkwargs) > 0:
-            raise UnknownArgumentsException("Unknown keyword arguments %s were supplied to PartiallyEvaluatableFunction %s" %
-                                            (str(kwargs), str(inst)))
+            logger.warn("Ignoring unexpected keyword arguments %s supplied to PartiallyEvaluatableFunction %s" %
+                        (str(kwargs), str(inst)))
+##            raise UnknownArgumentsException("Unknown keyword arguments %s were supplied to PartiallyEvaluatableFunction %s" %
+##                                            (str(kwargs), str(inst)))
 
         if len(finArgs) == 0:   # All arguments were supplied!!
             
+            # Trim down the actual argument list so it isn't too long.
+
+            if len(args) > len(inst._argList):
+                args = args[0:len(inst._argList)]
+
                 # Go ahead and evaluate our internal function.
             return inst._internalFunc(*args, **kwargs)
             

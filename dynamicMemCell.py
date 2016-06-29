@@ -17,7 +17,7 @@ class DynamicBiasFunction(QuadraticFunction):
         c1  =  -       stiffness * biasval
         c0  =    0.5 * stiffness * biasval**2
 
-        QuadraticFunction.__init__(inst, c2, c1, c0)
+        QuadraticFunction.__init__(inst, name='B', c2=c2, c1=c1, c0=c0)
 
         # Remember the bias value and stiffness for future reference.
 
@@ -63,5 +63,7 @@ class DynamicMemCell(DynamicOneTerminalGate):
 
         inst.potential = biasFunc
 
+        logger.normal("DynamicMemCell.__init__(): Output node momentum is: %f" % 
+                      inst.outputNode.coord.ccp._momVar.value)
 
         
