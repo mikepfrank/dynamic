@@ -200,11 +200,78 @@ if not "LOG_FILENAME" in dir():     # If not already defined above,
                 #
                 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
+global NAME_FIELDWIDTH
+NAME_FIELDWIDTH                 = 17
+
+global THREADNAME_FIELDWIDTH
+THREADNAME_FIELDWIDTH           = 10
+
+global COMPONENT_FIELDWIDTH
+COMPONENT_FIELDWIDTH            = 12
+
+global THREADROLE_FIELDWIDTH
+THREADROLE_FIELDWIDTH           = 8
+
+global MODULE_FIELDWIDTH
+MODULE_FIELDWIDTH               = 20
+
+global FUNCNAME_FIELDWIDTH
+FUNCNAME_FIELDWIDTH             = 18
+
+global LEVELNAME_FIELDWIDTH
+LEVELNAME_FIELDWIDTH            = 7
+
 global LOG_FORMATSTR
-LOG_FORMATSTR = ("%(asctime)s | %(name)-20s | " +                               # Time & logger name.
-                 "%(threadName)10s:  %(component)9s  %(threadrole)-16s  | " +   # Thread & its logging context (role & component).
-                 "%(module)18s.py:%(lineno)4d:%(funcName)-19s | " +             # Source code file, line #, and function/method name.
-                 "%(levelname)8s: %(message)s")                                 # Log level and log message.
+
+# Old version, less flexible
+##LOG_FORMATSTR = ("%(asctime)s | %(name)-20s | " +                               # Time & logger name.
+##                 "%(threadName)10s:  %(component)9s  %(threadrole)-16s  | " +   # Thread & its logging context (role & component).
+##                 "%(module)18s.py:%(lineno)4d:%(funcName)-19s | " +             # Source code file, line #, and function/method name.
+##                 "%(levelname)8s: %(message)s")                                 # Log level and log message.
+
+LOG_FORMATSTR = ("%(asctime)s | "                                       +   # Time.
+                 "%%(name)-%ds | "          % NAME_FIELDWIDTH           +   # Logger name.
+                 "%%(threadName)%ds: "      % THREADNAME_FIELDWIDTH     +   # Thread & its logging context (role & component).
+                 "%%(component)%ds "        % COMPONENT_FIELDWIDTH      +
+                 "%%(threadrole)-%ds | "    % THREADROLE_FIELDWIDTH     +    
+                 "%%(module)%ds.py:"        % MODULE_FIELDWIDTH         +   # Source code file, line #, and function/method name.
+                 "%(lineno)-4d: "                                       +
+                 "%%(funcName)-%ds | "      % FUNCNAME_FIELDWIDTH       +             
+                 "%%(levelname)%ds: "       % LEVELNAME_FIELDWIDTH      +   # Log level and log message.
+                 "%(message)s")                                 
+
+def limitlength(s:str, limit:int):
+    if len(s) > limit:
+        newstr = s[0:limit-4] + '..' +s[-2:]
+        #print("Limiting length of string [%s] to [%s] (%d chars)" % (s, newstr, limit))
+        return newstr
+    else:
+        return s
+
+#global origFormatMethod
+#origFormatMethod = logging.Formatter.format
+
+class CleanFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None, style='%'):
+        logging.Formatter.__init__(self, fmt, datefmt, style)
+        
+    def format(self, record):
+        if hasattr(record,'name'): record.name = limitlength(record.name, NAME_FIELDWIDTH)
+        if hasattr(record,'threadName'): record.threadName = limitlength(record.threadName, THREADNAME_FIELDWIDTH)
+        if hasattr(record,'component'): record.component = limitlength(record.component, COMPONENT_FIELDWIDTH)
+        if hasattr(record,'threadRole'): record.threadrole = limitlength(record.threadrole, THREADROLE_FIELDWIDTH)
+        if hasattr(record,'module'): record.module = limitlength(record.module, MODULE_FIELDWIDTH)
+        if hasattr(record,'funcName'): record.funcName = record.funcName+'()'
+        if hasattr(record,'funcName'): record.funcName = limitlength(record.funcName, FUNCNAME_FIELDWIDTH)
+        if hasattr(record,'levelname'): record.levelname = limitlength(record.levelname, LEVELNAME_FIELDWIDTH)
+        return logging.Formatter.format(self, record)
+
+#logging._defaultFormatter = CleanFormatter(LOG_FORMATSTR)
+
+# Replace the format method of the Formatter class.
+# This might be dangerous if other parts of the system are also using
+# logging.Formatter expecting the normal behavior!
+#logging.Formatter.format = CleanFormatter.format
 
                 #=============================================================
                 #   Logging options.            [public global constants]
@@ -1355,9 +1422,19 @@ def initLogMaster():
         # the same file format as the main file log handler.  This can
         # be changed if needed in a later call to configLogMaster().
         # (Note: Changing the logFormatter is not yet implemented.)
-
-    logFormatter = logging.Formatter(LOG_FORMATSTR)
+    cleanFormatter = CleanFormatter(LOG_FORMATSTR)
+    logFormatter = cleanFormatter
             # - LOG_FORMATSTR will be our normal log message format.
+
+    cleanHandler = logging.FileHandler(LOG_FILENAME, 'a')
+    cleanHandler.setFormatter(cleanFormatter)
+
+    #logging._defaultFormatter = logFormatter
+            # Replaces the default Formatter object used in logging module.
+            # Dangerous if other parts of the system are independently
+            # using the logging module and expecting the standard Formatter!
+
+    #logging.Formatter = CleanFormatter
 
         # Set the default console and file logging levels based on the
         # module defaults.  (Don't print debug info since this is just
@@ -1370,9 +1447,9 @@ def initLogMaster():
         # messages at INFO level or higher (no DEBUG).  To change
         # this, use configLogMaster().
         
-    logging.basicConfig(filename=LOG_FILENAME,
-                        level=log_level,
-                        format=LOG_FORMATSTR)
+    logging.basicConfig(level=log_level,
+                        format=LOG_FORMATSTR,
+                        handlers=[cleanHandler])
 
         # Create the global loggingContext object.  This is thread-local, and
         # does not get initialized for a given thread until it is actually
@@ -1484,11 +1561,13 @@ def configLogMaster(sysname:str = None, appname:str = None, filename:str = None,
           file=sys.stderr)
 
         # Start by appending a header to the log file for better human-readability.
+        # NOTE: Currently this has to be adjusted concurrently with the log-format string
+        # defined above.  There must be a better way???
 
     with open(LOG_FILENAME,'a') as tmp_file:
-        tmp_file.write("========================+======================+============================================+================================================+===========================================================================================\n" +
-                       "YYYY-MM-DD hh:mm:ss,msc | SysName.appName      | ThreadName:  Component   role              |      srcmodulename.py: ln#:functionName        | loglevel: Text\n"+
-                       "------------------------+----------------------+--------------------------------------------|------------------------------------------------|-------------------------------------------------------------------------------------------\n")
+        tmp_file.write("========================+===================+===================================+==================================================+===========================================================================================\n" +
+                       "YYYY-MM-DD hh:mm:ss,msc | SysName.appName   | ThreadName: Component    role     |     sourceModuleName.py:ln# : functionName()     | LGLEVEL: Message text\n"+
+                       "------------------------+-------------------+-----------------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------\n")
 
         # Figure out the file and console log levels based on user selections.
         # (Verbose in this call is turned on for now, to confirm the final

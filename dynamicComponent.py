@@ -175,14 +175,14 @@ class DynamicComponent:
             link = port.link                    # Get the link connected to that port.
             node = link.node                    # Get the node at the other end of that link.
             coord = node.coord                  # Get the DynamicCoordinate maintained at that node.
-            posVar = coord.positionVariable     # Get the generalized position variable for that coordinate.
+            posVar = coord.position             # Get the generalized position variable for that coordinate.
             varList.append(posVar)              # Append it to our variable list.
             if varnames == "":
                 varnames += posVar.name
             else:
                 varnames += ', ' + posVar.name
 
-        logger.info("New term name for interaction %s combines %s and %s..." % (interaction, interaction.name, varnames))
+        logger.debug("New term name for interaction %s combines %s and %s..." % (interaction, interaction.name, varnames))
         
         termname = interaction.name + '(' + varnames + ')'
 
@@ -191,7 +191,7 @@ class DynamicComponent:
         
         hamTerm = HamiltonianTerm(termname, varList, interaction)
 
-        logger.info("Just created a new Hamiltonian term %s..." % str(hamTerm))
+        logger.debug("Just created a new Hamiltonian term %s..." % str(hamTerm))
 
         return hamTerm
 

@@ -18,8 +18,8 @@ class ExampleNetwork_MemCell(DynamicNetwork):
 
     def __init__(inst, context:SimulationContext=None):
 
-        logger.info(("Initializing a new ExampleNetwork_MemCell in " +
-                     "simulation context %s...") % str(context))
+        logger.debug(("Initializing a new ExampleNetwork_MemCell in " +
+                      "simulation context %s...") % str(context))
 
         # First do generic initialization for dynamic networks.
 
@@ -32,7 +32,7 @@ class ExampleNetwork_MemCell(DynamicNetwork):
 
         netname = netName(inst)
         
-        logger.info("Creating a new DynamicMemCell in network '%s'..." % netname)
+        logger.debug("Creating a new DynamicMemCell in network '%s'..." % netname)
         m = DynamicMemCell('memcell', network=inst)
 
         ##-- Get our single node (the output node of that cell).

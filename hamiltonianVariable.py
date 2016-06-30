@@ -134,7 +134,7 @@ class PositionVariable(HamiltonianVariable):
 
         if conjMom != None and conjMom != self.conjugateMomentum:
         
-            logger.info("Setting conjugate momentum of %s to %s..." % (self, conjMom))
+            logger.debug("Setting conjugate momentum of %s to %s..." % (self, conjMom))
 
             self._conjugateMomentum = conjMom
             self.setTimeDeriv()
@@ -225,7 +225,7 @@ class MomentumVariable(HamiltonianVariable):
 
         if conjPos != None and conjPos != self.conjugatePosition:
             
-            logger.info("Setting conjugate position of %s to %s..." % (self, conjPos))
+            logger.debug("Setting conjugate position of %s to %s..." % (self, conjPos))
 
             self._conjugatePosition = conjPos
             self.setTimeDeriv()

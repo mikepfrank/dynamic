@@ -35,7 +35,7 @@ class BaseDynamicFunction(metaclass=ABCMeta):
 
     def __init__(inst, name:str=None, function:Callable=None):
 
-        logger.info("BaseDynamicFunction.__init__(): Setting name of BDF %s to %s..." %
+        logger.debug("BaseDynamicFunction.__init__(): Setting name of BDF %s to %s..." %
                     (str(inst), name))
 
         inst.name = name

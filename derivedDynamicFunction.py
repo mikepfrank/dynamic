@@ -61,12 +61,12 @@ class DerivedDynamicFunction(BaseDynamicFunction):
 
             # Prepend the values of our variables to the list of actual arguments provided.
 
-        logger.info("DerivedDynamicFunction.evaluateWith(): Extending argument list with values of variables: %s"
+        logger.debug("DerivedDynamicFunction.evaluateWith(): Extending argument list with values of variables: %s"
                     % str(inst._varList))
         
         args = list(map(lambda v: v(), inst._varList)) + list(args)
 
-        logger.info("DerivedDynamicFunction.evaluateWith(): Evaluating %s with extended argument list: %s %s" %
+        logger.debug("DerivedDynamicFunction.evaluateWith(): Evaluating %s with extended argument list: %s %s" %
                     (str(inst), str(args), str(kwargs)))
 
         value = pef(*args, **kwargs)

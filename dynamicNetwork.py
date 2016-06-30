@@ -61,7 +61,7 @@ class DynamicNetwork:
 
         netname = netName(inst)
 
-        logger.info("Initializing a new DynamicNetwork named '%s' (\"%s\")..." %
+        logger.debug("Initializing a new DynamicNetwork named '%s' (\"%s\")..." %
                     (netname, str(title)))
 
         inst._nodes = dict()    # Initially empty set of nodes.
@@ -178,7 +178,7 @@ class DynamicNetwork:
         
         node.renameTo(nodeName)     # Does nothing if node already had that name.
 
-        logger.info("Adding node '%s' to network '%s'" % (nodeName, str(self)))
+        logger.debug("Adding node '%s' to network '%s'" % (nodeName, str(self)))
 
         self._nodes[nodeName] = node
 
@@ -200,7 +200,7 @@ class DynamicNetwork:
 
     def evolveTo(self, timestep:int):
 
-        logger.info("Dynamic network is going to evolve to timestep %d..." % timestep)
+        logger.debug("Dynamic network is going to evolve to timestep %d..." % timestep)
 
         if len(self._nodes) == 0:
             logger.debug("Debug warning: Dynamic network has no nodes!!!")

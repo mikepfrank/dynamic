@@ -110,11 +110,11 @@ class CanonicalCoordinatePair:
         inst._posVar.evolveTo(timestep)
 
     @property
-    def positionVariable(self):
+    def posVar(self):
         return self._posVar
 
     @property
-    def momentumVariable(self):
+    def momVar(self):
         return self._momVar
         
     @property
@@ -258,12 +258,12 @@ class DynamicCoordinate:
         inst.ccp.evolveTo(timestep)
 
     @property
-    def positionVariable(self):
-        return self.ccp.positionVariable
+    def position(self):
+        return self.ccp.posVar
 
     @property
-    def momentumVariable(self):
-        return self.ccp.momentumVariable
+    def momentum(self):
+        return self.ccp.momVar
         
     @property
     def hamiltonian(self):

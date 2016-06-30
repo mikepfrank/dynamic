@@ -116,13 +116,14 @@ class SimulationContext:
             # position and momentum values of the node named 'q'.
             
         logger.normal("%d, %.9f, %d, %.9f" %
-                      (self.network._nodes['q'].coord.ccp._posVar.time,
-                       self.network._nodes['q'].coord.ccp._posVar.value,
-                       self.network._nodes['q'].coord.ccp._momVar.time,
-                       self.network._nodes['q'].coord.ccp._momVar.value))
+                      (self.network._nodes['q'].coord.position.time,
+                       self.network._nodes['q'].coord.position(),
+                       self.network._nodes['q'].coord.momentum.time,
+                       self.network._nodes['q'].coord.momentum()))
 
     def test(self):
         self.printDiagnostics()
+        #for t in range(10):
         for t in range(500):
             self.stepForward(2)
             self.printDiagnostics()

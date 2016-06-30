@@ -104,7 +104,7 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
     def addVariable(inst, var:DynamicVariable):
 
-        logger.info(("DifferentiableDynamicFunction.addVariable():  " +
+        logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
                       "Adding variable %s to the list of variables that " +
                       "function %s can be differentiated by...") % (str(var), str(inst)))
 
@@ -246,14 +246,14 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
                     leftPartial = self.dynPartialDerivWRT(var)
 
-                    logger.info("The partial of %s with respect to %s is %s..." %
+                    logger.debug("The partial of %s with respect to %s is %s..." %
                                 (str(self), str(var), str(leftPartial)))
 
                     # Next, find the partial of var with respect to v.
 
                     rightPartial = var.dynPartialDerivWRT(v)
 
-                    logger.info("The partial of %s with respect to %s is %s..." %
+                    logger.debug("The partial of %s with respect to %s is %s..." %
                                 (str(var), str(v), str(rightPartial)))
 
                     # Now multiply them.

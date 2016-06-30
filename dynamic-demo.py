@@ -142,8 +142,8 @@ def _main():
 
     logger = appLogger  # Get our application logger.
 
-    logger.info('')
-    logger.info('='*80)
+    #logger.info('')
+    #logger.info('='*80)
     logger.info("Dynamic demo application is starting up...")
 
     print()
@@ -170,12 +170,16 @@ def _main():
     logger.normal("Creating an ExampleNetwork_MemCell instance...")                
     net = ExampleNetwork_MemCell(context=sc)
 
-    logger.info("Initial node q momentum is: %f" % 
+    logger.debug("Initial node q momentum is: %f" % 
                   net._nodes['q'].coord.ccp._momVar.value)
 
     logger.normal("Requesting simulator to run a simple test...")
     
+    logmaster.setThreadRole('running')
+    
     sc.test()  # This method exercises some basic simulation capabilities.
+
+    logmaster.setThreadRole('shutdown')
 
     logger.normal("Dynamic demo application is shutting down...")
     

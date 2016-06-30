@@ -250,7 +250,7 @@ class DynamicVariable(BaseDynamicFunction):
             this.evolveTo(this.time + nSteps)
             return
 
-        logger.info("Stepping variable %s forward from time step %d..." %
+        logger.debug("Stepping variable %s forward from time step %d..." %
                     (this.name, this.time))
 
         # print("value=%s, timeDeriv=%s" % (str(this.value), str(this.timeDeriv)))
@@ -270,7 +270,7 @@ class DynamicVariable(BaseDynamicFunction):
 
         derivVal = this.timeDeriv(this.time + 1)
 
-        logger.info(("DynamicVariable.stepForward():  " +
+        logger.debug(("DynamicVariable.stepForward():  " +
                      "Got the time derivative value %f...")
                      % float(derivVal))
 
@@ -289,7 +289,7 @@ class DynamicVariable(BaseDynamicFunction):
         this.value = this.value + 2* derivVal * context.timedelta
         this.time  = this.time + 2
 
-        logger.info("Stepped variable %s forward to value %f at time %d..." %
+        logger.debug("Stepped variable %s forward to value %f at time %d..." %
                     (this.name, float(this.value), this.time))
 
     # Steps backwards in time by one minimal time increment (-2 units).

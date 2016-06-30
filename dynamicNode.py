@@ -1,8 +1,7 @@
 import logmaster
+logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 from dynamicCoordinate import DynamicCoordinate
-
-logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 #   In Dynamic, a (simple) "node" has the following features (at least):
 #
@@ -37,7 +36,7 @@ class DynamicNode:
 
     def __init__(inst, network, name:str=None):
 
-        logmaster.debug("Creating a new dynamic node named %s in network %s..." %
+        logger.debug("Creating a new dynamic node named %s in network %s..." %
                         (name, str(network)))
         
         if name != None:  inst.name = name
@@ -59,7 +58,7 @@ class DynamicNode:
                       inst.coord.ccp._momVar.value)
 
     def evolveTo(inst, timestep:int):
-        logmaster.info("Node %s is going to evolve to timestep %d...", inst.name, timestep)
+        logger.debug("Node %s is going to evolve to timestep %d...", inst.name, timestep)
         inst.coord.evolveTo(timestep)
 
     def getName(this):      # Get something that can be used as a node name.
