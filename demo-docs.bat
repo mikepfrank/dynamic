@@ -3,7 +3,6 @@
 ::|		demo-docs.bat								[MS Windows batch file]
 ::|
 ::|			This batch file uses pydoc3 to generate documentation
-
 ::|
 ::|			It assumes that Python 3.5.1 is in %PATH% and also that
 ::|			it's installed in the following folder under the user's

@@ -1,71 +1,114 @@
 #|==============================================================================
-#|   logmaster.py                                        [python source]
-#|
-#|       Module providing a customized logger based on python's
-#|       general logging facility.  The intent of putting this
-#|       code into its own module is to enable its definitions
-#|       to be accessed from within any number of other modules
-#|       in the application, so they all can do logging in a
-#|       consistent way.  This is particularly important when
-#|       debugging.
-#|
-#|       The specific logging functionality we provide is:
-#|
-#|           1.  A new logging level called "NORMAL" is added
-#|               (in between INFO and WARNING).  Its purpose
-#|               is to enable messages that are ordinarily
-#|               printed on stdout to be simultaneously logged
-#|               to the log file as NORMAL-level messages.
-#|
-#|           2.  Another new logging level called "UWSERR" is
-#|               added (between ERROR and CRITICAL) to convey
-#|               low-level UWScript scripting-language errors
-#|               transmitted to use from individual sensor nodes.
-#|
-#|           3.  Ultra-convenient logging functions are exported
-#|               (debug(), info(), etc.) that do not require
-#|               specifying the logger.
-#|
-#|           4.  The logger can be configured (via global bools)
-#|               to display or not display various "optional"
-#|               levels of log messages (warning, info, debug)
-#|               to the console (stderr), and, separately, to
-#|               save them or not save them in the log file.
-#|
-#|           5.  The logging formats for the file loghandlers
-#|               include the time, down to the millisecond.
-#|
-#|           6.  All formats include the log level (except for
-#|               NORMAL messages to stdout).
-#|
-#|           7.  All log messages (again except normal messages
-#|               to the console) are always prefixed with the
-#|               thread name, to facilitate debugging of
-#|               multithreaded programs.
-#|
-#|       Work in progress:
-#|
-#|           [ ] Create a structure (class object?) that lets us
-#|               avoid making each using module refresh its copies
-#|               of our globals whenever they change.
-#|
-#|           [/] Give each thread a logging context.
-#|
-#|           [/] Have each module use a LoggerAdapter, which uses
-#|               the logging context.
-#|
-#|           [/] Let each module use its own logger, a descendant
-#|               of the root logger "" in the logging hierarchy.
-#|
-#|           [/] Create a child logger for each node.
-#|           
-#|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+#|                          TOP OF FILE:    logmaster.py
+#|------------------------------------------------------------------------------
+#|   The below module documentation string will be displayed by pydoc3.
+#|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+"""
 
-    #==================================================================
-    #   Module imports.                             [code section]
-    #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    FILE NAME:      logmaster.py                [Python 3 module source file]
+  
+    MODULE NAME:    logmaster
+  
+  
+    SOFTWARE SYSTEM:        Dynamic (simulator for dynamic networks)
+    ----------------
+  
+        Note:  Although the present file exists as part of the
+        Dynamic system, the logmaster module is actually designed
+        to be usable in any software system; it does not depend
+        on any other parts of the Dynamic system.
+  
+  
+    SOFTWARE COMPONENT:     Dynamic.logging
+    -------------------
+  
+        For our purposes, a "software component" means a set of
+        modules that are logically related to each other and
+        that together implement some important capability.
+ 
+  
+    MODULE DESCRIPTION:
+    -------------------
+  
+        This module provides a customized logger based on python's
+        general logging facility.  The intent of putting this
+        code into its own module is to enable its definitions
+        to be accessed from within any number of other modules
+        in the application, so they all can do logging in a
+        consistent way.  This is particularly important when
+        debugging.
+  
+        The specific logging functionality we provide is:
+  
+             1.  A new logging level called "NORMAL" is added
+                 (in between INFO and WARNING).  Its purpose
+                 is to enable messages that are ordinarily
+                 printed on stdout to be simultaneously logged
+                 to the log file as NORMAL-level messages.
+  
+             2.  Ultra-convenient logging functions are exported
+                 (debug(), info(), etc.) that do not require
+                 specifying the logger.
+  
+             3.  The logger can be configured (via global bools)
+                 to display or not display various "optional"
+                 levels of log messages (warning, info, debug)
+                 to the console (stderr), and, separately, to
+                 save them or not save them in the log file.
+  
+             4.  The logging formats for the file loghandlers
+                 include the time, down to the millisecond.
+  
+             5.  All formats include the log level (except for
+                 NORMAL messages to stdout).
+  
+             6.  All log messages (again except normal messages
+                 to the console) always include the
+                 thread name, to facilitate debugging of
+                 multithreaded programs.
 
-        # Imports of standard python modules.
+
+    Revision history:
+    -----------------
+        
+        v0.1 (2009-2012) - Initial version developed as part of the COSMICi
+            system at FAMU Physics Dept., APCR-DRDL laboratory.  (M. Frank)
+            
+        v0.2 (2016) - New revision for the Dynamic simulator, Sandia Labs
+            Dept. 1425.  (M. Frank)
+        
+  
+    Work to do/in progress:
+    -----------------------
+  
+         [ ] Create a structure (class object?) that lets us
+             avoid making each using module refresh its copies
+             of our globals whenever they change.
+                                                                             """
+#|------------------------------------------------------------------------------
+#| End of module documentation string.
+#|------------------------------------------------------------------------------
+
+        #  Previously completed coding tasks:
+        #
+        #       [/] Give each thread a logging context.
+        #
+        #       [/] Have each module use a LoggerAdapter, which uses
+        #               the logging context.
+        #
+        #       [/] Let each module use its own logger, a descendant
+        #               of the root logger "" in the logging hierarchy.
+        #
+        #       [/] Create a child logger for each node.
+        #           
+
+    #|==========================================================================
+    #|   Module imports.                                [module code section]
+    #|--------------------------------------------------------------------------
+
+        #|======================================================================
+        #|  Imports of standard python modules.         [module code subsection]
+        #|----------------------------------------------------------------------
 
 import os           # Used in calculating _srcfile
 import sys          # For stdout/stderr, for console loghandler & internal debugging of logmaster.
@@ -75,36 +118,43 @@ import logging      # General python logging facility.
 import threading    # Used for our threading.local LoggingContext
 import traceback    # Used for ...
 
-        # Imports of lower-level custom modules.
+
+        #|======================================================================
+        #|  Imports of custom application modules.      [module code subsection]
+        #|----------------------------------------------------------------------
 
 global systemName, appName
-    # The initial values of these defined later in this file are
+    # The initial values of these that are defined later in this file are
     # placeholders that should never be used.
     
-import appdefs
-from appdefs import *   # Sets systemName, appName for this application.
+import  appdefs                 # Definitions for the current application.
+from    appdefs     import *    # Sets systemName, appName for this application.
+
+    # The following could be moved to the globals section.
+global sysName
 sysName = systemName    # Shorter synonym for systemName
 
-    #==================================================================
-    #   Global variables & constants.               [code section]
-    #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        #==============================================================
-        #   Special globals.                        [code subsection]
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    #|==========================================================================
+    #|   Global variables & constants.                  [module code section]
+    #|--------------------------------------------------------------------------
 
-            #==========================================================
-            #   __all__                             [special global]
-            #
-            #       List of explicitly exported public names.
-            #
-            #       These are the names we provide that will
-            #       get imported into another module when it
-            #       does:
-            #
-            #           from logmaster import *
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #|======================================================================
+        #|   Special globals.                           [module code subsection]
+        #|----------------------------------------------------------------------
+
+            #|==================================================================
+            #|
+            #|   logmaster.__all__:List[str]                    [special global]
+            #|
+            #|      List of explicitly exported public names.
+            #|
+            #|      These are the names we provide that will get automatically
+            #|      imported into another module if/when it does:
+            #|
+            #|          from logmaster import *
+            #|
+            #|------------------------------------------------------------------
             
 __all__ = ['NORMAL_LEVEL',                          # Public global variables.
            'LOG_FILENAME', 'LOG_FORMATSTR',
@@ -130,58 +180,122 @@ __all__ = ['NORMAL_LEVEL',                          # Public global variables.
            ]
 
 
-        #=============================================================
-        #   Public globals.
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #|======================================================================
+        #|
+        #|   Public globals.                            [module code subsection]
+        #|
+        #|      These are our globals that we encourage other modules
+        #|      to access and utilize.
+        #|
+        #|----------------------------------------------------------------------
 
-            #=========================================================
-            #   Public global constants.
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|==================================================================
+            #|
+            #|   Public global constants.           [module code subsubsection]
+            #|
+            #|      The following globals are not supposed to be ever
+            #|      changed after their initial definition.
+            #|
+            #|------------------------------------------------------------------
 
-global NORMAL_LEVEL, NORMAL, LOG_FILENAME, LOG_FORMATSTR
-global CONS_WARN, CONS_INFO, CONS_DEBUG, LOG_INFO, LOG_DEBUG
+    # Some of the below global declarations are redundant in that they
+    # also appear elsewhere in this module.  They are also gathered here
+    # for documentation purposes only.
+    
+global  systemName, appName, sysName, NORMAL_LEVEL, NORMAL
+global  LOG_FILENAME, LOG_FORMATSTR
+global  CONS_WARN, CONS_INFO, CONS_DEBUG, LOG_INFO, LOG_DEBUG
 
-                #============================================================
-                #   New logging levels.         [public global constants]
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+                #|==============================================================
+                #|
+                #|  NORMAL_LEVEL,NORMAL:int            [public global constants]
+                #|
+                #|      These constants identify new logging levels.
+                #|
+                #|--------------------------------------------------------------
 
 global NORMAL_LEVEL, NORMAL
 
-NORMAL_LEVEL = 25       # For normal output.  Between INFO and WARNING.
-NORMAL = NORMAL_LEVEL   # A more concise synonym.
-    #- initLogMaster() will actually add this new level.
+NORMAL_LEVEL  =  25             # For normal output.  Between INFO and WARNING.
+NORMAL        =  NORMAL_LEVEL   # A more concise synonym.
+    # initLogMaster() will actually add this new level.
 
-                #=============================================================================
-                #   systemName,appName:str              [public global constants]
-                #
-                #       Name of the overall system we are a part of, and the
-                #       specific application within that system.  They can be
-                #       modified if needed for another application by assigning
-                #       to logmaster.systemName, etc., any time before
-                #       logmaster.configLogMaster() is called, or as optioal
-                #       arguments to it.  These are important for setting up the
-                #       logger (logging channel) hierarchy.
-                #
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-if not "systemName" in dir():           # If appdefs did not already define systemName,
-    sysName = systemName = "(Unknown System)"         # Define it (placeholder value).
-if not "appName" in dir():              # If appdefs did not already define systemName,
-    appName = systemName + ".(Unknown App)"    # The name of this application program (child of system).    
-else:
-    LOG_FILENAME = appName + ".log"     # Default log file name.
+                #|==============================================================
+                #|
+                #|  systemName,appName:str         [public global constants]
+                #|
+                #|      Name of the overall system we are a part of, and the
+                #|      specific application within that system.  They can be
+                #|      modified if needed for another application by assigning
+                #|      to logmaster.systemName, etc., any time before
+                #|      logmaster.configLogMaster() is called, or as optioal
+                #|      arguments to it.  These are important for setting up
+                #|      the logger (logging channel) hierarchy.
+                #|
+                #|--------------------------------------------------------------
 
-                #===========================================================
-                #   LOG_FILENAME                [public global constant]
-                #
-                #       Actually this is not really constant, but can be
-                #       modified for other applications if needed before
-                #       configLogMaster() is called, or as an optional
-                #       argument to configLogMaster().
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+global  systemName, appName
+
+if not "systemName" in dir():   # If appdefs did not already define systemName,
+    sysName = systemName = "(Unknown System)"   # Define it (placeholder value).
+
+if not "appName" in dir():      # If appdefs did not already define systemName,
+    appName = systemName + ".(Unknown App)"
+        # The name of this application program (child of system).    
+else:                                   # Application name was defined.
+    LOG_FILENAME = appName + ".log"     # Construct the default log file name.
+
+
+                #|==============================================================
+                #|
+                #|  LOG_FILENAME:str                    [public global constant]
+                #|
+                #|      Actually this is not really constant; it can be
+                #|      modified for other applications if needed before
+                #|      configLogMaster() is called, or as an optional
+                #|       argument to configLogMaster().
+                #|
+                #|--------------------------------------------------------------
+
+global  LOG_FILENAME
 
 if not "LOG_FILENAME" in dir():     # If not already defined above,
-    LOG_FILENAME = "script.log"         # Set it to a generic default log file name.
+    LOG_FILENAME = "script.log"     # Set it to a generic default log file name.
+
+
+                #|==============================================================
+                #|
+                #|      NAME_FIELDWIDTH,            [public global constants]
+                #|      THREADNAME_FIELDWIDTH,
+                #|      COMPONENT_FIELDWIDTH,
+                #|      THREADROLE_FIELDWIDTH,
+                #|      MODULE_FIELDWIDTH,
+                #|      FUNCNAME_FIELDWIDTH,
+                #|      LEVELNAME_FIELDWIDTH : int
+                #|
+                #|          These integer parameters determine the widths
+                #|          of the corresponding fields of our default log
+                #|          line format string.  Their values are also used
+                #|          by the CleanFormatter class to abbreviate content
+                #|          to the desired width before it is formatted, so
+                #|          that it doesn't overflow its field.
+                #|
+                #|--------------------------------------------------------------
+
+global  NAME_FIELDWIDTH, THREADNAME_FIELDWIDTH, COMPONENT_FIELDWIDTH
+global  THREADROLE_FIELDWIDTH, MODULE_FIELDWIDTH, FUNCNAME_FIELDWIDTH
+global  LEVELNAME_FIELDWIDTH
+
+NAME_FIELDWIDTH         = 17    # Width of logger name field.
+THREADNAME_FIELDWIDTH   = 10    # Width of thread name field.
+COMPONENT_FIELDWIDTH    = 12    # Width of component name field.
+THREADROLE_FIELDWIDTH   = 8     # Width of thread role field.
+MODULE_FIELDWIDTH       = 20    # Width of module filename field.
+FUNCNAME_FIELDWIDTH     = 18    # Width of function name field.
+LEVELNAME_FIELDWIDTH    = 7     # Width of logging level name field.
+
 
                 #============================================================
                 #   LOG_FORMATSTR               [public global constant]
@@ -199,27 +313,6 @@ if not "LOG_FILENAME" in dir():     # If not already defined above,
                 #       that is used for doing the actual logging.
                 #
                 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-
-global NAME_FIELDWIDTH
-NAME_FIELDWIDTH                 = 17
-
-global THREADNAME_FIELDWIDTH
-THREADNAME_FIELDWIDTH           = 10
-
-global COMPONENT_FIELDWIDTH
-COMPONENT_FIELDWIDTH            = 12
-
-global THREADROLE_FIELDWIDTH
-THREADROLE_FIELDWIDTH           = 8
-
-global MODULE_FIELDWIDTH
-MODULE_FIELDWIDTH               = 20
-
-global FUNCNAME_FIELDWIDTH
-FUNCNAME_FIELDWIDTH             = 18
-
-global LEVELNAME_FIELDWIDTH
-LEVELNAME_FIELDWIDTH            = 7
 
 global LOG_FORMATSTR
 
@@ -1522,7 +1615,7 @@ def configLogMaster(sysname:str = None, appname:str = None, filename:str = None,
         # Do I really need to re-declare all these globals despite the
         # global statements at top level above?
     
-    global NORMAL_LEVEL, UWSERR_LEVEL
+    global NORMAL_LEVEL
     global LOG_FILENAME, LOG_FORMATSTR
     global CONS_WARN, LOG_INFO, LOG_DEBUG, CONS_DEBUG, CONS_INFO
     global systemName, sysName, appName

@@ -4,13 +4,39 @@
 #|
 #|      FILE NAME:  dynamic-demo.py         [Python application source code]
 #|
+#|      FULL PATH:  $GIT_ROOT/dynamic/dynamic-demo.py
+#|
+#|      MASTER GIT REPO:    git@gitlab.sandia.gov:mpfrank/dynamic.git
+#|
+#|
+#|      DESCRIPTION:
+#|      ------------
+#|
+#|          This Python script (intended to be run at top level,
+#|          not imported as a module) implements the demonstration
+#|          application for the Dynamic simulator framework.  See
+#|          the README.md file in this directory for more detailed
+#|          information about the Dynamic system in general.
+#|
+#|
 #|      Initial development platform:
+#|      -----------------------------
 #|
 #|          * Language:     Python 3.5.1 64-bit
 #|          * OS:           Microsoft Windows 8.1 Professional (64-bit)
 #|          * Processor:    Intel Xeon E5-2620 (64-bit)
 #|
+#|
+#|      Copyright Notice
+#|      ----------------
+#|
+#|          This file, and all other files in this repository, are
+#|          copyright (C) 2016 by Michael P. Frank.  All Rights
+#|          Reserved until further notice.
+#|
+#|
 #|      Revision history:
+#|      -----------------
 #|
 #|          6/21/16 (M. Frank) - Started writing initial version.
 #|
@@ -61,7 +87,7 @@ if __name__ == "__main__":
     if RAW_DEBUG:
         print("__main__: Importing standard Python library modules...")
         
-from sys import stderr
+from sys import stderr      # Used for error output to console.
 
         #|================================================
 	#|   Imports of our own custom modules.
@@ -77,7 +103,7 @@ from logmaster import configLogMaster,appLogger,info,normal
     # several definitions that we need from it.
 
 from appdefs import appName
-    # Name of the present application.
+    # Name of the present application.  Used for configuring logmaster.
 
 from simulationContext import SimulationContext
     # Used for tracking global state of the simulation.
@@ -126,13 +152,19 @@ global  is_top
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 def _main():
+    """Main routine of the dynamic-demo.py script.  Called from within
+        the script's main body code, if the script is run at top level
+        as opposed to being imported as a module of a larger system."""
     
     if RAW_DEBUG:
-        print("__main__.main(): Entered application's main routine...",
+        print("__main__._main(): Entered application's _main() routine...",
               file=stderr)
 
+    #---------------------------------
+    # Configure the logging facility.
+
     if RAW_DEBUG:
-        print("__main__.main(): Configuring the 'logmaster' logging module...",
+        print("__main__._main(): Configuring the 'logmaster' logging module...",
               file=stderr)
 
     configLogMaster(loginfo = True, role = 'startup', component = appName)
@@ -142,18 +174,21 @@ def _main():
 
     logger = appLogger  # Get our application logger.
 
-    #logger.info('')
-    #logger.info('='*80)
+    #----------------------------------------------
+    # Application startup:  Display splash text.
+
     logger.info("Dynamic demo application is starting up...")
 
-    print()
-    logger.normal("Welcome to the Dynamic demo program, v0.0.")
+    print() # Just visual whitespace; no need to log it.
+    logger.normal("Welcome to the Dynamic demo program, v0.1.")
     logger.normal("Copyright (c)2016 by Michael P. Frank.")
     logger.normal("All Rights Reserved.")
     print()
 
+    #------------------------------------------------------
     # Below follows the main code of the demo application.
 
+        #-----------------------------------------------------------------
         # First create a new simulation context object, initially empty.
         # This stores global parameters of the simulation (such as the
         # time delta value) and tracks global variables of the simulation
@@ -163,6 +198,7 @@ def _main():
 
     sc = SimulationContext()
 
+        #---------------------------------------------------------
         # Create an extremely simple example network for initial
         # testing during development.  Tell it that it's going to
         # be using that simulation context that we just created.
@@ -171,7 +207,10 @@ def _main():
     net = ExampleNetwork_MemCell(context=sc)
 
     logger.debug("Initial node q momentum is: %f" % 
-                  net._nodes['q'].coord.ccp._momVar.value)
+                  net.node('q').coord.momentum.value)
+
+        #---------------------------------------------------------
+        # Run the built-in .test() method of the example network.
 
     logger.normal("Requesting simulator to run a simple test...")
     
@@ -182,9 +221,12 @@ def _main():
     logmaster.setThreadRole('shutdown')
 
     logger.normal("Dynamic demo application is shutting down...")
+
+    # End of main code of demo application.
+    #---------------------------------------
     
     if RAW_DEBUG:
-        print("__main__.main(): Exiting from main()...", file=stderr)
+        print("__main__._main(): Exiting from _main()...", file=stderr)
 
 #--/ End function main().
 
@@ -199,19 +241,18 @@ def _main():
     #|  
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     
-
 if __name__ == "__main__":
     
     is_top = True   # For benefit of stuff called from within _main().
 
     if RAW_DEBUG:
-        print("__main__: Top-level module is invoking main() routine of " +
+        print("__main__: Top-level module is invoking _main() routine of " +
               "application...", file=stderr)
         
-    _main()
+    _main()     # Call the private _main() function, defined above.
     
     if RAW_DEBUG:
-        print("__main__: Application's main() routine has exited.",
+        print("__main__: Application's _main() routine has exited.",
               file=stderr)
         print("__main__: Exiting top-level module...",
               file=stderr)

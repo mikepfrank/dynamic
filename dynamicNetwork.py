@@ -1,7 +1,10 @@
 from numbers            import Real    # Used by DynamicNetwork.thermalize().
 
 import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.network')
+from   logmaster          import getLogger, ErrorException
+
+global logger
+logger = getLogger(logmaster.sysName + '.network')
 
 from dynamicNode        import DynamicNode
 from dynamicComponent   import DynamicComponent
@@ -12,6 +15,12 @@ class SimulationContext: pass
 
 __all__ = ['DynamicNetwork']
 
+class NetworkException(Exception): pass
+
+class NoSuchNode(ErrorException, NetworkException):
+    def __init__(self, *args, **kwargs):
+        ErrorException.__init__(self, *args, **kwargs)
+    
 
 #   DynamicNetwork class.  In Dynamic, a Network conceptually consists of:
 #
@@ -219,6 +228,12 @@ class DynamicNetwork:
 ##        logger.debug(("DynamicNetwork.evolveTo(): Requesting our Hamiltonian %s "
 ##                      "to evolve to time-step %d...") % (str(self.hamiltonian), timestep))
 ##        self.hamiltonian.evolveTo(timestep)
+
+    def node(self, nodeName:str):
+        if nodeName in self._nodes:
+            return self._nodes[nodeName]
+        else:
+            raise NoSuchNode("There is no node named %s in network %s" % (nodeName, str(self)))
 
     #-- inst.test() - Test this network by initializing it and then
     #       simulating it forwards in time a few steps.
