@@ -261,21 +261,21 @@
         docstrings for additional details.  The indentation below
         indicates the subclass relationships between these classes.
 
-            logmaster.LoggedException                   [public exception class]
+            logmaster.LoggedException           [module public exception class]
 
-              logmaster.InfoException                   [public exception class]
+              logmaster.InfoException           [module public exception class]
 
-                logmaster.ExitException                 [public exception class]
+                logmaster.ExitException         [module public exception class]
 
-              logmaster.WarningException                [public exception class]
+              logmaster.WarningException        [module public exception class]
 
-                logmaster.WrongThreadWarning            [public exception class]
+                logmaster.WrongThreadWarning    [module public exception class]
 
-              logmaster.ErrorException                  [public exception class]
+              logmaster.ErrorException          [module public exception class]
 
-                logmaster.CriticalException             [public exception class]
+                logmaster.CriticalException     [module public exception class]
 
-                  logmaster.FatalException              [public exception class]
+                  logmaster.FatalException      [module public exception class]
 
 
     PUBLIC CLASSES
@@ -284,7 +284,15 @@
         Public classes exported by this module, other than exception
         classes.  See the classes' docstrings for additional details.
 
-            logmaster.LoggingContext                            [public class]
+            logmaster.CleanFormatter                     [module public class]
+            
+            logmaster.LoggingContext                     [module public class]
+
+            logmaster.ThreadActor                        [module public class]
+
+            logmaster.AbnormalFilter                     [module public class]
+
+            logmaster.NormalLogger                       [module public class]
 
             ...
         
@@ -326,12 +334,36 @@
         #
         #-----------------------------------------------------------------------
 
+#|==============================================================================
+#|
+#|  TABLE OF CONTENTS                                   
+#|  -----------------
+#|
+#|      1.  Module imports.                                [module code section]
+#|
+#|          1.1.  Imports of standard python modules.   [module code subsection]
+#|          1.2.  Imports of custom application modules.[module code subsection]
+#|
+#|      2.  Global constants, variables, and objects.      [module code section]
+#|
+#|          2.1.  Special globals.                      [module code subsection]
+#|          2.2.  Public globals.                       [module code subsection]
+#|          2.3.  Private globals.                      [module code subsection]
+#|
+#|      3.  Class definitions.                             [module code section]
+#|
+#|          3.1.  Exception classes.                    [module code subsection]
+#|          3.2.  Normal public classes.                [module code subsection]
+#|
+#|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        
+
     #|==========================================================================
-    #|   Module imports.                                [module code section]
+    #|   1. Module imports.                                [module code section]
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
         #|======================================================================
-        #|  Imports of standard python modules.         [module code subsection]
+        #|  1.1. Imports of standard python modules.    [module code subsection]
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 import  os           # Used in calculating _srcfile.
@@ -344,7 +376,7 @@ import  traceback    # Used for printing stack traces.
 
 
         #|======================================================================
-        #|  Imports of custom application modules.      [module code subsection]
+        #|  1.2. Imports of custom application modules. [module code subsection]
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global  systemName, appName
@@ -356,11 +388,11 @@ from    appdefs     import *    # Use systemName, appName, topFile for this appl
 
 
     #|==========================================================================
-    #|   Global variables & constants.                  [module code section]
+    #|  2.  Global constants, variables, and objects.      [module code section]
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
         #|======================================================================
-        #|   Special globals.                           [module code subsection]
+        #|  2.1.  Special globals.                      [module code subsection]
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
@@ -405,7 +437,7 @@ __all__ = [
 
         #|======================================================================
         #|
-        #|   Public globals.                            [module code subsection]
+        #|   2.2.  Public globals.                      [module code subsection]
         #|
         #|      These are our globals that we encourage other modules
         #|      to access and utilize.
@@ -418,7 +450,7 @@ __all__ = [
 
             #|==================================================================
             #|
-            #|   Public global constants.           [module code subsubsection]
+            #|   2.2.1.  Public global constants.    [module code subsubsection]
             #|
             #|      The following globals are not supposed to be ever
             #|      changed after their initial definition.
@@ -619,7 +651,7 @@ console_level   = logging.WARNING   # By default, console displays messages at W
 
             #|==================================================================
             #|
-            #|   Public global objects.             [module code subsubsection]
+            #|   2.2.2.  Public global objects.      [module code subsubsection]
             #|
             #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
@@ -711,7 +743,7 @@ appLogger = None    # Logger for the specific application named by logmaster.app
 
         #|======================================================================
         #|
-        #|      Private globals.                            [code subsection]
+        #|  2.3.  Private globals.                      [module code subsection]
         #|
         #|          In this section, we define global variables that
         #|          are used within this module, but that are not
@@ -794,13 +826,13 @@ _srcfile = os.path.normcase(_srcfile)
 
     #|==========================================================================
     #|
-    #|      Class definitions.                                  [code section]
+    #|  3.  Class definitions.                             [module code section]
     #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
         #|======================================================================
         #|
-        #|      Exception classes.                             [code subsection]
+        #|  3.1.  Exception classes.                    [module code subsection]
         #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
@@ -1347,9 +1379,10 @@ class FatalException(CriticalException):
         #|   End of exception classes.
         #|======================================================================
 
+
         #|======================================================================
         #|
-        #|   Normal public classes.                         [code subsection]
+        #|   3.2.  Normal public classes.               [module code subsection]
         #|
         #|      In this code section, we define public classes other
         #|      than exception classes.
@@ -1405,54 +1438,54 @@ class CleanFormatter(logging.Formatter):
 #__/ End class CleanFormatter.
 
 
-        #|----------------------------------------------------------------------
-        #|
-        #|  LoggingContext(threading.local)             [module public class]
-        #|
-        #|      An object of this thread-local class serves as a
-        #|      dictionary on which each thread can store & track
-        #|      context information which will be passed to the
-        #|      LoggerAdapter for any given module, enabling the log
-        #|      records to be augmented with extra information printed
-        #|      in the top-level log line format string.
-        #|
-        #|      A single global LoggingContext object tracks context
-        #|      information throughout the application - although its
-        #|      attributes have different values in different threads.
-        #|
-        #|      Each time a new thread is created or a thread changes
-        #|      its role, the attributes of the global loggingContext
-        #|      should be updated to reflect the context information
-        #|      specific to that thread.  Some of this is handled
-        #|      automatically by LoggingContext's .__init__() method.
-        #|
-        #|      In the scope of typical user applications, important
-        #|      pieces of context information may include:
-        #|
-        #|          .threadname
-        #|
-        #|              The name of the current thread, helpful for
-        #|              debugging threading problems.
-        #|
-        #|          .threadrole
-        #|          
-        #|              The role that the current thread is engaged
-        #|              in. E.g. "startup", "Node1Main.consDriver",
-        #|              "guibot", and so forth.
-        #|
-        #|          .component
-        #|
-        #|              The system component that the thread is
-        #|              associated with, e.g., "server", "node #0",
-        #|              "node #1", etc.
-        #|
-        #|          .nodenum
-        #|          
-        #|              The numeric ID of the network node (if any)
-        #|              associated with this action.  None if no
-        #|              network node is related.
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|----------------------------------------------------------------------
+            #|
+            #|  LoggingContext(threading.local)                     [public class]
+            #|
+            #|      An object of this thread-local class serves as a
+            #|      dictionary on which each thread can store & track
+            #|      context information which will be passed to the
+            #|      LoggerAdapter for any given module, enabling the log
+            #|      records to be augmented with extra information printed
+            #|      in the top-level log line format string.
+            #|
+            #|      A single global LoggingContext object tracks context
+            #|      information throughout the application - although its
+            #|      attributes have different values in different threads.
+            #|
+            #|      Each time a new thread is created or a thread changes
+            #|      its role, the attributes of the global loggingContext
+            #|      should be updated to reflect the context information
+            #|      specific to that thread.  Some of this is handled
+            #|      automatically by LoggingContext's .__init__() method.
+            #|
+            #|      In the scope of typical user applications, important
+            #|      pieces of context information may include:
+            #|
+            #|          .threadname
+            #|
+            #|              The name of the current thread, helpful for
+            #|              debugging threading problems.
+            #|
+            #|          .threadrole
+            #|          
+            #|              The role that the current thread is engaged
+            #|              in. E.g. "startup", "Node1Main.consDriver",
+            #|              "guibot", and so forth.
+            #|
+            #|          .component
+            #|
+            #|              The system component that the thread is
+            #|              associated with, e.g., "server", "node #0",
+            #|              "node #1", etc.
+            #|
+            #|          .nodenum
+            #|          
+            #|              The numeric ID of the network node (if any)
+            #|              associated with this action.  None if no
+            #|              network node is related.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class LoggingContext(threading.local):
 
@@ -1626,9 +1659,9 @@ class LoggingContext(threading.local):
             
         thread = threading.current_thread()
 
-#[Commented-out diagnostic for low-level debugging.]
-#        print("Initializing logging context in thread %s." % thread,
-#              file=sys.stderr)
+        #[Commented-out diagnostic for low-level debugging.]
+        #print("Initializing logging context in thread %s." % thread,
+        #      file=sys.stderr)
 
             #----------------------------------------------------------
             # Set up the loggingContext's dictionary of context items.
@@ -1745,30 +1778,30 @@ class LoggingContext(threading.local):
 #__/ End class LoggingContext
 
 
-        #|----------------------------------------------------------------------
-        #|
-        #|  ThreadActor                                 [module public class]
-        #|
-        #|      This subclass of Thread (which can be used as a
-        #|      mixin class) adds an extra initialization keyword
-        #|      argument role=<str>, which sets the .role attribute of
-        #|      the thread, as separate from the .name argument (this
-        #|      lets us keep the .name argument as an automatic
-        #|      sequence counter, Thread-1, Thread-2, etc.).
-        #|
-        #|      The 'role' attribute is used by the loggingContext
-        #|      when it gets initialized later on, when the thread
-        #|      uses it.  The purpose of that is so that the thread
-        #|      role is available as a field that can be displayed
-        #|      as specified in the logging format string.
-        #|
-        #|      In addition to 'role', there's another optional
-        #|      initialization keyword argument called
-        #|      'component', the idea of which is to identify which
-        #|      system component a given thread is currently working
-        #|      on behalf of.  This is used similarly to 'role.'
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|----------------------------------------------------------------------
+            #|
+            #|  ThreadActor                                         [public class]
+            #|
+            #|      This subclass of Thread (which can be used as a
+            #|      mixin class) adds an extra initialization keyword
+            #|      argument role=<str>, which sets the .role attribute of
+            #|      the thread, as separate from the .name argument (this
+            #|      lets us keep the .name argument as an automatic
+            #|      sequence counter, Thread-1, Thread-2, etc.).
+            #|
+            #|      The 'role' attribute is used by the loggingContext
+            #|      when it gets initialized later on, when the thread
+            #|      uses it.  The purpose of that is so that the thread
+            #|      role is available as a field that can be displayed
+            #|      as specified in the logging format string.
+            #|
+            #|      In addition to 'role', there's another optional
+            #|      initialization keyword argument called
+            #|      'component', the idea of which is to identify which
+            #|      system component a given thread is currently working
+            #|      on behalf of.  This is used similarly to 'role.'
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
 class ThreadActor(threading.Thread):
 
@@ -2241,121 +2274,169 @@ class ThreadActor(threading.Thread):
 #__/ End class ThreadActor.
 
 
-
-        # ***** continue cleaning up below here *****
-
-        
-
-    # Should the following be moved to the initialize function?
-
-# Modify the real Thread class's .__str__() method to take advantage
-# of the role attribute even for non-ThreadActor classes, as long
-# as the attribute exists.
-
-threading.Thread.__str__ = ThreadActor.__str__
-
-# Functions for setting the global, thread-local "threadrole" and "component" attributes.
-
-def setThreadRole(role:str):
-    thread = threading.current_thread()
-    thread.role = role
-    theLoggingContext.threadrole = role
-
-def setComponent(component:str):
-    thread = threading.current_thread()
-    thread.component = component
-    theLoggingContext.component = component
-
-        #==============================================================
-        #   AbnormalFilter                      [module public class]
-        #
-        #       Subclass of Filter that only allows through log
-        #       messages that are not at NORMAL level.
-        #
-        #       This is used by our ConsoleHandler because NORMAL-
-        #       level messages appear anyway in the normal output
-        #       stream (on stdout) so it would be redundant to
-        #       display them again to stdout in the form of log
-        #       messages.
-        #
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|------------------------------------------------------------------
+            #|
+            #|  AbnormalFilter                             [module public class]
+            #|
+            #|      Subclass of Filter that only allows through log
+            #|      messages that are not at NORMAL level.
+            #|
+            #|      This is used by our ConsoleHandler because NORMAL-
+            #|      level messages appear anyway in the normal output
+            #|      stream (on stdout) so it would be redundant to
+            #|      display them again to stdout in the form of log
+            #|      messages.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class AbnormalFilter(logging.Filter):
-    # Override the filter() method.
+
+    """Subclass of logging.Filter that only allows through log
+       messages that are not at NORMAL level.
+            This is used by our ConsoleHandler, because NORMAL-level
+       messages appear anyway in the normal output stream (on stdout),
+       so it would be redundant to display them again to stdout in the
+       form of log messages"""
+    
+        # Override the filter() method.
+    
     def filter(inst, record:logging.LogRecord):   # Decide whether log record gets through this filter.
-        return record.levelno != NORMAL_LEVEL      # Evaluates as nonzero iff level is not NORMAL.
+
+        """This augments the default filter() method inherited from
+           logging.Filter to also filter out log messages that are at
+           NORMAL level."""
+        
+        return (record.levelno != NORMAL_LEVEL          # Evaluates as nonzero iff level is not NORMAL,
+            and logging.Filter.filter(inst, record))    #   and also let our superclass's filter have a say.
+
+    #__/ End AbnormalFilter.filter().
+    
+#__/ End class AbnormalFilter
 
 
-        #==============================================================
-        #   NormalLogger                        [module public class]
-        #
-        #       NormalLogger extends Logger with a new logging
-        #       method normal(), which prints the given message to
-        #       sys.stdout as well as logging it.
-        #
-        #       Note that since loggers are instantiated by getLogger,
-        #       rather than by specifying the class explicitly, this
-        #       new method has to be manually copied into the newly
-        #       created logger if we want to be able to use it.
-        #
-        #       We also replace the Logger._log() method with a
-        #       version that allows the caller to pass the
-        #       findCaller() result in directly.
-        #
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|------------------------------------------------------------------
+            #|
+            #|  NormalLogger                               [module public class]
+            #|
+            #|      NormalLogger extends the logging.Logger class with
+            #|      a new logging method normal(), which prints the
+            #|      given message to sys.stdout as well as logging it.
+            #|
+            #|      Note that since loggers are instantiated by cal-
+            #|      ling the logging.getLogger() function, rather than
+            #|      by specifying the class explicitly, we have to
+            #|      designate this as the new default logger class
+            #|      using the logging.setLoggerClass() function, which
+            #|      is done by logmaster.initLogMaster() when this
+            #|      module is first loaded.
+            #|
+            #|      We also override the Logger._log() method with a
+            #|      new version that allows the caller to optionally
+            #|      pass the findCaller() result in directly.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class NormalLogger(logging.Logger):
 
-    # Extend Logger with new normal() method for printing normal-level messages.
+    """NormalLogger extends the logging.Logger class with a new log-
+       ging method normal(), which prints the given message to
+       sys.stdout as well as logging it.
+            Note that since new loggers are instantiated by calling
+       the logging.getLogger() function, rather than by specifying the
+       class explicitly at instantiation time, we have to designate
+       the NormalLogger class as the new default logger class using
+       the logging.setLoggerClass() function, which is done by
+       logmaster.initLogMaster() when the logmaster module is first
+       loaded.
+            We also override the Logger._log() method with a new ver-
+       sion that allows the caller to pass the findCaller() result in
+       directly."""
+
+        #-------------------------------------------------------------
+        # Override the logging.Logger class's .__init__() method.
+        # The docstring for logging.setLoggerClass() tells us that we
+        # need to define the .__init__() method of a new logger class
+        # in this way.
+
+    def __init__(inst, name:str):
+        
+        """This version of the .__init__() method takes a name
+           argument but no level argument; this is what is expected by
+           the logging.setLoggerClass() function."""
+        
+        logging.Logger.__init__(inst, name)
+
+    #__/ End NormalLogger.__init__().
+
+        #-------------------------------------------------------------
+        # Extend logging.Logger with new normal() method for printing
+        # normal-level messages.
     
     def normal(inst, message:str, *args, caller=None, **kwargs):
+
+        """This special new logging method added by the NormalLogger
+           class prints the given message string to stdout before
+           then passing it on to the logging system for processing at
+           the new NORMAL logging level."""
+        
         print(message)              # Print the message to stdout.
+        
         if inst.isEnabledFor(NORMAL):
             if caller==None:                                
                 caller = mainLogger.logger.findCaller()
             inst.log(NORMAL, message, *args, caller=caller, **kwargs)  # Also log it via the active LogHandlers.
+            
+    #__/ End NormalLogger.normal().
 
-    # Override Logger's standard logging methods to also find caller information.
+        #-----------------------------------------------------------------------
+        # Override Logger's standard logging methods to also find caller information.
     
     def debug(self, msg, *args, caller=None, **kwargs):
-        if self.isEnabledFor(DEBUG):
+        if self.isEnabledFor(logging.DEBUG):
             if caller==None:                                
                 caller = mainLogger.logger.findCaller()
-            self._log(DEBUG, msg, args, caller=caller, **kwargs)
+            self._log(logging.DEBUG, msg, args, caller=caller, **kwargs)
 
     def info(self, msg, *args, caller=None, **kwargs):
-        if self.isEnabledFor(INFO):
+        if self.isEnabledFor(logging.INFO):
             if caller==None:                                
                 caller = mainLogger.logger.findCaller()
-            self._log(INFO, msg, args, caller=caller, **kwargs)
+            self._log(logging.INFO, msg, args, caller=caller, **kwargs)
 
     def warning(self, msg, *args, caller=None, **kwargs):
-        if self.isEnabledFor(WARNING):
+        if self.isEnabledFor(logging.WARNING):
             if caller==None:                                
                 caller = mainLogger.logger.findCaller()
-            self._log(WARNING, msg, args, caller=caller, **kwargs)
+            self._log(logging.WARNING, msg, args, caller=caller, **kwargs)
 
     def error(self, msg, *args, caller=None, **kwargs):
-        if self.isEnabledFor(ERROR):
+        if self.isEnabledFor(logging.ERROR):
             if caller==None:                                
                 caller = mainLogger.logger.findCaller()
-            self._log(ERROR, msg, args, caller=caller, **kwargs)
+            self._log(logging.ERROR, msg, args, caller=caller, **kwargs)
 
     def critical(self, msg, *args, caller=None, **kwargs):
-        if self.isEnabledFor(CRITICAL):
+        if self.isEnabledFor(logging.CRITICAL):
             if caller==None:                                
                 caller = mainLogger.logger.findCaller()
-            self._log(CRITICAL, msg, args, caller=caller, **kwargs)
+            self._log(logging.CRITICAL, msg, args, caller=caller, **kwargs)
 
-    # Modify Logger's _log() method to take an additional kwarg "caller".
+        #-----------------------------------------------------------------------
+        # Modify Logger's _log() method to take an additional kwarg "caller".
+        
     def _log(self, level, msg, args, exc_info=None, extra=None, caller=None):
+        
         global _srcfile
-        """
-        Low-level logging routine which creates a LogRecord and then calls
-        all the handlers of this logger to handle the record.
-        """
-        if caller != None:
-            fn, lno, func, *rest_ignored = caller
+        
+        """This is a low-level logging routine which creates a
+           LogRecord and then calls all the handlers of this logger
+           to handle the record.  This version of the routine, defined
+           in the logging.NormalLogger class, adds a new keyword
+           argument <caller> to optionally specify the calling
+           function or method, instead of us looking it up here."""
+        
+        if caller != None:                          # Was caller specified?
+            fn, lno, func, *rest_ignored = caller   # Parse that tuple.
         else:
             if _srcfile:
                 #IronPython doesn't track Python frames, so findCaller throws an
@@ -2368,38 +2449,67 @@ class NormalLogger(logging.Logger):
             else:
                 fn, lno, func = "(unknown file)", 0, "(unknown function)"
                 if hasattr(appdefs,'topFile'): fn = appdefs.topFile
-#        print("logging/__init__.py/Logger._log(): Got function: " + func.__str__() + "()",file=sys.stderr)
-        if exc_info:
-            if not isinstance(exc_info, tuple):
-                exc_info = sys.exc_info()
-        record = self.makeRecord(self.name, level, fn, lno, msg, args, exc_info, func, extra)
+                
+            #__/ End if _srcfile... else...
+                
+        #_/ End if caller != None... else...
+
+        #[Low-level diagnostic, currently commented out.]       
+        #print("logging/__init__.py/Logger._log(): Got function: " + func.__str__() + "()",file=sys.stderr)
+                
+        if exc_info and not isinstance(exc_info, tuple):
+            exc_info = sys.exc_info()
+        #__/ End if exc_info is a non-tuple object.
+            
+        record = self.makeRecord(self.name, level, fn, lno, msg, args,
+                                 exc_info, func, extra)
+        
         self.handle(record)
-    # End method NormalLogger._log().
-# End class NormalLogger.
+        
+    #__/ End method NormalLogger._log().
+        
+#__/ End class NormalLogger.
 
-    # Here, we actually modify the existing Logger class by adding our
-    # new normal() and _log() methods to it.  We have to do it this way
-    # since we can't as easily change the fact the logging.getLogger()
-    # returns a Logger, not a NormalLogger.
+        #|======================================================================
+        #|
+        #|  Hacks to the logging module.               [unorthodox code section]
+        #|
+        #|      The following code modifies Python's logging module in
+        #|      "unauthorized" ways to get the functionality we want.
+        #|      This is rather inelegant, but it works....
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-logging.Logger.normal = NormalLogger.normal
-logging.Logger._log = NormalLogger._log
+# [The following is no longer needed now that we call logging.setLoggerClass()
+#  in initLogMaster().  Good thing, because this was very inelegant...]
+#
+##    # Here, we actually modify the existing Logger class by adding our
+##    # new normal() and _log() methods to it.  We have to do it this way
+##    # since we can't as easily change the fact the logging.getLogger()
+##    # returns a Logger, not a NormalLogger.
+##
+##logging.Logger.normal = NormalLogger.normal
+##logging.Logger._log = NormalLogger._log
 
-    # The point of this mess is to also modify logging's getframe() method
+    # The point of the below mess is to modify logging's getframe() method
     # to work in our situation (i.e., go back 1 fewer stack frames).
 
-# next bit filched from 1.5.2's inspect.py
-def currentframe():
+# The below code is borrowed from 1.5.2's inspect.py.
+# (This is kind of hacky though; there must be a better way.)
+
+def _currentframe():
     """Return the frame object for the caller's stack frame."""
     try:
         raise Exception
     except:
         return sys.exc_info()[2].tb_frame
 
-if hasattr(sys, '_getframe'): currentframe = lambda: sys._getframe(2)
-# done filching
+if hasattr(sys, '_getframe'):
+    _currentframe = lambda: sys._getframe(2)
+    
+# End code borrowed from inspect.py.
 
-logging.currentframe = currentframe     # Reprogram logging's currentframe() method.
+logging.currentframe = _currentframe     # Reprogram logging's currentframe() method.
 
 
         #==============================================================
@@ -2495,6 +2605,20 @@ class NullOut(io.TextIOBase):  # A simple class implementing a "null" output str
     #===============================================================
     #   Function definitions.
     #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+# Functions for setting the global, thread-local "threadrole" and "component" attributes.
+
+def setThreadRole(role:str):
+    thread = threading.current_thread()
+    thread.role = role
+    theLoggingContext.threadrole = role
+
+def setComponent(component:str):
+    thread = threading.current_thread()
+    thread.component = component
+    theLoggingContext.component = component
+
+
 
         #==================================================================
         #   getLogger()                         [module public function]
@@ -2736,6 +2860,12 @@ def initLogMaster():
     global consHandler, _moduleLogger, _initialized       # the globals that we'll reassign.
     global sysLogger, appLogger
 
+        # Modify the real Thread class's .__str__() method to take advantage
+        # of the role attribute even for non-ThreadActor classes, as long
+        # as the attribute exists.
+
+    threading.Thread.__str__ = ThreadActor.__str__
+
         # Pretend the main thread is a ThreadActor by giving it a "role"
         # attribute.  This is descriptive, for debugging purposes.    
 
@@ -2798,6 +2928,12 @@ def initLogMaster():
         # first accessed within that thread.
 
     theLoggingContext = LoggingContext()   
+
+        # Tell the logging module to please use our custom NormalLogger
+        # class (instead of the default logging.Logger class) when
+        # generating new loggers.
+
+    logging.setLoggerClass(NormalLogger)
 
         # Get the main (root) logger object for this environment.  Note this
         # uses our special getLogger() method defined above, which actually
