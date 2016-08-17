@@ -1,46 +1,55 @@
 #|==============================================================================
 #|                      TOP OF FILE:    dynamic-demo.py
 #|------------------------------------------------------------------------------
-#|
-#|      FILE NAME:  dynamic-demo.py         [Python application source code]
-#|
-#|      FULL PATH:  $GIT_ROOT/dynamic/dynamic-demo.py
-#|
-#|      MASTER GIT REPO:    git@gitlab.sandia.gov:mpfrank/dynamic.git
-#|
-#|
-#|      DESCRIPTION:
-#|      ------------
-#|
-#|          This Python script (intended to be run at top level,
-#|          not imported as a module) implements the demonstration
-#|          application for the Dynamic simulator framework.  See
-#|          the README.md file in this directory for more detailed
-#|          information about the Dynamic system in general.
-#|
-#|
-#|      Initial development platform:
-#|      -----------------------------
-#|
-#|          * Language:     Python 3.5.1 64-bit
-#|          * OS:           Microsoft Windows 8.1 Professional (64-bit)
-#|          * Processor:    Intel Xeon E5-2620 (64-bit)
-#|
-#|
-#|      Copyright Notice
-#|      ----------------
-#|
-#|          This file, and all other files in this repository, are
-#|          copyright (C) 2016 by Michael P. Frank.  All Rights
-#|          Reserved until further notice.
-#|
-#|
-#|      Revision history:
-#|      -----------------
-#|
-#|          6/21/16 (M. Frank) - Started writing initial version.
-#|
+#|   The below module documentation string will be displayed by pydoc3.
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+"""
+
+    FILE NAME:      dynamic-demo.py         [Python application source code]
+
+    FULL PATH:      $GIT_ROOT/dynamic/dynamic-demo.py
+
+    MASTER REPO:    git@gitlab.sandia.gov:mpfrank/dynamic.git
+
+    SYSTEM NAME:    Dynamic (simulator for dynamic networks)
+
+    APP NAME:       Dynamic.demo (Dynamic demonstration application)
+
+
+    DESCRIPTION:
+    ------------
+
+          This Python script (intended to be run at top level,
+          not imported as a module) implements the demonstration
+          application for the Dynamic simulator framework.  See
+          the README.md file in this directory for more detailed
+          information about the Dynamic system in general.
+
+
+    Initial development platform:
+    -----------------------------
+
+          * Language:     Python 3.5.1 64-bit
+          * OS:           Microsoft Windows 8.1 Professional (64-bit)
+          * Processor:    Intel Xeon E5-2620 (64-bit)
+
+
+    Copyright Notice
+    ----------------
+
+          This file, and all other files in this repository, are
+          copyright (C) 2016 by Michael P. Frank.  All Rights
+          Reserved until further notice.
+
+
+    Revision history:
+    -----------------
+
+          6/21/16 (M. Frank) - Started writing initial version.
+                                                                            """
+#|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#| End of module documentation string.
+#|------------------------------------------------------------------------------
 
     #|--------------------------------------------------------------------------
     #|
@@ -97,18 +106,21 @@ if __name__ == "__main__":
     if RAW_DEBUG:
         print("__main__: Importing custom application modules...", file=stderr)
 
-import logmaster
-from logmaster import configLogMaster,appLogger,info,normal
+import  logmaster
+from    logmaster   import configLogMaster,appLogger,info,normal
     # The logmaster module defines our logging framework; we import
     # several definitions that we need from it.
 
-from appdefs import appName
+import  appdefs
+from    appdefs     import appName
     # Name of the present application.  Used for configuring logmaster.
 
-from simulationContext import SimulationContext
+import  simulationContext
+from    simulationContext   import SimulationContext
     # Used for tracking global state of the simulation.
 
-from exampleNetworks import ExampleNetwork_MemCell
+import  exampleNetworks
+from    exampleNetworks import ExampleNetwork_MemCell
     # The exampleNetworks module defines various simple example modules to be
     # used for development and testing.  ExampleNetwork_MemCell is a minimally-
     # simple example network to be used for initial development purposes.
@@ -118,36 +130,61 @@ from exampleNetworks import ExampleNetwork_MemCell
     #|   Globals					    [code section]
     #|
     #|      Declare and/or define various global variables and
-    #|      constants.
+    #|      constants.  Top-level global declarations are not
+    #|      strictly required, but they serve to verify that
+    #|      these names were not previously used, and also
+    #|      serve as documentation.
     #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-# These top-level global declarations verify that these names were
-# not previously used, and also serve as documentation.
 
-global  is_top
+        #|======================================================================
+        #|
+        #|  Special globals.                                    [code section]
+        #|
+        #|      These globals have special meanings defined by the
+        #|      Python language.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+global  __all__         # List of public symbols exported by this module.
+__all__ = ['is_top']    # Boolean; is this file running at top level?
+
+
+        #|======================================================================
+        #|
+        #|  Module globals.                                    [code section]
+        #|
+        #|      These globals are specific to the present module.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+global  is_top      # Boolean; is this module running at top level?
 
     #|==========================================================================
     #|
     #|   Module-level function definitions.                   [code section]
     #|
+    #|      These functions are at top level within the module; 
+    #|      they are not part of any particular class.
     #|
-    #|       These functions are not part of any particular class.
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        #|======================================================================
+        #|----------------------------------------------------------------------
         #|
         #|   _main()                                [module private function]
         #|
-        #|      Main routine of module.
+        #|      Main routine of this module.  It is private; we do not
+        #|      export it, and other modules should not attempt to call it.
         #|
-        #|      This routine is traditionally called within a module's main
-        #|      body code, within the context of a conditional like
+        #|      The _main() routine is traditionally called within a
+        #|      module's main body code, within the context of a
+        #|      conditional like
         #|
         #|           if __name__ == "__main__":
         #|
-        #|      so it won't be automatically executed when this module is only
-        #|      being imported as a sub-module of a larger system.
+        #|      so that it won't be automatically executed when this module
+        #|      is only being imported as a sub-module of a larger system.
         #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
@@ -232,7 +269,7 @@ def _main():
 
     #|==========================================================================
     #|
-    #|   Main script body.                                   [code section]
+    #|   Main script body.                              [script code section]
     #|
     #|      Above this section should only be definitions and
     #|      assignments.  Below is the main executable body of
@@ -240,11 +277,12 @@ def _main():
     #|      this script is not just being loaded as a submodule).
     #|  
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    
-if __name__ == "__main__":
-    
-    is_top = True   # For benefit of stuff called from within _main().
 
+is_top = (__name__ == "__main__")
+    # Remember this for benefit of stuff called from within _main().
+           
+if is_top:
+    
     if RAW_DEBUG:
         print("__main__: Top-level module is invoking _main() routine of " +
               "application...", file=stderr)

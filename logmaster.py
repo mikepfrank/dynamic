@@ -25,20 +25,21 @@
         For our purposes, a "software component" means a set of
         modules that are logically related to each other and
         that together implement some important capability.
+        Component names generally appear in log record output,
+        with the exception of the present component.
  
   
     MODULE DESCRIPTION:
     -------------------
   
-        This module provides a customized logger based on python's
-        general logging facility.  The intent of putting this
-        code into its own module is to enable its definitions
-        to be accessed from within any number of other modules
-        in the application, so they all can do logging in a
-        consistent way.  This is particularly important when
-        debugging.
+        This module provides a customized logger based on Python's
+        general logging facility.  The intent of putting this code
+        into its own module is to enable its definitions to be
+        accessed from within any number of other modules in the
+        application, so they all can do logging in a consistent way
+        This is particularly important when debugging.
   
-        The specific logging functionality we provide is:
+        The specific new logging functionality we provide includes:
   
              1.  A new logging level called "NORMAL" is added
                  (in between INFO and WARNING).  Its purpose
@@ -48,7 +49,7 @@
   
              2.  Ultra-convenient logging functions are exported
                  (debug(), info(), etc.) that do not require
-                 specifying the logger.
+                 even specifying a logger.
   
              3.  The logger can be configured (via global bools)
                  to display or not display various "optional"
@@ -60,7 +61,7 @@
                  include the time, down to the millisecond.
   
              5.  All formats include the log level (except for
-                 NORMAL messages to stdout).
+                 NORMAL messages displayed on stdout).
   
              6.  All log messages (again except normal messages
                  to the console) always include the
@@ -68,13 +69,233 @@
                  multithreaded programs.
 
 
-    Revision history:
+    MODULE USAGE:
+    -------------
+
+        These are basic usage instructions, but for more features,
+        see the rest of the module docs.  To use the logmaster
+        module in an application,
+
+            (1) In a file appdefs.py, define and export the
+                    globals systemName, appName, and topFile.
+                    systemName should be a string (a concise
+                    name for the software system); appName
+                    should be another string, in the format
+                    "<systemName>.<appSuffix>" (w/o brackets),
+                    and topFile should be the name of the
+                    top-level application script (w/o .py).
+
+            (2) In the main application script and each
+                    module, import the logmaster module.
+
+                        import logmaster
+
+            (3) In the main application script, do something
+                    like the following:
+
+                        logmaster.configLogMaster(role='startup', component=logmaster.appName)
+                        logger = logmaster.appLogger
+
+                    and thence, for normal program output, do:
+
+                        logger.normal("Blah blah blah...")
+
+                    and for logging at other levels, use logger.info(),
+                    logger.warn(), etc.  After the startup phase of the
+                    program is over, you can change the thread role
+                    designation with something like
+
+                        logmaster.setThreadRole('running')    ;
+
+                    this role designator appears in log file output.
+
+            (4) At the top of other modules (after importing logmaster),
+                    do something like:
+
+                        logger = logmaster.getLogger(logmaster.sysName + '.<compName>')
+
+                    where <compName> is the formal name of the software
+                    component that that module is conceptually a part of.
+                    The component name will appear in log file output.
+
+            (5) Look for output in the file <appName>.log.
+
+        There are additional features for multithreaded applications
+        and for generating automatically-logged exceptions.
+        
+
+    PUBLIC GLOBALS:
+    ---------------
+
+      The following are the global attributes of this module, which
+      may be accessed by other modules.
+
+
+        Public constants:
+        -----------------
+
+            logmaster.{NORMAL_LEVEL,NORMAL}:int [public global constant integer]
+
+                These constants identify a new logging level for
+                normal program output.  (Above INFO, below WARNING.)
+                NORMAL is just provided as a shorter name for
+                NORMAL_LEVEL.
+
+
+            logmaster.{systemName,sysName}:str  [public global constant string]
+
+                Name of the overall system we are a part of.  This can
+                be modified if needed for another application by
+                assigning to logmaster.systemName any time before
+                logmaster.configLogMaster() is called, or as an
+                optional argument to it.  This name is important for
+                setting up the logger (logging channel) hierarchy.
+
+
+            logmaster.appName:str               [public global constant string]
+
+                Name of the current application within the overall
+                system.  This can be modified if needed for another
+                application by assigning to logmaster.appName any time
+                before logmaster.configLogMaster() is called, or as an
+                optional argument to it.  This name is important for
+                setting up the logger (logging channel) hierarchy.
+
+
+            logmaster.{NAME,THREADNAME,COMPONENT,   [public global constant integers]
+                THREADROLE,MODULE,FUNCNAME,
+                LEVELNAME}_FIELDWIDTH : int
+
+                These integer parameters determine the widths of the
+                corresponding fields of our default log line format
+                string.  Their values are also used by the
+                CleanFormatter class to abbreviate content to the
+                desired width before it is formatted, so that it
+                doesn't overflow its field.
+
+
+            logmaster.LOG_FORMATSTR:str         [public global constant string]
+                
+                Default line format for the main log file.  Actually,
+                this "constant" can be modified if needed before
+                initLogMaster() is called, or as an optional argument
+                to initLogMaster().
+
+
+            logmaster.{CONS_{WARN,INFO,DEBUG},  [public global constant booleans]
+                LOG_{INFO,DEBUG}:bool
+                
+                Change these Booleans to modify how the logging levels
+                for the console and the main log file are set up.
+                Normally (using the default values recommended below)
+                the console will show warnings and higher, and the log
+                file will show info-level messages and higher.  For
+                more flexible control, you can always just set the log
+                level explicitly.
+
+
+            logmaster.{log,console}_level:int
+                                                [public global constant integers]
+                
+                These keep track of what logging level we are using for
+                both the main log file and the console.  Change these
+                indirectly using configLogMaster().
+
+
+        Public objects:
+        ---------------
+                
+            logmaster.logFormatter:LogFormatter         [public global object]
+                
+                This is the default LogFormatter instance used by
+                logmaster for the main application log file.  It is
+                based on the format string LOG_FORMATSTR above.  It
+                is created in initLogMaster().
+
+
+            logmaster.theLoggingContext:LoggingContext
+                                            [public global thread-local object]
+                
+                This is a single (but thread-local) LoggingContext
+                object, to be shared by all modules (but it is
+                different for each thread), for passing to their
+                module-specific loggerAdapter objects that they
+                will use for logging.  This object is created in
+                this module, (in init_logging()), it gets
+                initialized separately within each thread, and
+                then it is updated dynamically, if needed, as
+                the thread progresses.  It maintains thread-
+                specific information, such as the thread's role
+                and the software component that it is part of.
+
+
+            logmaster.mainLogger:Logger                 [public global object]
+                
+                This is the main logger for the application.  It can
+                be used in modules that don't bother to define their
+                own logger (but most modules should define a logger,
+                either based on the systemName, the appName, or at
+                least the module's own name).
+                
+                We don't initialize this when the module is first
+                loaded, but wait until initLogMaster() is called,
+                which should be done only once in the program, before
+                using any of the logging capabilities.
+                
+                
+            logmaster.{sysLogger,appLogger}:Logger      [public global objects]
+                
+                These are additional loggers that are included in the
+                default logger hierarchy; they are both subordinate
+                to the main logger, while being specific to the
+                present system, and to the present application within
+                the system, respectively.  
+
+
+    EXCEPTION CLASSES
     -----------------
+
+        Applications may subclass or mixin these classes to create
+        their own exception classes that automatically generate log
+        entries at designated logging levels.  See these classes'
+        docstrings for additional details.  The indentation below
+        indicates the subclass relationships between these classes.
+
+            logmaster.LoggedException                   [public exception class]
+
+              logmaster.InfoException                   [public exception class]
+
+                logmaster.ExitException                 [public exception class]
+
+              logmaster.WarningException                [public exception class]
+
+                logmaster.WrongThreadWarning            [public exception class]
+
+              logmaster.ErrorException                  [public exception class]
+
+                logmaster.CriticalException             [public exception class]
+
+                  logmaster.FatalException              [public exception class]
+
+
+    PUBLIC CLASSES
+    --------------
+
+        Public classes exported by this module, other than exception
+        classes.  See the classes' docstrings for additional details.
+
+            logmaster.LoggingContext                            [public class]
+
+            ...
+        
+                
+    Module revision history:
+    ------------------------
         
         v0.1 (2009-2012) - Initial version developed as part of the COSMICi
             system at FAMU Physics Dept., APCR-DRDL laboratory.  (M. Frank)
             
-        v0.2 (2016) - New revision for the Dynamic simulator, Sandia Labs
+        v0.2 (2016) - New revision for the Dynamic simulator, Sandia Labs,
             Dept. 1425.  (M. Frank)
         
   
@@ -85,11 +306,13 @@
              avoid making each using module refresh its copies
              of our globals whenever they change.
                                                                              """
-#|------------------------------------------------------------------------------
+#|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #| End of module documentation string.
 #|------------------------------------------------------------------------------
 
-        #  Previously completed coding tasks:
+        #-----------------------------------------------------------------------
+        #
+        #  Some previously-completed coding tasks:
         #
         #       [/] Give each thread a logging context.
         #
@@ -100,84 +323,84 @@
         #               of the root logger "" in the logging hierarchy.
         #
         #       [/] Create a child logger for each node.
-        #           
+        #
+        #-----------------------------------------------------------------------
 
     #|==========================================================================
     #|   Module imports.                                [module code section]
-    #|--------------------------------------------------------------------------
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
         #|======================================================================
         #|  Imports of standard python modules.         [module code subsection]
-        #|----------------------------------------------------------------------
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-import os           # Used in calculating _srcfile
-import sys          # For stdout/stderr, for console loghandler & internal debugging of logmaster.
-import io           # For TextIOBase, which we subclass in NullOut.
-import logging      # General python logging facility.
+import  os           # Used in calculating _srcfile.
+import  sys          # For stdout/stderr, for console loghandler & internal debugging of logmaster.
+import  io           # For TextIOBase, which we subclass in NullOut.
+import  logging      # General python logging facility.
     # - Don't import names from within it, b/c we redefine some of them.
-import threading    # Used for our threading.local LoggingContext
-import traceback    # Used for ...
+import  threading    # Used for our threading.local LoggingContext.
+import  traceback    # Used for printing stack traces.
 
 
         #|======================================================================
         #|  Imports of custom application modules.      [module code subsection]
-        #|----------------------------------------------------------------------
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global systemName, appName
-    # The initial values of these that are defined later in this file are
-    # placeholders that should never be used.
+global  systemName, appName
+    # - The initial values of these that are defined later in this file are
+    #   placeholders that should never be used.
     
-import  appdefs                 # Definitions for the current application.
-from    appdefs     import *    # Sets systemName, appName for this application.
-
-    # The following could be moved to the globals section.
-global sysName
-sysName = systemName    # Shorter synonym for systemName
+import  appdefs                 # Import definitions for the current application.
+from    appdefs     import *    # Use systemName, appName, topFile for this application.
 
 
     #|==========================================================================
     #|   Global variables & constants.                  [module code section]
-    #|--------------------------------------------------------------------------
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
         #|======================================================================
         #|   Special globals.                           [module code subsection]
-        #|----------------------------------------------------------------------
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-            #|==================================================================
+            #|------------------------------------------------------------------
             #|
             #|   logmaster.__all__:List[str]                    [special global]
             #|
             #|      List of explicitly exported public names.
             #|
-            #|      These are the names we provide that will get automatically
-            #|      imported into another module if/when it does:
+            #|      These are the names we provide that will get
+            #|      automatically imported into another module if/when
+            #|      it does:
             #|
             #|          from logmaster import *
             #|
-            #|------------------------------------------------------------------
-            
-__all__ = ['NORMAL_LEVEL',                          # Public global variables.
-           'LOG_FILENAME', 'LOG_FORMATSTR',
-           'CONS_WARN', 'CONS_INFO', 'CONS_DEBUG',
-           'LOG_INFO', 'LOG_DEBUG',
-           'systemName', 'sysName', 'appName',
-           'theLoggingContext', 'mainLogger',       # Public global objects.
-           'sysLogger', 'appLogger',
-           'logFormatter',
-           'LoggedException', 'InfoException',      # Public exception classes.
-           'ExitException', 
-           'WarningException', 'ErrorException',
-           'CriticalException', 'FatalException',
-           'LoggingContext', 'ThreadActor',         # Public regular classes.
-           'AbnormalFilter', 'NormalLogger',
-           'NormalLoggerAdapter',
-           'initLogMaster', 'configLogMaster',      # Public functions.
-           'normal', 'debug', 'info', 'error',
-           'warning', 'warn', 'error', 'exception',
-           'critical', 'lvlname_to_loglevel',
-           'byname', 'getLogger', 'testLogging',
-           'updateStderr', 'setThreadRole', 'setComponent',
-           ]
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+global  __all__
+__all__ = [
+    'NORMAL_LEVEL',                          # Public global variables.
+    'LOG_FILENAME', 'LOG_FORMATSTR',
+    'CONS_WARN', 'CONS_INFO', 'CONS_DEBUG',
+    'LOG_INFO', 'LOG_DEBUG',
+    'systemName', 'sysName', 'appName',
+    'theLoggingContext', 'mainLogger',       # Public global objects.
+    'sysLogger', 'appLogger',
+    'logFormatter',
+    'LoggedException', 'InfoException',      # Public exception classes.
+    'ExitException', 'WarningException', 
+    'WrongThreadWarning', 'ErrorException',
+    'CriticalException', 'FatalException',
+    'LoggingContext', 'ThreadActor',         # Public regular classes.
+    'AbnormalFilter', 'NormalLogger',
+    'NormalLoggerAdapter', 'CleanFormatter',
+    'initLogMaster', 'configLogMaster',      # Public functions.
+    'normal', 'debug', 'info', 'error',
+    'warning', 'warn', 'error', 'exception',
+    'critical', 'lvlname_to_loglevel',
+    'byname', 'getLogger', 'testLogging',
+    'updateStderr', 'setThreadRole', 'setComponent',
+]
 
 
         #|======================================================================
@@ -187,7 +410,11 @@ __all__ = ['NORMAL_LEVEL',                          # Public global variables.
         #|      These are our globals that we encourage other modules
         #|      to access and utilize.
         #|
-        #|----------------------------------------------------------------------
+        #|      At some point, the documentation for these should be
+        #|      included in the module documentation string at the
+        #|      top of this file.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|==================================================================
             #|
@@ -196,35 +423,27 @@ __all__ = ['NORMAL_LEVEL',                          # Public global variables.
             #|      The following globals are not supposed to be ever
             #|      changed after their initial definition.
             #|
-            #|------------------------------------------------------------------
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-    # Some of the below global declarations are redundant in that they
-    # also appear elsewhere in this module.  They are also gathered here
-    # for documentation purposes only.
-    
-global  systemName, appName, sysName, NORMAL_LEVEL, NORMAL
-global  LOG_FILENAME, LOG_FORMATSTR
-global  CONS_WARN, CONS_INFO, CONS_DEBUG, LOG_INFO, LOG_DEBUG
-
-
-                #|==============================================================
+                #|--------------------------------------------------------------
                 #|
                 #|  NORMAL_LEVEL,NORMAL:int            [public global constants]
                 #|
-                #|      These constants identify new logging levels.
+                #|      These constants identify a new logging level for
+                #|      normal program output.  (Above INFO, below WARNING.)
                 #|
-                #|--------------------------------------------------------------
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global NORMAL_LEVEL, NORMAL
 
 NORMAL_LEVEL  =  25             # For normal output.  Between INFO and WARNING.
 NORMAL        =  NORMAL_LEVEL   # A more concise synonym.
-    # initLogMaster() will actually add this new level.
+    # \_ initLogMaster() adds this new level to our logging facility.
 
 
-                #|==============================================================
+                #|--------------------------------------------------------------
                 #|
-                #|  systemName,appName:str         [public global constants]
+                #|  systemName,sysName,appName:str  [public global constants]
                 #|
                 #|      Name of the overall system we are a part of, and the
                 #|      specific application within that system.  They can be
@@ -234,12 +453,25 @@ NORMAL        =  NORMAL_LEVEL   # A more concise synonym.
                 #|      arguments to it.  These are important for setting up
                 #|      the logger (logging channel) hierarchy.
                 #|
-                #|--------------------------------------------------------------
+                #|  LOG_FILENAME:str                [public global constant]
+                #|
+                #|      Actually this is not really constant; it can be
+                #|      modified for other applications if needed before
+                #|      configLogMaster() is called, or as an optional
+                #|       argument to configLogMaster().
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global  systemName, appName
+global  systemName,sysName
+global  appName
+global  LOG_FILENAME
+
+    # Ensure that systemName, appName, sysName and LOG_FILENAME are initialized.
 
 if not "systemName" in dir():   # If appdefs did not already define systemName,
     sysName = systemName = "(Unknown System)"   # Define it (placeholder value).
+else:
+    sysName = systemName    # Shorter synonym for systemName
 
 if not "appName" in dir():      # If appdefs did not already define systemName,
     appName = systemName + ".(Unknown App)"
@@ -247,25 +479,11 @@ if not "appName" in dir():      # If appdefs did not already define systemName,
 else:                                   # Application name was defined.
     LOG_FILENAME = appName + ".log"     # Construct the default log file name.
 
-
-                #|==============================================================
-                #|
-                #|  LOG_FILENAME:str                    [public global constant]
-                #|
-                #|      Actually this is not really constant; it can be
-                #|      modified for other applications if needed before
-                #|      configLogMaster() is called, or as an optional
-                #|       argument to configLogMaster().
-                #|
-                #|--------------------------------------------------------------
-
-global  LOG_FILENAME
-
 if not "LOG_FILENAME" in dir():     # If not already defined above,
     LOG_FILENAME = "script.log"     # Set it to a generic default log file name.
 
 
-                #|==============================================================
+                #|--------------------------------------------------------------
                 #|
                 #|      NAME_FIELDWIDTH,            [public global constants]
                 #|      THREADNAME_FIELDWIDTH,
@@ -282,7 +500,7 @@ if not "LOG_FILENAME" in dir():     # If not already defined above,
                 #|          to the desired width before it is formatted, so
                 #|          that it doesn't overflow its field.
                 #|
-                #|--------------------------------------------------------------
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global  NAME_FIELDWIDTH, THREADNAME_FIELDWIDTH, COMPONENT_FIELDWIDTH
 global  THREADROLE_FIELDWIDTH, MODULE_FIELDWIDTH, FUNCNAME_FIELDWIDTH
@@ -297,211 +515,276 @@ FUNCNAME_FIELDWIDTH     = 18    # Width of function name field.
 LEVELNAME_FIELDWIDTH    = 7     # Width of logging level name field.
 
 
-                #============================================================
-                #   LOG_FORMATSTR               [public global constant]
-                #
-                #       Default format for the main log file.  Actually,
-                #       this "constant" can be modified if needed before
-                #       initLogMaster() is called, or as an optional
-                #       argument to initLogMaster().
-                #
-                #       IMPORTANT NOTE:  The fields named 'threadrole' and
-                #       'component' below are only meaningful because these
-                #       keys are defined in the dictionary of the thread-local
-                #       (but lexically global) LoggingContext object that
-                #       gets passed into the constructor for the LoggerAdapter
-                #       that is used for doing the actual logging.
-                #
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+                #|--------------------------------------------------------------
+                #|
+                #|      LOG_FORMATSTR:str             [public global constant]
+                #|
+                #|          Default format for the main log file.  Actually,
+                #|          this "constant" can be modified if needed before
+                #|          initLogMaster() is called, or as an optional
+                #|          argument to initLogMaster().
+                #|
+                #|          IMPORTANT NOTE:  The fields named 'threadrole' and
+                #|          'component' below are only meaningful because these
+                #|          keys are defined in the dictionary of the thread-
+                #|          local (but lexically global) LoggingContext object
+                #|          that gets passed into the constructor for the
+                #|          LoggerAdapter that is used for doing the actual
+                #|          logging.
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global LOG_FORMATSTR
+global  LOG_FORMATSTR
 
-# Old version, less flexible
-##LOG_FORMATSTR = ("%(asctime)s | %(name)-20s | " +                               # Time & logger name.
-##                 "%(threadName)10s:  %(component)9s  %(threadrole)-16s  | " +   # Thread & its logging context (role & component).
-##                 "%(module)18s.py:%(lineno)4d:%(funcName)-19s | " +             # Source code file, line #, and function/method name.
-##                 "%(levelname)8s: %(message)s")                                 # Log level and log message.
-
-LOG_FORMATSTR = ("%(asctime)s | "                                       +   # Time.
-                 "%%(name)-%ds | "          % NAME_FIELDWIDTH           +   # Logger name.
-                 "%%(threadName)%ds: "      % THREADNAME_FIELDWIDTH     +   # Thread & its logging context (role & component).
+LOG_FORMATSTR = (   # Current time.
+                 "%(asctime)s | "                                       +
+                    # Logger name.
+                 "%%(name)-%ds | "          % NAME_FIELDWIDTH           +   
+                    # Thread & its logging context (role & component):
+                 "%%(threadName)%ds: "      % THREADNAME_FIELDWIDTH     +
                  "%%(component)%ds "        % COMPONENT_FIELDWIDTH      +
-                 "%%(threadrole)-%ds | "    % THREADROLE_FIELDWIDTH     +    
-                 "%%(module)%ds.py:"        % MODULE_FIELDWIDTH         +   # Source code file, line #, and function/method name.
+                 "%%(threadrole)-%ds | "    % THREADROLE_FIELDWIDTH     +
+                    # Source code file, line #, and function/method name.
+                 "%%(module)%ds.py:"        % MODULE_FIELDWIDTH         +   
                  "%(lineno)-4d: "                                       +
-                 "%%(funcName)-%ds | "      % FUNCNAME_FIELDWIDTH       +             
-                 "%%(levelname)%ds: "       % LEVELNAME_FIELDWIDTH      +   # Log level and log message.
-                 "%(message)s")                                 
+                 "%%(funcName)-%ds | "      % FUNCNAME_FIELDWIDTH       +
+                    # Log level and log message.
+                 "%%(levelname)%ds: "       % LEVELNAME_FIELDWIDTH      +   
+                 "%(message)s"
+                )                                 
 
-def limitlength(s:str, limit:int):
-    if len(s) > limit:
-        newstr = s[0:limit-4] + '..' +s[-2:]
-        #print("Limiting length of string [%s] to [%s] (%d chars)" % (s, newstr, limit))
-        return newstr
-    else:
-        return s
 
-#global origFormatMethod
-#origFormatMethod = logging.Formatter.format
-
-class CleanFormatter(logging.Formatter):
-    def __init__(self, fmt=None, datefmt=None, style='%'):
-        logging.Formatter.__init__(self, fmt, datefmt, style)
-        
-    def format(self, record):
-        if hasattr(record,'name'): record.name = limitlength(record.name, NAME_FIELDWIDTH)
-        if hasattr(record,'threadName'): record.threadName = limitlength(record.threadName, THREADNAME_FIELDWIDTH)
-        if hasattr(record,'component'): record.component = limitlength(record.component, COMPONENT_FIELDWIDTH)
-        if hasattr(record,'threadRole'): record.threadrole = limitlength(record.threadrole, THREADROLE_FIELDWIDTH)
-        if hasattr(record,'module'): record.module = limitlength(record.module, MODULE_FIELDWIDTH)
-        if hasattr(record,'funcName'): record.funcName = record.funcName+'()'
-        if hasattr(record,'funcName'): record.funcName = limitlength(record.funcName, FUNCNAME_FIELDWIDTH)
-        if hasattr(record,'levelname'): record.levelname = limitlength(record.levelname, LEVELNAME_FIELDWIDTH)
-        return logging.Formatter.format(self, record)
-
-#logging._defaultFormatter = CleanFormatter(LOG_FORMATSTR)
-
-# Replace the format method of the Formatter class.
-# This might be dangerous if other parts of the system are also using
-# logging.Formatter expecting the normal behavior!
-#logging.Formatter.format = CleanFormatter.format
-
-                #=============================================================
-                #   Logging options.            [public global constants]
-                #
-                #       Change these Booleans to modify how the logging
-                #       levels for the console and the main log file are
-                #       set up.  Normally the console will show warnings
-                #       and higher, and the log file will show info-level
-                #       messages and higher.  For more flexible control,
-                #       you can always just set the log level explicitly.
-                #
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+                #|--------------------------------------------------------------
+                #|
+                #|      CONS_WARN, CONS_INFO,       [public global constant booleans]
+                #|      CONS_DEBUG, LOG_INFO,
+                #|      LOG_DEBUG
+                #|
+                #|          Change these Booleans to modify how the
+                #|          logging levels for the console and the
+                #|          main log file are set up.  Normally (using
+                #|          the default values recommended below) the
+                #|          console will show warnings and higher, and
+                #|          the log file will show info-level messages
+                #|          and higher.  For more flexible control,
+                #|          you can always just set the log level
+                #|          explicitly.
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global CONS_WARN, CONS_INFO, CONS_DEBUG, LOG_INFO, LOG_DEBUG
 
+        #|---------------------------------------------------
+        #| Initialize the booleans that control the logging
+        #| level for messages to the system console.
+
 CONS_WARN = True    # Default value: True.
     # - Change this to False before initialization to suppress warnings from console.
+    
 CONS_INFO = False   # Default value: False.
     # - Change this to True before initialization if you want verbose information on console.
+    
 CONS_DEBUG = False  # Default value: False.
     # - Change this to True before initialization if you want detailed debug info on console.
     #   Overrides CONS_WARN.
 
+
+        #|---------------------------------------------------
+        #| Initialize the booleans that control the logging
+        #| level for messages to the log file.
+
 LOG_INFO = True     # Default value: True.
     # - Change this to False before initialization to suppress verbose info from log file.
+    
 LOG_DEBUG = False   # Default value: False.
     # - Change this to True before initialization to log detailed debugging information in log file.
     #   Overrides CONS_INFO.
 
-                #=============================================================
-                #   Log level settings.         [public global constants]
-                #
-                #       These keep track of what logging level we are
-                #       using for both the main log file and the console.
-                #       Change these indirectly using configLogMaster().
-                #
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+                #|--------------------------------------------------------------
+                #|
+                #|  {log,console}_level:int    [public global constant integers]
+                #|
+                #|      These keep track of what logging level we are
+                #|      using for both the main log file and the console.
+                #|      Change these indirectly using configLogMaster().
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global log_level, console_level
-log_level = logging.INFO            # By default, log file records messages at INFO level and higher.
-console_level = logging.WARNING     # By default, console displays messages at WARNING level & higher.
 
-            #=========================================================
-            #   Public global objects.
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+log_level       = logging.INFO      # By default, log file records messages at INFO level and higher.
+console_level   = logging.WARNING   # By default, console displays messages at WARNING level & higher.
 
-                #=======================================================================
-                #   logFormatter:LogFormatter               [public global object]
-                #
-                #       This is the default LogFormatter used by logmaster for
-                #       the main application log file.  It is based on the format
-                #       string LOG_FORMATSTR above.  It is created in initLogMaster().
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global logFormatter
-logFormatter = None
+            #|==================================================================
+            #|
+            #|   Public global objects.             [module code subsubsection]
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-                #=============================================================================
-                #   theLoggingContext:LoggingContext       [public global thread-local object]
-                #
-                #       A single (but thread-local) LoggingContext object, to be shared by
-                #       all modules (but different for each thread), for passing to their
-                #       module-specific loggerAdapter objects that they will use for logging.
-                #       This object is created in this module, (in init_logging()), it gets
-                #       initialized separately within each thread, and then it is updated
-                #       dynamically, if needed, as the thread progresses.
-                #
-                #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+                #|--------------------------------------------------------------
+                #|
+                #|  logFormatter:LogFormatter           [public global object]
+                #|
+                #|      This is the default LogFormatter instance used
+                #|      by logmaster for the main application log file.
+                #|      It is based on the format string LOG_FORMATSTR
+                #|      above.  It is created in initLogMaster().
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global theLoggingContext       # A single global (but thread-local) LoggingContext object.
-theLoggingContext = None       # To be properly initialized later.
+global  logFormatter
 
-                #=============================================================================
-                #   mainLogger:Logger                           [module public global object]
-                #
-                #       This is the main logger for the application.  It is the logger
-                #       that should be used in modules that don't bother to define their
-                #       own logger (but most modules should define a logger, either based
-                #       on the systemName, the appName, or at least the module's own name).
-                #
-                #       We don't initialize this when the module is first loaded, but
-                #       wait until logmaster.initLogMaster() is called, which should be done
-                #       only once in the program, before using any logging capabilities.
+logFormatter = None     # Initially, no logFormatter has been created yet.
 
-global mainLogger
-mainLogger = None           # Initialized later.
+                #|--------------------------------------------------------------
+                #|
+                #|  theLoggingContext:LoggingContext       [public global
+                #|                                          thread-local object]
+                #|
+                #|      This is a single (but thread-local) LoggingContext
+                #|      object, to be shared by all modules (but it is
+                #|      different for each thread), for passing to their
+                #|      module-specific loggerAdapter objects that they
+                #|      will use for logging.  This object is created in
+                #|      this module, (in init_logging()), it gets
+                #|      initialized separately within each thread, and
+                #|      then it is updated dynamically, if needed, as
+                #|      the thread progresses.  It maintains thread-
+                #|      specific information, such as the thread's role
+                #|      and the software component that it is part of.
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-    # Some more loggers.
-global sysLogger, appLogger
-sysLogger = None
-appLogger = None
+global  theLoggingContext   # A single global (but thread-local) LoggingContext object.
 
-        #======================
-        #   Private Globals.            [code subsection]
-        #======================
+theLoggingContext = None    # To be properly initialized later (in init_logging()).
 
-            #========================================================================
-            #   initialized:bool                    [module private global variable]
-            #
-            #       This bool is set to True once the logmaster module has been
-            #       initialized.  It is used to prevent the module from being
-            #       initialized more than once.  Use the initLogMaster() function
-            #       to initialize the module.  (We didn't use a flag here because
-            #       nobody else will get the opportunity to wait for it anyway.)
 
-global initialized
-initialized = False     # Initially false; this module has not yet been initialized.
+                #|--------------------------------------------------------------
+                #|
+                #|  mainLogger:Logger                   [public global object]
+                #|
+                #|      This is the main logger for the application.
+                #|      It can be used in modules that don't bother
+                #|      to define their own logger (but most modules
+                #|      should define a logger, either based on the
+                #|      systemName, the appName, or at least the
+                #|      module's own name).
+                #|
+                #|      We don't initialize this when the module is
+                #|      first loaded, but wait until initLogMaster()
+                #|      is called, which should be done only once in
+                #|      the program, before using any of the logging
+                #|      capabilities.
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+global  mainLogger  # The main logger for the current application.
+
+mainLogger = None   # To be initialized later (in initLogMaster()).
+
+
+                #|--------------------------------------------------------------
+                #|
+                #|  sysLogger,appLogger:Logger          [public global objects]
+                #|
+                #|      These are additional loggers that are included
+                #|      in the default logger hierarchy; they are both
+                #|      subordinate to the main logger, while being
+                #|      specific to the present system, and to the
+                #|      present application within the system,
+                #|      respectively.   
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    # Some more loggers.  Subordinate to the main logger, but
+    # specific to the system and the application within the
+    # system.  These may not be needed...
+    
+global  sysLogger, appLogger
+
+sysLogger = None    # Logger for the overall system named by logmaster.systemName.
+appLogger = None    # Logger for the specific application named by logmaster.appName.
+
+
+        #|======================================================================
+        #|
+        #|      Private globals.                            [code subsection]
+        #|
+        #|          In this section, we define global variables that
+        #|          are used within this module, but that are not
+        #|          exported nor intended to be used by other modules.
+        #|
+        #|          Since these are private, they aren't documented
+        #|          in the module's documentation string.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+
+            #|------------------------------------------------------------------
+            #|
+            #|  _initialized:bool               [module private global variable]
+            #|
+            #|      This bool is set to True once the logmaster module
+            #|      has been initialized.  It is used to prevent the
+            #|      module from being initialized more than once.  Use
+            #|      the initLogMaster() function to initialize the
+            #|      module.  (We didn't use a concurrency-control flag
+            #|      here because nobody else will get the opportunity
+            #|      to wait for it anyway.)
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+global  _initialized
+
+_initialized = False    # Initially false; this module has not yet been initialized.
         
        
-            #===============================================================
-            #   moduleLogger:Logger          [module private global object]
-            #
-            #       This logger (which is not publicly exported) is
-            #       to be used, from within this module only, for log
-            #       messages generated by this module.  This is also a
-            #       model for what other non-application-specific
-            #       modules that use logmaster should do to get their
-            #       own module-local loggers.
+            #|------------------------------------------------------------------
+            #|
+            #|  _moduleLogger:Logger          [module private global object]
+            #|
+            #|      This logger (which is not publicly exported) is
+            #|      to be used, from within this module only, for log
+            #|      messages generated by this module.  This is also a
+            #|      model for what other non-application-specific
+            #|      modules that use logmaster should do to get their
+            #|      own module-local loggers.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global moduleLogger
-moduleLogger = None     # Initialize in init_logging()
+global  _moduleLogger
+
+_moduleLogger = None     # Really initialize this later, in init_logging().
 
 
-            #=================================================================
-            #   _srcfile                    [module private global variable]
-            #
-            #       Copied from logging/__init__.py.  This code had to be
-            #       copied into this module in order for it to get the value
-            #       of __file__ that we want to use here.
+            #|------------------------------------------------------------------
+            #|
+            #|  _srcfile:str                [module private global variable]
+            #|
+            #|      Copied from logging/__init__.py.  This code had to
+            #|      be copied into this module in order for it to get
+            #|      the value of __file__ that we want to use here.
+            #|
+            #|      Comment from logging/__init__.py:  "_srcfile is
+            #|      used when walking the stack to check when we've
+            #|      got the first caller stack frame, by skipping
+            #|      frames whose filename is that of this module's
+            #|      source. It therefore should contain the filename
+            #|      of this module's source file."
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global _srcfile
-#
-# _srcfile is used when walking the stack to check when we've got the first
-# caller stack frame.
-#
-if hasattr(sys, 'frozen'): #support for py2exe                  # This part is inappropriate for us,
-    _srcfile = "logging%s__init__%s" % (os.sep, __file__[-4:])  # not sure how to fix yet. -mpf
+global _srcfile     # Name of this file (logmaster.py).  Initialized below.
+
+def dummyFunc(): pass
+    # This function is being defined solely as a hack that allows us
+    # to find out our filename even when this module is frozen.
+
+if hasattr(sys, 'frozen'):
+    _srcfile = dummyFunc.__code__.co_filename
 elif __file__[-4:].lower() in ['.pyc', '.pyo']:
     _srcfile = __file__[:-4] + '.py'
 else:
@@ -509,274 +792,821 @@ else:
 _srcfile = os.path.normcase(_srcfile)
 
 
-    #==================================================================
-    #   Class definitions.                          [code section]
-    #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    #|==========================================================================
+    #|
+    #|      Class definitions.                                  [code section]
+    #|
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        #==============================================================
-        #   Exception classes.                      [code subsection]
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #|======================================================================
+        #|
+        #|      Exception classes.                             [code subsection]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-            #==========================================================
-            #   LoggedException             [public exception class]
-            #
-            #       A LoggedException is an exception such that,
-            #       when it is first constructed, a log message
-            #       of an appropriate level is automatically
-            #       generated and sent to a specified logger.
-            #
-            #       The constructor for a LoggedException takes
-            #       a logger and a message.  The logging level for
-            #       the message is determined by the subclass of
-            #       LoggedException that is used (see subclasses
-            #       below).
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|------------------------------------------------------------------
+            #|
+            #|      LoggedException                     [public exception class]
+            #|
+            #|          A LoggedException is an exception such that,
+            #|          when it is first constructed, a log message of
+            #|          an appropriate level is automatically
+            #|          generated and sent to a specified logger.
+            #|
+            #|          The constructor for a LoggedException takes a
+            #|          logger and a message.  The logging level for
+            #|          the message is determined by the subclass of
+            #|          LoggedException that is used (see subclasses
+            #|          defined below).
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    # IMPLEMENTATION NODE: The following class is intended to be used as an
+    # abstract base class, so really, we should set its meta-class to abc.
 
 class LoggedException(Exception):
+    
+    """A LoggedException is an exception such that, when it is first
+        constructed, a log message of an appropriate level is automatically
+        generated and sent to a specified logger.
+        
+        The constructor for a LoggedException takes a logger and a message.
+        The logging level for the message is determined by the subclass of
+        LoggedException that is used (see subclasses defined below).
 
-        #=========================================================
-        #   .defLogger                          [class variable]
-        #
-        #       The default logger to use for exceptions of a
-        #       given (subclass) type.  NOTE: This value is
-        #       just a placeholder for this attribute in this
-        #       abstract base class.  All concrete derived
-        #       classes (ones for which a constructor will
-        #       actually be called) MUST override this class
-        #       variable, or it will cause an exception to be
-        #       thrown (before the one you want gets thrown)!
-        #
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            CLASS VARIABLES:
+            ----------------
+
+                LoggedException.defLogger:logging.Logger        [class variable]
+        
+                        The default logger to use for exceptions of a
+                        given (subclass) type.  NOTE: This value is
+                        just a placeholder for this attribute in this
+                        abstract base class.  All concrete derived
+                        classes (ones for which a constructor will
+                        actually be called) MUST override this class
+                        variable, or it will cause an exception to be
+                        thrown (before the one you want gets thrown)!
+            
+                LoggedException.loglevel:int                    [class variable]
+        
+                        The logging level of the exception.  We set
+                        its default value to logging.NOTSET as a
+                        placeholder in this abstract class.  Subclasses
+                        should override this value with the value that
+                        is appropriate for their purposes.  This is
+                        done in the subclasses defined below.
+
+        """
+
+        #|======================================================================
+        #|  Class variables.                                [class code section]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|----------------------------------------------------------------------
+            #|
+            #|      LoggedException.defLogger:logging.Logger    [class variable]
+            #|
+            #|              The default logger to use for exceptions of a
+            #|              given (subclass) type.  NOTE: This value is
+            #|              just a placeholder for this attribute in this
+            #|              abstract base class.  All concrete derived
+            #|              classes (ones for which a constructor will
+            #|              actually be called) MUST override this class
+            #|              variable, or it will cause an exception to be
+            #|              thrown (before the one you want gets thrown)!
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     defLogger = None    # Default logger.  None defined for this base class.
 
-        #---------------------------------------------------------
-        #   .loglevel                            [class variable]
-        #
-        #       The logging level of the exception.  We set
-        #       its default value to NOTSET as a placeholder
-        #       in this abstract class.  Subclasses should
-        #       override this value with the value that is
-        #       appropriate for their purposes.  This is done
-        #       in the subclasses defined below.
-        #
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|----------------------------------------------------------------------
+            #|
+            #|      LoggedException.loglevel:int                [class variable]
+            #|
+            #|          The logging level of the exception.  We set
+            #|          its default value to logging.NOTSET as a
+            #|          placeholder in this abstract class.  Subclasses
+            #|          should override this value with the value that is
+            #|          appropriate for their purposes.  This is done in
+            #|          the subclasses defined below.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     loglevel = logging.NOTSET
 
-        #----------------------------------------------------------
-        #   .__init__()                 [special instance method]
-        #
-        #       The instance initializer for a LoggedException
-        #       creates a default log message for the exception
-        #       (if none is provided), and then goes ahead and
-        #       logs the occurrence of the exception to the
-        #       provided logger.  Note that this initial logging
-        #       of the exception will generally occur *before*
-        #       the exception is actually raised, in the raising
-        #       routine wherever the exception's constructor is
-        #       called.  The entity that catches the exception
-        #       may of course do additional logging, such as a
-        #       logger.exception() call which will also display
-        #       a traceback.  We avoid printing tracebacks here,
-        #       since that may not be needed for exceptions that
-        #       are caught and handled appropriately somewhere
-        #       in the calling (i.e., catching) code.
-        #
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        #|======================================================================
+        #|
+        #|      Special instance methods.                   [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            
+            #|------------------------------------------------------------------
+            #|
+            #|      LoggedException.__init__()      [special instance method]
+            #|
+            #|          The instance initializer for a LoggedException
+            #|          creates a default log message for the exception
+            #|          (if none is provided), and then goes ahead and
+            #|          logs the occurrence of the exception to the
+            #|          provided logger.  Note that this initial logging
+            #|          of the exception will generally occur *before*
+            #|          the exception is actually raised, in the raising
+            #|          routine wherever the exception's constructor is
+            #|          called.  The entity that catches the exception
+            #|          may of course do additional logging, such as a
+            #|          logger.exception() call which will also display
+            #|          a traceback.  We avoid printing tracebacks here,
+            #|          since that may not be needed for exceptions that
+            #|          are caught and handled appropriately somewhere
+            #|          in the surrounding (i.e., catching) code.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     
-    def __init__(inst, msg:str=None, level=None, logger:logging.Logger=None):
+    def __init__(inst, msg:str=None, level:int=None, logger:logging.Logger=None):
+        
+        """The instance initializer for a LoggedException creates a
+           default log message for the exception (if none is
+           provided), and then goes ahead and logs the occurrence of
+           the exception to the provided logger.  Note that this
+           initial logging of the exception will generally occur
+           *before* the exception is actually raised, in the raising
+           routine wherever the exception's constructor is called.
+           The entity that catches the exception may of course do
+           additional logging, such as a logger.exception() call which
+           will also display a traceback.  We avoid printing
+           tracebacks here, since that may not be needed for
+           exceptions that are caught and handled appropriately
+           somewhere in the surrounding (i.e., catching) code."""
+
+            #--------------------------------------------------------
+            # If no logger was specified in the constructor call, use
+            # the instance's class's default logger.
+        
         if logger==None:
             logger = inst.defLogger  # This should get the value of this
                 # class variable for the object's actual class (not from
                 # this abstract base class LoggedException).
+
+            #----------------------------------------------------------------
+            # Do some error handling in case no default logger was specified.
+            # (Or, should we just use our own private _moduleLogger in
+            # such a case?)
+                
         if logger==None:
-            moduleLogger.error("LoggedException.__init__(): No default logger "
-                               "provided for this class of LoggedException.")
+            errmsg = ("LoggedException.__init__(): No default logger " +
+                      "was provided for this class of LoggedException.")
+            _moduleLogger.error(errmsg)
             traceback.print_stack()  # goes to sys.stderr
-            raise TypeError("LoggedException.__init__(): No default logger "
-                               "provided for this class of LoggedException.")
+            raise TypeError(errmsg)
+
+            #-----------------------------------------------------------
+            # If no logging level was specified in the constructor call,
+            # use the instance's class's default logging level.
+            
         if level==None:
             level = inst.loglevel   # Get derived class's log level.
+
+            #----------------------------------------------------------------
+            # Do some error handling in case no logging level was specified.
+                
+        if level==None:
+            errmsg = ("LoggedException.__init__(): No default log level " +
+                      "was provided for this class of LoggedException.")
+            _moduleLogger.error(errmsg)
+            traceback.print_stack()  # goes to sys.stderr
+            raise TypeError(errmsg)
+
+            #-----------------------------------------------------------
+            # If no log message was provided in the constructor call,
+            # create a default message appropriate to our logging level.
+            
         if msg==None:
             msg = ('Creating a LoggedException at level %s.' %
                    logging._levelNames[level])
+
+            #---------------------------------------
+            # Finally, actually log the log message.
+            
+# [The following low-level diagnostic for debugging is commented out.]
 #        print("About to log message [%s] at level %s." % (msg, str(level)),
 #              file=sys.stdout)
+
         logger.log(level, msg)
+        
+    #__/ End LoggedException.__init__().
  
 # End class LoggedException
 
-            #==========================================================
-            #   InfoException               [public exception class]
-            #
-            #       An InfoException, when it is raised at all, is
-            #       simply a way to indicate in which of several
-            #       normal ways a routine is returning, in cases
-            #       where this information is worth reporting in
-            #       the log file at INFO level.  An InfoException
-            #       should be immediately caught by the caller &
-            #       not re-raised.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|      InfoException                       [public exception class]
+            #|
+            #|          An InfoException, when it is raised at all, is
+            #|          simply a way to indicate in which of several
+            #|          normal ways a routine is returning, in cases
+            #|          where this information is worth reporting in
+            #|          the log file at INFO level.  An InfoException
+            #|          should be immediately caught by the caller &
+            #|          not re-raised.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class InfoException(LoggedException):
+
+    """An InfoException, when it is raised at all, is simply a way to
+       indicate in which of several normal ways a routine is
+       returning, in cases where this information is worth reporting
+       in the log file at INFO level.  An InfoException should be
+       immediately caught by the caller & not re-raised.
+
+            CLASS VARIABLES:
+            ----------------
+
+                InfoException.loglevel:int          [class variable]
+
+                    The default logging level of an InfoException
+                    is of course logging.INFO.  This overrides the
+                    default value of logging.NOTSET that otherwise
+                    would have been inherited from LoggedException."""
+    
+        #|======================================================================
+        #|  Class variables.                                [class code section]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|      InfoException.loglevel:int                  [class variable]
+            #|
+            #|          The default logging level of an InfoException
+            #|          is of course logging.INFO.  This overrides the
+            #|          default value of logging.NOTSET that otherwise
+            #|          would have been inherited from LoggedException.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    
     loglevel = logging.INFO
-# End class InfoException
-
-            #==========================================================
-            #   ExitException               [public exception class]
-            #
-            #       An ExitException is like an InfoException in
-            #       that it is reported at INFO level; however, it
-            #       is intended to cause the entire thread in which
-            #       it takes place to terminate.  (Use FatalException
-            #       to cause the entire application PROCESS to
-            #       terminate.)
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-class ExitException(LoggedException):
-    loglevel = logging.INFO
-# End class ExitException
+    
+#__/ End class InfoException
 
 
-            #==========================================================
-            #   WarningException            [public exception class]
-            #
-            #       These exceptions, when they are raised at all,
-            #       are simply used as a way to exit early from a
-            #       routine with some indication as why we are
-            #       exiting early, due to some harmless but unex-
-            #       pected circumstance that is worth reporting at
-            #       WARNING level, as a sort of alternate return
-            #       code; they should be caught (and not re-raised)
-            #       at a high level, before they have a chance to
-            #       interfere significantly with overall program
-            #       flow.  Basically, for any routine that might
-            #       throw a WarningException, all callers of that
-            #       routine should handle it.
-            #
-            #       Creating a WarningException automatically generates
-            #       log message at WARNING level.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|------------------------------------------------------------------
+            #|
+            #|      ExitException                       [public exception class]
+            #|
+            #|          An ExitException is like an InfoException in
+            #|          that it is reported at INFO level; however, it
+            #|          is intended to cause the entire thread in which
+            #|          it takes place to terminate.  (Use FatalException
+            #|          to cause the entire application PROCESS to
+            #|          terminate.)
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    
+class ExitException(InfoException):
+
+    """An ExitException is like an InfoException in that it is
+       reported at INFO level; however, it is intended to cause
+       the entire thread in which it takes place to terminate.
+       (Use FatalException to cause the entire application
+       PROCESS to terminate.)"""
+    
+    pass    # No differences from InfoException class except connotation.
+
+#__/ End class ExitException
+
+
+            #|------------------------------------------------------------------
+            #|
+            #|      WarningException                    [public exception class]
+            #|
+            #|          These exceptions, when they are raised at all,
+            #|          are simply used as a way to exit early from a
+            #|          routine with some indication as why we are
+            #|          exiting early, due to some harmless but unex-
+            #|          pected circumstance that is worth reporting at
+            #|          WARNING level, as a sort of alternate return
+            #|          code; they should be caught (and not re-raised)
+            #|          at a high level, before they have a chance to
+            #|          interfere significantly with overall program
+            #|          flow.  Basically, for any routine that might
+            #|          throw a WarningException, all callers of that
+            #|          routine should handle it.
+            #|
+            #|          Creating a WarningException automatically
+            #|          generates a log message at WARNING level.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class WarningException(LoggedException):
-     loglevel = logging.WARNING
-# End class WarningException.
+    
+    """A WarningException, when it is raised at all, is simply used as
+       a way to exit early from a routine with some indication as why
+       we are exiting early, due to some harmless but unexpected
+       circumstance that is worth reporting at WARNING level, as a
+       sort of alternate return code; they should be caught (and not
+       re-raised) at a high level, before they have a chance to
+       interfere significantly with overall program flow.  Basically,
+       for any routine that might throw a WarningException, all
+       callers of that routine should handle it.
+            Creating a WarningException automatically generates a log
+       message at WARNING level.
+
+            CLASS VARIABLES:
+            ----------------
+
+                WarningException.loglevel:int                   [class variable]
+
+                    The default logging level of a WarningException is
+                    of course logging.WARNING.  This overrides the
+                    default value of logging.NOTSET that otherwise
+                    would have been inherited from LoggedException."""
+    
+        #|======================================================================
+        #|  Class variables.                                [class code section]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|      WarningException.loglevel:int               [class variable]
+            #|
+            #|          The default logging level of a WarningException
+            #|          is of course logging.WARNING.  This overrides the
+            #|          default value of logging.NOTSET that otherwise
+            #|          would have been inherited from LoggedException.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    
+    loglevel = logging.WARNING
+    
+#__/ End class WarningException.
 
 
-            #=========================================================
-            #   ErrorException              [public exception class]
-            #
-            #       An ErrorException indicates a fairly serious
-            #       problem, one that might prevent us from doing
-            #       (or doing properly) a fairly signifcant task.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|------------------------------------------------------------------
+            #|
+            #|      WrongThreadWarning                  [public exception class]
+            #|
+            #|          This subclass of WarningException connotes
+            #|          that a method that was intended to be called
+            #|          only from within a specific thread is being
+            #|          called from some other thread, instead.  In
+            #|          such a case, the method will generally just
+            #|          throw a WrongThreadWarning exception instead
+            #|          of returning normally, and will have no side
+            #|          effects.  This exception is designated to be
+            #|          at warning level, b/c it may be safely caught
+            #|          and ignored given that the method throwing it
+            #|          will have had no side effects.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+class WrongThreadWarning(WarningException):
+
+    """This subclass of WarningException connotes that a method that
+       was intended to be called only from within a specific thread is
+       being called from some other thread, instead.  In such a case,
+       the method may just throw a WrongThreadWarning exception
+       instead of returning normally, and in such a case the method
+       should have had no side effects.  This exception is designated
+       to be logged at warning level, b/c it may be safely caught and
+       ignored, given that the method throwing it will have had no
+       side effects."""
+    
+    pass
+#__/ End class WrongThreadWarning.
+
+
+            #|------------------------------------------------------------------
+            #|
+            #|      ErrorException                      [public exception class]
+            #|
+            #|          An ErrorException indicates a fairly serious
+            #|          problem, one that might prevent us from doing
+            #|          (or doing properly) a fairly signifcant task.
+            #|          A caller may or may not be able to handle it.
+            #|          Creating an ErrorException automatically
+            #|          generates a log message at ERROR level.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class ErrorException(LoggedException):
+
+    """An ErrorException indicates a fairly serious problem, one that
+       might prevent us from doing (or doing properly) a fairly
+       signifcant task.  A caller may or may not be able to handle it.
+       Creating an ErrorException automatically generates a log
+       message at ERROR level.
+
+            CLASS VARIABLES:
+            ----------------
+
+                ErrorException.loglevel:int                     [class variable]
+
+                    The default logging level of an ErrorException
+                    is of course logging.ERROR.  This overrides the
+                    default value of logging.NOTSET that otherwise
+                    would have been inherited from LoggedException."""
+    
+        #|======================================================================
+        #|  Class variables.                                [class code section]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|      ErrorException.loglevel:int                 [class variable]
+            #|
+            #|          The default logging level of an ErrorException
+            #|          is of course logging.ERROR.  This overrides the
+            #|          default value of logging.NOTSET that otherwise
+            #|          would have been inherited from LoggedException.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
     loglevel = logging.ERROR
-# End class ErrorException.
+    
+#__/ End class ErrorException.
 
 
-            #=========================================================
-            #   CriticalException           [public exception class]
-            #
-            #       A CriticalException indicates a very serious
-            #       problem, one that might prevent us from doing
-            #       a very important task.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|------------------------------------------------------------------
+            #|
+            #|      CriticalException                   [public exception class]
+            #|
+            #|          A CriticalException indicates a very serious
+            #|          problem, one that will probably cause us to
+            #|          fail to accomplish some very important task.
+            #|          It may be difficult for callers to recover
+            #|          gracefully, if at all.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-class CriticalException(LoggedException):
+class CriticalException(ErrorException):
+
+    """A CriticalException indicates a very serious problem, one that
+       will probably cause us to fail to accomplish some very
+       important task.  It may be difficult for callers to recover
+       gracefully, if at all.
+
+            CLASS VARIABLES:
+            ----------------
+
+                CriticalException.loglevel:int                  [class variable]
+
+                    The default logging level of a CriticalException
+                    is of course logging.CRITICAL.  This overrides the
+                    default value of logging.ERROR that otherwise
+                    would have been inherited from ErrorException."""
+    
+        #|======================================================================
+        #|  Class variables.                                [class code section]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|      CriticalException.loglevel:int              [class variable]
+            #|
+            #|          The default logging level of a CriticalException
+            #|          is of course logging.CRITICAL.  This overrides the
+            #|          default value of logging.NOTSET that otherwise
+            #|          would have been inherited from LoggedException.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
     loglevel = logging.CRITICAL
-# End class CriticalException
+    
+#__/ End class CriticalException
 
 
-            #==========================================================
-            #   FatalException              [public exception class]
-            #
-            #       Like a CriticalException, but even worse.
-            #       When this exception is raised, it generally
-            #       causes the application to exit.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            #|------------------------------------------------------------------
+            #|
+            #|      FatalException                      [public exception class]
+            #|
+            #|          Like a CriticalException, but even worse.
+            #|          When this exception is raised, it generally
+            #|          causes the application to exit, with or
+            #|          without a stack backtrace (depending on how
+            #|          and whether it is handled).
+            #|
+            #|              Fatal exceptions are actually logged at
+            #|          the same level as critical exceptions; this
+            #|          class designation is really just documentation
+            #|          to the programmer to tell them to expect to be
+            #|          unable to recover from this kind of error other
+            #|          than by exiting.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-class FatalException(LoggedException):
+class FatalException(CriticalException):
+
+    """A FatalException is a kind of CriticalException, but even worse.
+       When this type of exception is raised, it generally causes the
+       application to exit, with or without a stack backtrace
+       (depending on how and whether it is handled).
+
+           Fatal exceptions are actually logged at the same level as
+        critical exceptions; this class designation is really just
+        documentation to the programmer to tell them to expect to be
+        unable to recover from this kind of critical error other than
+        by exiting.
+
+            CLASS VARIABLES:
+            ----------------
+
+                FatalException.loglevel:int                  [class variable]
+
+                    The default logging level of a CriticalException
+                    is of course logging.FATAL.  This overrides the
+                    default value of logging.NOTSET that otherwise
+                    would have been inherited from LoggedException."""
+    
+        #|======================================================================
+        #|
+        #|      Class variables.                            [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|      FatalException.loglevel:int                 [class variable]
+            #|
+            #|          The default logging level of a FatalException
+            #|          is of course logging.FATAL.  This overrides the
+            #|          default value of logging.NOTSET that otherwise
+            #|          would have been inherited from LoggedException.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
     loglevel = logging.FATAL    # This is actually the same as CRITICAL.
-# End class FatalException
+    
+#__/ End class FatalException
             
-        #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        #   End of exception classes.
-        #==============================================================
+        #|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        #|   End of exception classes.
+        #|======================================================================
+
+        #|======================================================================
+        #|
+        #|   Normal public classes.                         [code subsection]
+        #|
+        #|      In this code section, we define public classes other
+        #|      than exception classes.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|  CleanFormatter(logging.Formatter)               [public class]
+            #|                                                  
+            #|      This customized subclass of logging.Formatter
+            #|      ensures that values to be formatted will fit in
+            #|      the designated field widths (defined by the
+            #|      logmaster.*_FIELDWIDTH globals).  It also includes
+            #|      support for new fields <component> and
+            #|      <threadrole> which are helpful when debugging
+            #|      complex, multithreaded applications.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+class CleanFormatter(logging.Formatter):
+    
+    """This customized subclass of logging.Formatter ensures that
+        values to be formatted will fit in the designated field
+        widths (defined by the logmaster.*_FIELDWIDTH globals).
+        It also includes support for new fields <component> and
+        <threadrole> which are helpful when debugging complex,
+        multithreaded applications."""
+
+    #[This is unnecessary since it's inherited anyway.]
+    #def __init__(self, fmt=None, datefmt=None, style='%'):
+    #    logging.Formatter.__init__(self, fmt, datefmt, style)
+        
+    def format(self, record):
+        """This overrides the default .format() method inherited
+           by the logging.Formatter class, to first truncate string
+           fields of the log record to the desigated field width."""
+
+            # Shorten all the string fields of the record as necessary to fit within the designated field widths.
+        
+        if hasattr(record,'name'):          record.name         = _limitLength(record.name,         NAME_FIELDWIDTH)
+        if hasattr(record,'threadName'):    record.threadName   = _limitLength(record.threadName,   THREADNAME_FIELDWIDTH)
+        if hasattr(record,'component'):     record.component    = _limitLength(record.component,    COMPONENT_FIELDWIDTH)
+        if hasattr(record,'threadRole'):    record.threadrole   = _limitLength(record.threadrole,   THREADROLE_FIELDWIDTH)
+        if hasattr(record,'module'):        record.module       = _limitLength(record.module,       MODULE_FIELDWIDTH)
+        if hasattr(record,'funcName'):      record.funcName     = _limitLength(record.funcName+'()',FUNCNAME_FIELDWIDTH)
+        if hasattr(record,'levelname'):     record.levelname    = _limitLength(record.levelname,    LEVELNAME_FIELDWIDTH)
+        
+        return  logging.Formatter.format(self, record)
+    
+    #__/ End method CleanFormatter.format().
+    
+#__/ End class CleanFormatter.
 
 
-        #==============================================================
-        #   LoggingContext                      [module public class]
-        #
-        #       An object of this thread-local class serves as a
-        #       dictionary on which each thread can store & track
-        #       context information which will be passed to the
-        #       LoggerAdapter for any given module, enabling the
-        #       log records to be augmented with extra information
-        #       printed by the top-level COSMICi format string.
-        #
-        #       A single global LoggingContext object tracks
-        #       context information throughout the application -
-        #       although its attributes have different values in
-        #       different threads.
-        #
-        #       Each time a new thread is created, the attributes
-        #       of the global loggingContext should be updated
-        #       to reflect the context information specific to
-        #       that thread.  Some of this is handled automatically
-        #       by LoggingContext's __init__ method.
-        #
-        #       In the scope of the COSMICi application, important
-        #       pieces of context information include:
-        #
-        #           threadname = The name of the current thread,
-        #               helpful for debugging threading problems.
-        #
-        #           threadrole = The role for which the current
-        #               thread was created. E.g. "MainSock.listener",
-        #               "Node1Main.reader", "Node1Main.consDriver",
-        #               "guibot", and so forth.
-        #
-        #           component = The system component that the thread
-        #               is associated with, e.g., "server", "node #0",
-        #               "node #1", etc.
-        #
-        #           nodenum = The numeric ID of the sensor node
-        #               (if any) associated with this action.
-        #               None if no sensor node is related.
-        #
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #|----------------------------------------------------------------------
+        #|
+        #|  LoggingContext(threading.local)             [module public class]
+        #|
+        #|      An object of this thread-local class serves as a
+        #|      dictionary on which each thread can store & track
+        #|      context information which will be passed to the
+        #|      LoggerAdapter for any given module, enabling the log
+        #|      records to be augmented with extra information printed
+        #|      in the top-level log line format string.
+        #|
+        #|      A single global LoggingContext object tracks context
+        #|      information throughout the application - although its
+        #|      attributes have different values in different threads.
+        #|
+        #|      Each time a new thread is created or a thread changes
+        #|      its role, the attributes of the global loggingContext
+        #|      should be updated to reflect the context information
+        #|      specific to that thread.  Some of this is handled
+        #|      automatically by LoggingContext's .__init__() method.
+        #|
+        #|      In the scope of typical user applications, important
+        #|      pieces of context information may include:
+        #|
+        #|          .threadname
+        #|
+        #|              The name of the current thread, helpful for
+        #|              debugging threading problems.
+        #|
+        #|          .threadrole
+        #|          
+        #|              The role that the current thread is engaged
+        #|              in. E.g. "startup", "Node1Main.consDriver",
+        #|              "guibot", and so forth.
+        #|
+        #|          .component
+        #|
+        #|              The system component that the thread is
+        #|              associated with, e.g., "server", "node #0",
+        #|              "node #1", etc.
+        #|
+        #|          .nodenum
+        #|          
+        #|              The numeric ID of the network node (if any)
+        #|              associated with this action.  None if no
+        #|              network node is related.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class LoggingContext(threading.local):
 
-            #--------------------------------------------------------------
-            #   .__init__()                         [class special method]
-            #
-            #       The initializer of the global loggingContext will
-            #       get called once for each thread, when the global
-            #       is first accessed from within that thread.  We
-            #       simply initialize its members based on thread
-            #       attributes.  Every thread that wants to use the
-            #       logmaster module for logging should be a ThreadActor,
-            #       or at least have a .role attribute.  The value to
-            #       which the "component" dictionary key is assigned
-            #       should be changed to "node0", "node1", etc., for
-            #       errors being reported on behalf of specific nodes.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    """An object of this thread-local class serves as a dictionary on
+       which each thread can store & track context information which
+       will be passed to the LoggerAdapter for any given module,
+       enabling the log records to be augmented with extra thread-
+       specific information printed in the top-level log line format
+       string.
+
+       A single global LoggingContext object tracks context
+       information throughout the application - although its
+       attributes have different values in different threads.
+    
+       Each time a new thread is created or a thread changes its role,
+       the attributes of the global loggingContext should be updated
+       to reflect the context information specific to that thread.
+       Some of this is handled automatically by LoggingContext's
+       .__init__() method.
+    
+       In the scope of typical user applications, important
+       pieces of context information attached to the LoggingContext
+       may include:
+    
+           .threadname
+           
+                The name of the current thread, helpful for debugging
+                threading problems.
+        
+           .threadrole
+                  
+                The role that the current thread is engaged in. E.g.
+                "startup", "Node1Main.consDriver", "guibot", and so
+                forth.
+        
+           .component
+
+                The system component that the thread is associated
+                with, e.g., "server", "node #0", "node #1", etc.
+        
+           .nodenum
+        
+                The numeric ID of the network node (if any) associated
+                with this action.  None if no network node is related.
+
+
+        CLASS VARIABLES:
+        ----------------
+
+            LoggingContext.defComp:str                          [class variable]
+
+                This class variable specifies the default value of the
+                LoggingContext's .component attribute, if it is not
+                otherwise specified.  This is just a placeholder value,
+                "(unsetComp)".
+
+            LoggingContext.defRole:str                          [class variable]
+
+                This class variable specifies the default value of the
+                LoggingContext's .threadrole attribute, if it is not
+                otherwise specified.  This is just a placeholder value,
+                "(unsetRole)".
+
+
+        PUBLIC PROPERTIES:
+        ------------------
+
+            loggingContext.threadrole:str                   [public property]
+
+                The name of the role that the current thread is
+                currently playing.
+                
+
+            loggingContext.component:str                    [public property]
+
+                The name of the software or hardware component of the
+                overall system that the current thread is currently
+                implementing, modeling, or serving."""
+
+        #|======================================================================
+        #|
+        #|      Class attributes.                           [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     defComp = "(unsetComp)"    # By default, we don't know which system component this thread is being created to manage.
     defRole = "(unsetRole)"    # By default, we don't know what role this thread is supposed to be playing.
-    
-    def __init__(inst, myrole=None, who=None, **kwargs):
 
+
+        #|----------------------------------------------------------------------
+        #|
+        #|      Private instance attributes.        [class code documentation]
+        #|
+        #|          The following attributes of instances of this class
+        #|          are not intended to be directly accessed by external
+        #|          users of this class.
+        #|
+        #|              ._dict                      [private instance attribute]
+        #|
+        #|                  A dictionary containing the attribute-value
+        #|                  mapping for this LoggingContext object.
+        #|
+        #|----------------------------------------------------------------------
+
+    
+        #|======================================================================
+        #|
+        #|      Special instance methods.                   [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            
+            #|------------------------------------------------------------------
+            #|
+            #|  LoggingContext.__init__()           [special instance method]
+            #|
+            #|      The initializer of the global loggingContext will
+            #|      get called once for each thread, when the global
+            #|      is first accessed from within that thread.  We
+            #|      simply initialize its members based on thread
+            #|      attributes.  Every thread that wants to use the
+            #|      logmaster module for logging should be an instance
+            #|      of the logmaster.ThreadActor class, or of a
+            #|      subclass of it, or at least have a .role attribute.
+            #|      The value to which the "component" dictionary key
+            #|      is assigned can be changed to "node0", "node1", etc.,
+            #|      for errors being reported on behalf of specific
+            #|      network nodes.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    def __init__(inst, myrole=None, forWhom=None, **kwargs):
+
+        """The initializer of the global loggingContext will get
+           called once for each thread, when the global is first
+           accessed from within that thread.  We simply initialize its
+           members based on thread attributes.  Every thread that
+           wants to use the logmaster module for logging should be an
+           instance of the logmaster.ThreadActor class, or of a
+           subclass of it, or at least have a .role attribute.  The
+           value to which the "component" dictionary key is assigned
+           can be changed to "node0", "node1", etc., for errors being
+           reported on behalf of specific network nodes.
+
+               Initializer arguments:
+               ----------------------
+
+                   myrole   - Initial value of .threadrole attribute.
+
+                   forWhom  - Initial value of .component attribute.
+
+                   **kwargs - Any additional keyword arguments to be
+                               passed to threading.local.__init__()."""
+
+            #-------------------------------------------------------
             # First, do the default initialization for thread.local
             # objects, so that subsequent operations on this object
             # in this initializer will treat it as thread-local.
@@ -784,220 +1614,639 @@ class LoggingContext(threading.local):
         threading.local.__init__(inst, **kwargs)
             #\_ Do the default thread.local initialization.
 
-            # Initialize local copies of the role and component from args or defaults.
+            #------------------------------------------
+            # Initialize local copies of the component
+            # and role from arguments or defaults.
 
-        if (who == None):       who = inst.defComp
-        if (myrole == None):    myrole = inst.defRole
+        if (forWhom == None):   forWhom = inst.defComp
+        if (myrole  == None):   myrole  = inst.defRole
 
+            #-----------------------------------
             # Figure out which thread we're in.
+            
         thread = threading.current_thread()
 
+#[Commented-out diagnostic for low-level debugging.]
 #        print("Initializing logging context in thread %s." % thread,
 #              file=sys.stderr)
 
+            #----------------------------------------------------------
             # Set up the loggingContext's dictionary of context items.
             
-        inst.dict = {}  # Start with empty dictionary.
+        inst._dict = {}  # Start with empty dictionary.
 
-            # If thread has no role/component attributes defined, set them based on our local values.
+            #---------------------------------------------------------
+            # If the thread we're in has no role/component attributes
+            # defined, go ahead set them based on our local values.
 
-        if not hasattr(thread, 'role'):         thread.role = myrole
-        if not hasattr(thread, 'component'):    thread.component = who
+        if not hasattr(thread, 'role'):         thread.role      = myrole
+        if not hasattr(thread, 'component'):    thread.component = forWhom
 
-            # These next two lines use the property setters defined after
-            # the current method.
+            #--------------------------------------------------------
+            # Set this logging context's threadrole and component
+            # attributes.  These next two lines use the property
+            # setters defined after the current method.
             
         inst.threadrole = thread.role      # Set the role of this thread.
         inst.component = thread.component  # What system component does it involve?
 
-#        print("The dictionary is: [%s]." % inst.dict, file=sys.stderr)
+#[Commented-out diagnostic for low-level debugging.]
+#        print("The dictionary is: [%s]." % inst._dict, file=sys.stderr)
 
-    # End method __init__()
+    #__/ End method LoggingContext.__init__().
 
-            #-------------------------------------------------------------
-            #   .threadrole                    [instance public property]
-            #
-            #       This property is used to keep track of the current
-            #       thread's current role string within the dictionary
-            #       structure required for logging context objects.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        #|======================================================================
+        #|
+        #|      Instance public properties.                 [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|  inst.threadrole                     [instance public property]
+            #|
+            #|      This property is used to keep track of the current
+            #|      thread's current role string within the dictionary
+            #|      structure provided by the LoggingContext object.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     @property
-    def threadrole(inst): return inst.dict['threadrole']
+    def threadrole(inst):
+        
+        """The name of the role that the current thread is currently
+           playing."""
+        
+        return inst._dict['threadrole']
 
     @threadrole.setter
     def threadrole(inst, role:str):
-        inst.dict['threadrole'] = role
+        inst._dict['threadrole'] = role
 
-            #-------------------------------------------------------------
-            #   .component                    [instance public property]
-            #
-            #       This property is used to keep track of the current
-            #       thread's component string within a dictionary
-            #       structure, as logging context objects must have.
-            #
-            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|  inst.component                      [instance public property]
+            #|
+            #|      This property is used to keep track of the current
+            #|      thread's component string within the dictionary
+            #|      structure provided by the LoggingContext object.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     @property
-    def component(inst): return inst.dict['component']
+    def component(inst):
+        
+        """The name of the software or hardware component of the
+           overall system that the current thread is currently
+           implementing, modeling, or serving."""
+        
+        return inst._dict['component']
 
     @component.setter
-    def component(inst, who:str):
-        inst.dict['component'] = who
+    def component(inst, forWhom:str):
+        inst._dict['component'] = forWhom
 
-            # Pass these methods to support "dictionary-like" behavior directly
-            # to the underlying dictionary.
 
-    def iter(inst):         # If someone asks for an interator on us,
-        inst.dict.iter()        # give them an iterator on our dictionary.
+        #|======================================================================
+        #|
+        #|      Duck-typing support.                        [class code section]
+        #|
+        #|          The following definitions allow instances of the
+        #|          present class to behave like instances of other
+        #|          types that we are not formally a subclass of.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        
+            #|------------------------------------------------------------------
+            #|
+            #|  Dictionary behavior.                        [class duck type]
+            #|
+            #|      The following code allows LoggingContext objects
+            #|      to be used as if they were dictionary objects.  We
+            #|      define these methods to support "dictionary-like"
+            #|      behavior on the part of instances of the
+            #|      LoggingContext class by dispatching them directly
+            #|      to the underlying dictionary.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-#    def keys(): 
+    #[I think the following is not necessary since we define .__iter__() below.]
+    #def iter(inst):         # If someone asks for an interator on us,
+    #    inst._dict.iter()   #   give them an iterator on our dictionary.
 
-    def __getitem__(inst, name):                # __getitem__ on us goes to
-        return inst.dict.__getitem__(name)      #   our dictionary instead.
+    def __getitem__(inst, name):            # .__getitem__() on us goes to
+        return inst._dict.__getitem__(name) #   our dictionary instead.
 
-    def __iter__(inst):                         # __iter__ on us goes to
-        return inst.dict.__iter__()             #   our dictionary instead.
+    def __iter__(inst):                     # .__iter__() on us goes to
+        return inst._dict.__iter__()        #   our dictionary instead.
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# End class LoggingContext
-#===========================
+#__/ End class LoggingContext
 
-        #==============================================================
-        #   ThreadActor                         [module public class]
-        #
-        #       This subclass of Thread (which can be used as a
-        #       mixin class) simply adds an extra initialization
-        #       keyword argument role=<str>, which simply sets
-        #       the .role attribute of the thread, as separate
-        #       from the .name argument (this lets us keep the
-        #       .name argument as an automatic sequence counter,
-        #       Thread-1, Thread-2, etc.).
-        #
-        #       The 'role' attribute is used by loggingContext
-        #       when it gets initialized later on, when the thread
-        #       uses it.  The purpose of that is so that the thread
-        #       role is available as a field that can be displayed
-        #       as specified in the logging format string.
-        #
-        #       Oh, and in addition to 'role', there's another one
-        #       called 'component'.  The idea of which is to identify
-        #       which system component a given thread is currently
-        #       working on behalf of.
-        #
-        #       This class is not itself dependent on the rest of
-        #       the logmaster module, and so it should probably be
-        #       moved out to its own module.
-        #
-        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        #|----------------------------------------------------------------------
+        #|
+        #|  ThreadActor                                 [module public class]
+        #|
+        #|      This subclass of Thread (which can be used as a
+        #|      mixin class) adds an extra initialization keyword
+        #|      argument role=<str>, which sets the .role attribute of
+        #|      the thread, as separate from the .name argument (this
+        #|      lets us keep the .name argument as an automatic
+        #|      sequence counter, Thread-1, Thread-2, etc.).
+        #|
+        #|      The 'role' attribute is used by the loggingContext
+        #|      when it gets initialized later on, when the thread
+        #|      uses it.  The purpose of that is so that the thread
+        #|      role is available as a field that can be displayed
+        #|      as specified in the logging format string.
+        #|
+        #|      In addition to 'role', there's another optional
+        #|      initialization keyword argument called
+        #|      'component', the idea of which is to identify which
+        #|      system component a given thread is currently working
+        #|      on behalf of.  This is used similarly to 'role.'
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
 class ThreadActor(threading.Thread):
 
-        # Default role and component for ThreadActor objects when not
-        # otherwise specified.  Subclasses should override
-        # this class variable.
+    """This subclass of threading.Thread (which can be used as a mixin
+       class) adds an extra initialization keyword argument role=<str>,
+       which sets the .role attribute of the thread, as separate from
+       the .name argument (this lets us keep the .name argument as an
+       automatic sequence counter, Thread-1, Thread-2, etc.).
+    
+       The 'role' attribute is used by the loggingContext when it gets
+       initialized later on, when the thread uses it.  The purpose of
+       that is so that the thread role is available as a field that
+       can be displayed in log lines as specified in the logging format
+       string.
+
+       In addition to 'role', there's another optional initialization
+       keyword argument called 'component', the idea of which is to
+       identify which system component a given thread is currently
+       working on behalf of.  This is used similarly to 'role.'
+
+
+            Public class attributes:
+            ------------------------
+
+                ThreadActor.defaultRole:str         [public class attribute]
+
+                    This class attribute specifies the default role
+                    for new ThreadActor objects when the role is not
+                    otherwise specified.  The default value is just
+                    a placeholder role, "actor".  Subclasses should
+                    override this value.
+                
+                ThreadActor.defaultComponent:str    [public class attribute]
+
+                    This class attribute specifies the default compo-
+                    nent name for new ThreadActor objects when the
+                    component is not otherwise specified.  The default
+                    value is just a placeholder component name,
+                    "logdapp" denoting a general logged application.
+                    Subclasses should override this value.
+
+                ThreadActor.defaultTarget:Callable  [public class attribute]
+
+                    This class attribute specifies the default method
+                    to be called when the thread is run, if not the
+                    normal .run() method.  The default value is None
+                    which specifies that .run() will be used.  Sub-
+                    classes may wish to override this value.
+
+
+            Public instance attributes:
+            ---------------------------
+
+                threadActor.role:str                [public instance attribute]
+
+                    The name of the role that this thread plays within
+                    the application.
+
+                threadActor.component:str           [public instance attribute]
+
+                    The name of the system hardware or software compo-
+                    nent that this thread is running on behalf of."""
+
+        #|======================================================================
+        #|
+        #|      Class attributes.                           [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #----------------------------------------------------------
+            # The following class attributes specify the default role
+            # and component for newly-created ThreadActor objects when
+            # they are not otherwise specified, and a default target
+            # method for the thread (if not .run()).  Subclasses may
+            # want to override these class attributes.
 
     defaultRole      = 'actor'       # The role of a ThreadActor is that it is an actor that has a role.
     defaultComponent = 'logdapp'     # By default, new ThreadActors will be operating on behalf of a "logged application".
     defaultTarget    = None          # By default, just use the class's run() method, no other target.
     
-        #-----------------------------------------
-        # Override the default Thread initializer.
+        #|======================================================================
+        #|
+        #|      Special instance methods.                   [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|  ThreadActor.__init__()              [special instance method]
+            #|
+            #|      Initialzer method for new ThreadActor instances.
+            #|      Here, we override the default threading.Thread
+            #|      initializer to process the new keyword arguments
+            #|      <role> and <component> by storing their values in
+            #|      attributes of this ThreadActor object.  Later
+            #|      these values will get picked up by the thread's
+            #|      LoggingContext for use in generating log lines.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
     def __init__(inst, *args, role:str=None, component:str=None, target=None, **kwargs):
 
-            # If the parent thread has role and component attributes,
-            # use them (instead of class defaults) as the default values
-            # for this new thread.  Unless, that is, the subclass overrides
-            # the parent class's role/component.
+        """Initialzer method for new ThreadActor instances.  Here, we
+           override the default threading.Thread initializer to first
+           process the new keyword arguments <role> and <component> by
+           storing their values in attributes of this ThreadActor
+           object.  Later these values will get picked up by the
+           thread's LoggingContext for use in generating log lines.
 
+                New keyword arguments:
+                ----------------------
+
+                    role:str                                [keyword argument]
+
+                        The name of the role that this new thread will
+                        be playing in the application.  The default
+                        value of None results in the class's default
+                        role (stored in the .defaultRole class
+                        attribute) being used instead.
+
+                    component:str                           [keyword argument]
+
+                        The name of the software or hardware component
+                        that this new thread is acting on behalf of.
+                        the default value of None results in the
+                        class's default component (stored in the
+                        .defaultComponent class attribute) being used
+                        instead."""
+
+            #---------------------------------------------------------
+            # If the parent thread has role and component attributes
+            # set, use them (instead of class defaults) as the default
+            # values for this new thread.  (Unless, of course, we're
+            # running in a subclass of ThreadActor that is overriding
+            # the parent class's role/component.)
+
+        # First, find the parent thread...
         parent = threading.current_thread()
-        if hasattr(parent, 'role') and (inst.defaultRole == 'actor'):                 inst.defaultRole = parent.role
-        if hasattr(parent, 'component') and (inst.defaultComponent == 'logdapp'):     inst.defaultComponent = parent.component
+            #\_ The current thread, which this initializer for the
+            #   newly-created thread object is being run in, will be
+            #   the parent thread of the newly-created thread.
+            
+        if inst.defaultRole == 'actor' and hasattr(parent, 'role'):     # If our subclass's default role isn't customized, and our parent thread has a role,
+            inst.defaultRole = parent.role                              #   change our instance's default role to match our parent's role.
+            
+        if inst.defaultComponent == 'logdapp' and hasattr(parent, 'component'):     # If our subclass's default role isn't customized, and our parent thread has a role,
+            inst.defaultComponent = parent.component                                #   change our instance's default component to match our parent's component.
 
-            # This allows subclasses to define their thread's role
-            # by simply overriding the .defaultRole class variable.
-            # Same for component.  And target.
+            #---------------------------------------------------------
+            # If non-None values of the keyword arguments were not
+            # provided, then instead, take their values from the class
+            # defaults.  This means that subclasses can define their
+            # thread's role by simply overriding the .defaultRole
+            # class variable.  Same for component.  And target.
 
-        if       role==None:          role = inst.defaultRole
-        if  component==None:     component = inst.defaultComponent
-        if     target==None:        target = inst.defaultTarget
+        if       role==None:         role = inst.defaultRole
+        if  component==None:    component = inst.defaultComponent
+        if     target==None:       target = inst.defaultTarget
+
+            #-------------------------------------------------------
+            # Remember the role & component in instance attributes.
             
         inst.role       = role          # Initialize our .role instance attribute.
         inst.component  = component     # Initialize our .component instance attribute.
 
-        moduleLogger.debug("ThreadActor.__init__(): Initialized ThreadActor with role [%s] for component [%s]..."
-                     % (inst.role, inst.component))
-            # - NOTE: We can't actually update the thread-local logging context at
-            #   this point, because we're not actually running within the newly-created
-            #   thread yet!
+            #---------------------------------------------------------
+            # Generate a debug-level diagnostic reflecting actor info.
+
+        _moduleLogger.debug("ThreadActor.__init__(): Initialized a new "
+                            "ThreadActor instance with role [%s] for "
+                            "component [%s]..."
+                                 % (inst.role, inst.component))
         
-            # Do default Thread initialization.
+        # NOTE: We can't actually update the thread-local logging
+        # context yet at this point, because we're not actually
+        # running within the newly-created thread yet!
+        
+            #---------------------------------------------------------
+            # Finish with default initialization for Thread instances.
+            
         threading.Thread.__init__(inst, *args, target=target, **kwargs)
-
-    # end def
-
-        # Override the default run() method to initialize the thread's logging context before doing anything else.
         
-    def run(self, *args, **kwargs):                         # Run this only from within the newly-created thread itself.
-        self.starting();                                    # ThreadActor-specific initialization to be done at start of run().
-        return threading.Thread.run(self,*args, **kwargs)   # Dispatch to the default run() method for superclass threading.Thread().
+    #__/ End ThreadActor.__init__().
 
-        # Update the thread-local logging context to reflect changes in thread attributes.
 
-    def starting(self):
-        if self != threading.current_thread():
-            moduleLogger.warn("ThreadActor.starting(): Can't execute starting() method of thread %s "
-                              "from within a different thread %s!  Ignoring request." % (self, threading.current_thread()))
-            return
-        self.update_context()                                # Update the logging context for this new thread
-
-    def update_context(self):           # Run this only from within the newly-created thread itself.
-        if self != threading.current_thread():
-            moduleLogger.warn("ThreadActor.update_context(): Can't update logging context for thread %s "
-                              "from within a different thread %s!  Ignoring request." % (self, threading.current_thread()))
-            return
-
-        moduleLogger.debug("ThreadActor.update_context(): Updating logging context to role [%s] & component [%s]..."
-                           % (self.role, self.component))
-        
-        theLoggingContext.threadrole = self.role             
-        theLoggingContext.component = self.component   
-            # - NOTE: loggingContext is a thread.local global, so it differs for each thread.
-            #   Why not just leave this information in thread attributes?  Because LoggerAdapter
-            #   wants an object that supports a dict-like interface.  I suppose we could have
-            #   stored such an object as a single thread attribute, instead of a thread-local
-            #   global.  'Cuz you can always get hold of it through threading.current_thread().
-            #   Oh well. Que sera sera.
-
-    def set_role(self, role):
-        if self != threading.current_thread():
-            moduleLogger.warn("ThreadActor.set_role(): Can't update logging context for thread %s "
-                              "from within a different thread %s!  Ignoring request." % (self, threading.current_thread()))
-            return
-        moduleLogger.debug("ThreadActor.set_role(): Setting role to [%s] for this thread & its logging context." % role)
-        self.role                 = role        # Provides for easy access.
-        theLoggingContext.threadrole = self.role   # Also store it in the thread-local global LoggingContext.
-
-    def set_component(self, comp):
-        if self != threading.current_thread():
-            moduleLogger.warn("ThreadActor.set_component(): Can't update logging context for thread %s "
-                              "from within a different thread %s!  Ignoring request." % (self, threading.current_thread()))
-            return
-        moduleLogger.debug("ThreadActor.set_component(): Setting component to [%s] for this thread & its logging context." % component)
-        self.component           = comp             # Provides for easy access.
-        theLoggingContext.component = self.component   # Also store it in the thread-local global LoggingContext.
-
-        #----------------------------------------------------------------
-        # Overrides the default __str__ string converter to display both
-        # the thread name and the thread role.
+            #|------------------------------------------------------------------
+            #|
+            #|  threadActor.__str__                 [special instance method]
+            #|
+            #|      This special instance method returns a simple
+            #|      string representation of the given object.  We
+            #|      override the default implementation defined in
+            #|      the threading.Thread class, and instead return
+            #|      a string that gives both the thread's name and
+            #|      its role.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
     def __str__(inst):
+
+        """This special instance method returns a simple string
+           representation of the given object.  We override the
+           default implementation defined in the threading.Thread
+           class, and instead return a string that gives both the
+           thread's name and its role."""
+        
         if hasattr(inst, 'role'):   # So this method will work for non-ThreadActor classes also.
             return "%s (%s)" % (inst.name, inst.role)
         else:
-            return inst.name
+            return inst.name    # If role is unset, just return the name.
+        
+    #__/ End ThreadActor.__str__().
+
+
+        #|======================================================================
+        #|
+        #|      Public instance methods.                    [class code section]
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|  threadActor.run()                       [public instance method]
+            #|
+            #|      A thread calls its .run() method by default when
+            #|      the thread starts.  Here, we override the default
+            #|      .run() method inherited from threading.Thread so
+            #|      as to initialize the thread's logging context
+            #|      before doing anything else.  It should only ever
+            #|      be called from within the ThreadActor thread
+            #|      itself! (If not, it raises a WrongThreadWarning.)
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        
+    def run(self, *args, **kwargs):     # May throw WrongThreadWarning.
+            # \_ Run this method only from within the newly-created thread itself.
+
+        """A thread calls its .run() method by default when the thread starts.
+           Here in ThreadActor, we override the default .run() method inherited
+           from threading.Thread in order to initialize the thread's logging
+           context before doing anything else.  It should only ever be called
+           from within the ThreadActor thread itself!  (If not, it raises a
+           WrongThreadWarning.)"""
+        
+        self.starting();
+            # Does ThreadActor-specific initialization here at the start of run().
+            
+        return threading.Thread.run(self, *args, **kwargs)
+            # Dispatches to the default run() method for superclass threading.Thread().
+    
+    #__/ End ThreadActor.run().
+
+            #|------------------------------------------------------------------
+            #|
+            #|  threadActor.starting()                  [public instance method]
+            #|
+            #|      This method is for ThreadActor-specific initial-
+            #|      ization to be done within the thread after the
+            #|      thread starts.  It is called at the start of the
+            #|      ThreadActor class's .run() method.  It may also
+            #|      be called again later if needed.  It updates the
+            #|      thread-local logging context to reflect initial or
+            #|      newly-changed values of thread attributes.  It
+            #|      should only ever be called from within the
+            #|      ThreadActor thread itself! (If not, it raises a
+            #|      WrongThreadWarning.)
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    def starting(self):     # May throw WrongThreadWarning.
+            # self="Run this method only from this thread, itself.
+
+        """This method is for ThreadActor-specific initialization to
+           be done within the thread after the thread starts.  It is
+           called at the start of the ThreadActor class's .run()
+           method.  It may also be called again later if needed.  It
+           updates the thread-local logging context to reflect initial
+           or newly-changed values of thread attributes.  It should
+           only ever be called from within the ThreadActor thread
+           itself!  (If not, it raises a WrongThreadWarning.)"""
+
+            #-------------------------------------------------------
+            # Make sure this method is being called from within the
+            # thread represented by this ThreadActor object, itself.
+            # If not, raise a warning.
+        
+        if self != threading.current_thread():
+
+            errstr = ("ThreadActor.starting():  Can't execute "
+                      ".starting() method of thread %s from within a "
+                      "different thread %s!  Ignoring request."
+                      % (self, threading.current_thread()))
+
+            raise WrongThreadWarning(errstr, logger=_moduleLogger)
+
+            #[Previously, we just logged a warning and returned.
+            # Is it better style to actually throw an exception?]
+            #
+            #_moduleLogger.warn(errstr)
+            #
+            #return  # We don't even bother throwing a WarningException
+            #    # here, b/c our caller is just being a numbskull for
+            #    # calling us from the wrong thread, and so he probably
+            #    # wouldn't be prepared to catch the exception anyway.
+                
+        #__/ End if (in the wrong thread).
+
+            #-------------------------------------------------------
+            # If we get here, then we're in the right thread, so do
+            # the actual work of updating the logging context.
+        
+        self.update_context()   # Update the logging context for this new thread
+
+    #__/ End ThreadActor.starting().
+
+
+            #|------------------------------------------------------------------
+            #|
+            #|  threadActor.update_context()            [public instance method]
+            #|
+            #|      This method updates the thread-local logging
+            #|      context to reflect initial or newly-changed
+            #|      values of thread attributes.  It should only
+            #|      ever be called from within the ThreadActor
+            #|      thread itself! (If not, it raises a
+            #|      WrongThreadWarning.)
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    def update_context(self):   # May throw WrongThreadWarning.
+            # self="Run this method only from this thread, itself.
+
+        """This method updates the thread-local logging context to
+           reflect initial or newly-changed values of thread
+           attributes.  It should only ever be called from within
+           the ThreadActor thread itself! (If not, it raises a
+           WrongThreadWarning.)"""
+
+            #-------------------------------------------------------
+            # Make sure this method is being called from within the
+            # thread represented by this ThreadActor object, itself.
+            # If not, raise a warning.
+            
+        if self != threading.current_thread():
+
+            errmsg = ("ThreadActor.update_context(): Can't update "
+                      "logging context for thread %s from within a "
+                      "different thread %s!  Ignoring request."
+                      % (self, threading.current_thread()))
+            
+            raise WrongThreadWarning(errmsg, logger=_moduleLogger)
+        
+            #[Previously, we just logged a warning and returned.
+            # Is it better style to actually throw an exception?]
+            #_moduleLogger.warn(errmsg)
+            #return
+            
+        #__/ End if (in the wrong thread).
+
+            #---------------------------------------------------
+            # Generate a diagnostic log message at debug level.
+
+        _moduleLogger.debug("ThreadActor.update_context(): Updating "
+                            "logging context to role [%s] & component"
+                            " [%s]..." % (self.role, self.component))
+
+            #------------------------------------------
+            # Now actually update the logging context.
+        
+        theLoggingContext.threadrole = self.role             
+        theLoggingContext.component  = self.component   
+            # \_ NOTE: theLoggingContext is a thread.local global, so
+            #    it differs for each thread.  Why did we not just
+            #    leave this information in thread attributes?  Because
+            #    LoggerAdapter wants an object that supports a dict-
+            #    like interface.  I suppose we could have stored such
+            #    an object as a single thread attribute, instead of a
+            #    thread-local global.  'Cuz you can always get hold of
+            #    it through threading.current_thread().  Oh well.  Que
+            #    sera sera.
+            
+    #__/ End ThreadActor.update_context().
+
+        #|-----------------------------------------------------------|
+        #| We should probably make the following two methods private |
+        #| and build .role and .component properties on top of them. |
+        #| That would be a little bit more elegant.  Oh well.        |
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
+
+            #|------------------------------------------------------------------
+            #|
+            #|  threadActor.set_role()                  [public instance method]
+            #|
+            #|      Set the role of this ThreadActor to the given string.
+            #|      May be called only from within the ThreadActor thread,
+            #|      itself.  If not, a WrongThreadWarning is raised.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    def set_role(self, role:str):   # May throw WrongThreadWarning.
+
+        """Set the role of this ThreadActor to the given string.  May
+           be called only from within the ThreadActor thread, itself.
+           If not, a WrongThreadWarning is raised."""
+        
+        if self != threading.current_thread():
+
+            errmsg = ("ThreadActor.set_role(): Can't update logging "
+                      "context for thread %s from within a different "
+                      "thread %s!  Ignoring request." %
+                      (self, threading.current_thread()))
+
+            raise WrongThreadWarning(errmsg, logger=_moduleLogger)
+
+            #_moduleLogger.warn(errmsg)
+            #return
+        
+        #__/ End if (in the wrong thread).
+        
+        _moduleLogger.debug("ThreadActor.set_role(): Setting role to "
+                            "[%s] for this thread & its logging "
+                            "context." % role)
+        
+        self.role                    = role     # Provides for easy access.
+        theLoggingContext.threadrole = role     # Also store it in the thread-local global LoggingContext.
+
+    #__/ End ThreadActor.set_role().
+
+
+            #|------------------------------------------------------------------
+            #|
+            #|  threadActor.set_component()             [public instance method]
+            #|
+            #|      Set the component of this ThreadActor to the given
+            #|      string.  May be called only from within the
+            #|      ThreadActor thread, itself.  If not, a
+            #|      WrongThreadWarning is raised.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    def set_component(self, comp:str):  # May throw WrongThreadWarning.
+
+        """Set the component of this ThreadActor to the given string.
+           May be called only from within the ThreadActor thread,
+           itself.  If not, a WrongThreadWarning is raised."""
+        
+        if self != threading.current_thread():
+
+            errmsg = ("ThreadActor.set_component(): Can't update "
+                      "logging context for thread %s from within a "
+                      "different thread %s!  Ignoring request."
+                      % (self, threading.current_thread()))
+            
+            raise WrongThreadWarning(errmsg, logger=_moduleLogger)
+        
+            #_moduleLogger.warn(errmsg)
+            #return
+        
+        #__/ End if (in the wrong thread).
+
+        _moduleLogger.debug("ThreadActor.set_component(): Setting "
+                            "component to [%s] for this thread & its "
+                            "logging context." % component)
+        
+        self.component              = comp  # Provides for easy access.
+        theLoggingContext.component = comp  # Also store it in the thread-local global LoggingContext.
+
+    #__/ End ThreadActor.set_component().
+
+#__/ End class ThreadActor.
+
+
+
+        # ***** continue cleaning up below here *****
+
+        
+
+    # Should the following be moved to the initialize function?
 
 # Modify the real Thread class's .__str__() method to take advantage
 # of the role attribute even for non-ThreadActor classes, as long
@@ -1366,13 +2615,13 @@ def byname(lvlname, msg):
         #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 def testLogging():
-    moduleLogger.debug('This message just verifies that debug-level log output is enabled for this stream.')
-    moduleLogger.info('This message just verifies that info-level log output is enabled for this stream.')
-    moduleLogger.normal('This message just verifies that normal-level log output is enabled for this stream.')
-    moduleLogger.warning('This message just verifies that warning-level log output is enabled for this stream.')    
+    _moduleLogger.debug('This message just verifies that debug-level log output is enabled for this stream.')
+    _moduleLogger.info('This message just verifies that info-level log output is enabled for this stream.')
+    _moduleLogger.normal('This message just verifies that normal-level log output is enabled for this stream.')
+    _moduleLogger.warning('This message just verifies that warning-level log output is enabled for this stream.')    
     # Maybe shouldn't test these two b/c they look unnecessarily panicky & are always enabled anyway.
-    moduleLogger.error('This message just verifies that error-level log output is enabled for this stream.')
-    moduleLogger.critical('This message just verifies that critical-level log output is enabled for this stream.')
+    _moduleLogger.error('This message just verifies that error-level log output is enabled for this stream.')
+    _moduleLogger.critical('This message just verifies that critical-level log output is enabled for this stream.')
 
 
         #==================================================================
@@ -1484,7 +2733,7 @@ def setDefaultRole():
 
 def initLogMaster():
     global logFormatter, theLoggingContext, mainLogger     # In python, we have to declare
-    global consHandler, moduleLogger, initialized       # the globals that we'll reassign.
+    global consHandler, _moduleLogger, _initialized       # the globals that we'll reassign.
     global sysLogger, appLogger
 
         # Pretend the main thread is a ThreadActor by giving it a "role"
@@ -1587,12 +2836,12 @@ def initLogMaster():
 
         # Get a subordinate logger for use by routines in this module.
 
-    moduleLogger = getLogger('logmaster')    # For messages produced by this module only.
+    _moduleLogger = getLogger('logmaster')    # For messages produced by this module only.
 
         # Remember that this module has already been initialized, to
         # make sure we don't try to initialize it again.
 
-    initialized = True
+    _initialized = True
 
 # End initLogMaster().
         
@@ -1619,8 +2868,8 @@ def configLogMaster(sysname:str = None, appname:str = None, filename:str = None,
     global LOG_FILENAME, LOG_FORMATSTR
     global CONS_WARN, LOG_INFO, LOG_DEBUG, CONS_DEBUG, CONS_INFO
     global systemName, sysName, appName
-    global logFormatter, theLoggingContext, mainLogger, moduleLogger
-    global initialized, consHandler
+    global logFormatter, theLoggingContext, mainLogger, _moduleLogger
+    global _initialized, consHandler
     global sysLogger, appLogger
 
         # Reinitialize some globals, if requested, in optional args.
@@ -1697,7 +2946,41 @@ def configLogMaster(sysname:str = None, appname:str = None, filename:str = None,
 #    testLogging()      # Don't do this normally.
 
 # End configLogMaster().
-        
+
+        #|======================================================================
+        #|
+        #|      Module private functions.           [module code subsection]
+        #|
+        #|          This code section defines module-level functions that
+        #|          are used internally by this module but that are not
+        #|          supposed to be used by other modules.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|
+            #|      _limitLength(s:str, limit:int)->str     [private function]
+            #|
+            #|          Given a string <s> and an integer <limit>,
+            #|          return a version of <s> that is limited to
+            #|          be at most <limit> characters in length,
+            #|          interposing ".." if needed to represent
+            #|          any elided characters near the end of the
+            #|          string.
+            #|
+            #|          This function is used by CleanFormatter
+            #|          to generate log output that fits neatly
+            #|          in the available field widths.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+def _limitLength(s:str, limit:int) -> str:
+    if len(s) > limit:
+        newstr = s[0:limit-4] + '..' +s[-2:]
+        #print("Limiting length of string [%s] to [%s] (%d chars)" % (s, newstr, limit))
+        return newstr
+    else:
+        return s
 
     #=================================================================================
     #   Module initialization.                                  [code section]
@@ -1706,14 +2989,14 @@ def configLogMaster(sysname:str = None, appname:str = None, filename:str = None,
     #       module, which is supposed to be executed whenever this module
     #       is first loaded.  Normally, a given module will only be loaded
     #       once anyway per python interprer session.  But, we check and
-    #       set our "initialized" flag anyway,to make extra sure we don't
+    #       set our "_initialized" flag anyway,to make extra sure we don't
     #       accidentally re-initialize the module.  (To intentionally
     #       reinitialize it, users can explicitly call
     #       logmaster.initLogMaster().)
     #
     #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-if not initialized:     # If the module is not already initialized,
+if not _initialized:     # If the module is not already initialized,
 #    if hasattr(sys, "stderr") and sys.stderr != None:   # Needed b/c in some environments, it's not defined!
 #        print("logmaster.py: Initializing logmaster module...", file=sys.stderr)
     initLogMaster()         # then initialize it.

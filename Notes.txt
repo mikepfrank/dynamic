@@ -15,33 +15,50 @@
 |
 |------------------------------------------------------------------------------
 
+NOTE: In the below, "System name," "Application name" and "Module name"
+refer to specific formal software architecture concepts used within the 
+logmaster logging system, and appear in log file output (Dynamic.demo.log)
+in order to facilitate filtering for log data associated with particular
+software components as an aid to debugging.
+
+
 	System:		(the overall software system)
-	-------
+	=======
 	
 		System name:			Dynamic 
 	
 	
 	Applications:	(application programs within this system)
-	-------------
+	=============
 			Modules:	(python modules implementing the given component)
-			--------			
-				Definitions:	(public classes & other top-level definitions provided by the module)
-				------------
-				
-		* Dynamic.demo	Main demonstration application.
+			========			
+				Definitions:	(public classes & other top-level 
+				============	definitions provided by the module)
+
 		
-			* dynamic-demo.py		Top-level module of the demo application.
+		* Dynamic.demo	- Application name of the main demonstration application.
+		  ------------
+		
+			* dynamic-demo.py		- Top-level module of the demo application.
 			
-			* exampleNetworks.py	Example networks used in demo.
+			* exampleNetworks.py	- Example networks used in demo.
 	
 	
-	Components:		(software components that, taken together, implement the 
-	-----------		 system & its applications)
+	Components:		(lower-level software components that, taken together, 
+	===========		 implement the overall system & its applications)
 	
-		* Dynamic.fixed	Fixed-point arithmetic component.  Although really, 
-						this logically doesn't need to be considered part of 
-						the Dynamic system; at the moment, it is implemented
-						as an independent module.  (Except for using logmaster.)
+		* Dynamic.logging	- Component for implementing logging capabilities.
+		  ---------------
+	
+			* appdefs.py		- Defines the name of the system and application.
+		
+			* logmaster.py		- Customized logger capability.
+								
+
+		* Dynamic.fixed		- Fixed-point arithmetic component.  Although really, 
+		  -------------		    this logically doesn't need to be considered part of 
+								the Dynamic system; at the moment, it is implemented
+								as an independent module.  (Except for using logmaster.)
 			
 			* fixed.py	Fixed-point arithmetic module.
 			
@@ -55,9 +72,9 @@
 						- Initial value was not provided.
 
 						
-		* Dynamic.partialEval	Partially-evaluatable function component.
-								This, too, is an independent component, aside
-								from depending on the logmaster module.
+		* Dynamic.partialEval	- Partially-evaluatable function component.
+		  -------------------		This, too, is an independent component, aside
+									from depending on the logmaster module.
 								
 			* partialEvalFunc.py
 			
@@ -67,10 +84,10 @@
 				* partialEvalFunc.UnknownArgumentsError(Exception):Class
 			
 			
-		* Dynamic.functions		This component provided an abstraction for
-								various classes of differentiable functions.
-								(Note this is distinct from the DynamicFunction
-								capability that is central to the simulator.)
+		* Dynamic.functions		- This component provided an abstraction for
+		  -----------------			various classes of differentiable functions.
+									(Note this is distinct from the DynamicFunction
+									capability that is central to the simulator.)
 								
 			* differentiableFunction.py
 			
@@ -81,8 +98,8 @@
 			* quadraticFunction.py
 			
 			
-		* Dynamic.simulator		This component includes modules that are central
-								to our core simulation capability.
+		* Dynamic.simulator		- This component includes modules that are central
+		  -----------------			to our core simulation capability.
 								
 			* simulationContext.py	- Global parameters/variables of simulation.
 			
@@ -110,18 +127,18 @@
 					position-momentum phase space.
 		
 		
-		* Dynamic.network		This component allows us to define 
-								networks of components and nodes that
-								can be dynamically simulated.
+		* Dynamic.network		- This component allows us to define 
+		  ---------------			networks of components and nodes that
+									can be dynamically simulated.
 			
-			* dynamicNode.py		Network nodes with associated 
-									dynamical coordinates.
+			* dynamicNode.py		- Network nodes with associated 
+										dynamical coordinates.
 			
-			* linkport.py			Links between nodes and ports
-									of components.
+			* linkport.py			- Links between nodes and ports
+										of components.
 			
-			* dynamicComponent.py	Components with ports and 
-									interaction functions between them.
+			* dynamicComponent.py	- Components with ports and 
+										interaction functions between them.
 			
 			* dynamicOneTerminalGate.py
 				- A base class for dynamic components with exactly one port.
@@ -129,36 +146,31 @@
 			* dynamicTwoTerminalGate.py
 				- A base class for dynamic components with exactly two ports.
 			
-			* dynamicNetwork.py		Groups together a set of nodes,
-									components, links, & a Hamiltonian.
+			* dynamicNetwork.py		- Groups together a set of nodes,
+										components, links, & a Hamiltonian.
 									
-			* dynamicMemCell.py		A simple read-only "memory cell."
+			* dynamicMemCell.py		- A simple read-only "memory cell."
 			
 			
-		* Dynamic.boolean	This component defines Dynamic equivalents
-							of various standard Boolean logic gates.
+		* Dynamic.boolean	- This component defines Dynamic equivalents
+		  ---------------		of various standard Boolean logic gates.
 			
-			* dynamicNOTGate.py		Dynamic version of a Boolean NOT gate.
-			* dynamicANDGate.py		Dynamic version of a Boolean AND gate.
-			* dynamicORGate.py		Dynamic version of a Boolean OR gate.
-			* dynamicXORGate.py		Dynamic version of a Boolean XOR gate.
+			* dynamicNOTGate.py		- Dynamic version of a Boolean NOT gate.
+			* dynamicANDGate.py		- Dynamic version of a Boolean AND gate.
+			* dynamicORGate.py		- Dynamic version of a Boolean OR gate.
+			* dynamicXORGate.py		- Dynamic version of a Boolean XOR gate.
 			
 			
-		* Dynamic.examples	Examples of higher-order logic functions 
-							that can be composed out of Dynamic gates.
+		* Dynamic.examples	- Examples of higher-order logic functions 
+		  ----------------		that can be composed out of Dynamic gates.
 			
-			* halfAdder.py			A binary half-adder (two 1-bit operands).
-			* fullAdder.py			A binary full-adder (three 1-bit operands).
+			* halfAdder.py			- A binary half-adder (two 1-bit operands).
+			* fullAdder.py			- A binary full-adder (three 1-bit operands).
 			
 	
-	Miscellaneous Modules:		(other system modules that are not yet 
-	----------------------		 considered part of any formally-defined component)
+	Miscellaneous Modules:	- Other system modules that are not yet considered
+	----------------------		part of any formally-defined software component)
 	
-		appdefs.py		Defines the name of the system and application.
-		
-		logmaster.py	Customized logger capability.  (Depends on appdefs.py.)
-
-
 
 -------------------------------------------------------------------------------
 Some concepts/classes: (OLD)
