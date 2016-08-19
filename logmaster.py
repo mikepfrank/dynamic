@@ -459,9 +459,8 @@ __all__ = [
         #|      These are our globals that we encourage other modules
         #|      to access and utilize.
         #|
-        #|      At some point, the documentation for these should be
-        #|      included in the module documentation string at the
-        #|      top of this file.
+        #|      The documentation for these is included in the module
+        #|      documentation string at the top of this file.
         #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
@@ -927,7 +926,6 @@ class LoggedException(Exception):
         #|                      (in class LoggedException)
         #|  Class variables.                                [class code section]
         #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|----------------------------------------------------------------------
             #|
@@ -942,7 +940,6 @@ class LoggedException(Exception):
             #|              variable, or it will cause an exception to be
             #|              thrown (before the one you want gets thrown)!
             #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     defLogger = None    # Default logger.  None defined for this base class.
 
@@ -958,7 +955,6 @@ class LoggedException(Exception):
             #|          appropriate for their purposes.  This is done in
             #|          the subclasses defined below.
             #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     loglevel = logging.NOTSET
 
@@ -966,8 +962,6 @@ class LoggedException(Exception):
         #|======================================================================
         #|                      (in class LoggedException)
         #|  Special instance methods.                       [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
             
             #|------------------------------------------------------------------
             #|
@@ -989,7 +983,6 @@ class LoggedException(Exception):
             #|          are caught and handled appropriately somewhere
             #|          in the surrounding (i.e., catching) code.
             #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     
     def __init__(inst, msg:str=None, level:int=None, logger:logging.Logger=None):
         
@@ -1101,7 +1094,6 @@ class InfoException(LoggedException):
     
         #|======================================================================
         #|  Class variables.    (in class InfoException)    [class code section]
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
             #|
@@ -1111,8 +1103,6 @@ class InfoException(LoggedException):
             #|          is of course logging.INFO.  This overrides the
             #|          default value of logging.NOTSET that otherwise
             #|          would have been inherited from LoggedException.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     
     loglevel = logging.INFO
     
@@ -1193,7 +1183,6 @@ class WarningException(LoggedException):
     
         #|======================================================================
         #|  Class variables.   (in class WarningException)  [class code section]
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
             #|
@@ -1204,7 +1193,6 @@ class WarningException(LoggedException):
             #|          default value of logging.NOTSET that otherwise
             #|          would have been inherited from LoggedException.
             #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     
     loglevel = logging.WARNING
     
@@ -1278,7 +1266,6 @@ class ErrorException(LoggedException):
     
         #|======================================================================
         #|  Class variables.   (in class ErrorException)    [class code section]
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
             #|
@@ -1288,8 +1275,6 @@ class ErrorException(LoggedException):
             #|          is of course logging.ERROR.  This overrides the
             #|          default value of logging.NOTSET that otherwise
             #|          would have been inherited from LoggedException.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     loglevel = logging.ERROR
     
@@ -1327,7 +1312,6 @@ class CriticalException(ErrorException):
     
         #|======================================================================
         #|  Class variables.  (in class CriticalException)  [class code section]
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
             #|
@@ -1337,8 +1321,6 @@ class CriticalException(ErrorException):
             #|          is of course logging.CRITICAL.  This overrides the
             #|          default value of logging.NOTSET that otherwise
             #|          would have been inherited from LoggedException.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     loglevel = logging.CRITICAL
     
@@ -1388,10 +1370,7 @@ class FatalException(CriticalException):
                     would have been inherited from LoggedException."""
     
         #|======================================================================
-        #|
-        #|      Class variables.                            [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #|   Class variables.  (in class FatalException)  [class code section]
 
             #|------------------------------------------------------------------
             #|
@@ -1402,7 +1381,6 @@ class FatalException(CriticalException):
             #|          default value of logging.NOTSET that otherwise
             #|          would have been inherited from LoggedException.
             #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     loglevel = logging.FATAL    # This is actually the same as CRITICAL.
     
@@ -1595,17 +1573,15 @@ class LoggingContext(threading.local):
                 implementing, modeling, or serving."""
 
         #|======================================================================
-        #|
+        #|                       (in class LoggingContext)
         #|      Class attributes.                           [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     defComp = "(unsetComp)"    # By default, we don't know which system component this thread is being created to manage.
     defRole = "(unsetRole)"    # By default, we don't know what role this thread is supposed to be playing.
 
 
         #|----------------------------------------------------------------------
-        #|
+        #|                       (in class LoggingContext)
         #|      Private instance attributes.        [class code documentation]
         #|
         #|          The following attributes of instances of this class
@@ -1617,14 +1593,12 @@ class LoggingContext(threading.local):
         #|                  A dictionary containing the attribute-value
         #|                  mapping for this LoggingContext object.
         #|
-        #|----------------------------------------------------------------------
+        #|
 
     
         #|======================================================================
-        #|
+        #|                       (in class LoggingContext)
         #|      Special instance methods.                   [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
             
             #|------------------------------------------------------------------
             #|
@@ -1642,8 +1616,6 @@ class LoggingContext(threading.local):
             #|      is assigned can be changed to "node0", "node1", etc.,
             #|      for errors being reported on behalf of specific
             #|      network nodes.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def __init__(inst, myrole=None, forWhom=None, **kwargs):
 
@@ -1719,10 +1691,8 @@ class LoggingContext(threading.local):
 
 
         #|======================================================================
-        #|
+        #|                       (in class LoggingContext)
         #|      Instance public properties.                 [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
             #|
@@ -1731,8 +1701,6 @@ class LoggingContext(threading.local):
             #|      This property is used to keep track of the current
             #|      thread's current role string within the dictionary
             #|      structure provided by the LoggingContext object.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     @property
     def threadrole(inst):
@@ -1754,8 +1722,6 @@ class LoggingContext(threading.local):
             #|      This property is used to keep track of the current
             #|      thread's component string within the dictionary
             #|      structure provided by the LoggingContext object.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     @property
     def component(inst):
@@ -1772,17 +1738,15 @@ class LoggingContext(threading.local):
 
 
         #|======================================================================
-        #|
+        #|                       (in class LoggingContext)
         #|      Duck-typing support.                        [class code section]
         #|
         #|          The following definitions allow instances of the
         #|          present class to behave like instances of other
         #|          types that we are not formally a subclass of.
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
             #|------------------------------------------------------------------
-            #|
+            #|                    (in class LoggingContext)
             #|  Dictionary behavior.                        [class duck type]
             #|
             #|      The following code allows LoggingContext objects
@@ -1791,8 +1755,6 @@ class LoggingContext(threading.local):
             #|      behavior on the part of instances of the
             #|      LoggingContext class by dispatching them directly
             #|      to the underlying dictionary.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     #[I think the following is not necessary since we define .__iter__() below.]
     #def iter(inst):         # If someone asks for an interator on us,
@@ -1897,8 +1859,6 @@ class ThreadActor(threading.Thread):
         #|======================================================================
         #|                          (in class ThreadActor)
         #|      Class attributes.                           [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #----------------------------------------------------------
             # The following class attributes specify the default role
@@ -1914,8 +1874,6 @@ class ThreadActor(threading.Thread):
         #|======================================================================
         #|                          (in class ThreadActor)
         #|      Special instance methods.                   [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
             #|
@@ -1928,8 +1886,6 @@ class ThreadActor(threading.Thread):
             #|      attributes of this ThreadActor object.  Later
             #|      these values will get picked up by the thread's
             #|      LoggingContext for use in generating log lines.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
     def __init__(inst, *args, role:str=None, component:str=None, target=None, **kwargs):
 
@@ -2026,8 +1982,6 @@ class ThreadActor(threading.Thread):
             #|      the threading.Thread class, and instead return
             #|      a string that gives both the thread's name and
             #|      its role.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
     def __str__(inst):
 
@@ -2048,8 +2002,6 @@ class ThreadActor(threading.Thread):
         #|======================================================================
         #|                          (in class ThreadActor)
         #|      Public instance methods.                    [class code section]
-        #|
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
             #|
@@ -2062,8 +2014,6 @@ class ThreadActor(threading.Thread):
             #|      before doing anything else.  It should only ever
             #|      be called from within the ThreadActor thread
             #|      itself! (If not, it raises a WrongThreadWarning.)
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         
     def run(self, *args, **kwargs):     # May throw WrongThreadWarning.
             # \_ Run this method only from within the newly-created thread itself.
@@ -2097,8 +2047,6 @@ class ThreadActor(threading.Thread):
             #|      should only ever be called from within the
             #|      ThreadActor thread itself! (If not, it raises a
             #|      WrongThreadWarning.)
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def starting(self):     # May throw WrongThreadWarning.
             # self="Run this method only from this thread, itself.
@@ -2214,11 +2162,10 @@ class ThreadActor(threading.Thread):
             
     #__/ End ThreadActor.update_context().
 
-        #|-----------------------------------------------------------|
-        #| We should probably make the following two methods private |
-        #| and build .role and .component properties on top of them. |
-        #| That would be a little bit more elegant.  Oh well.        |
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
+        #|===========================================================
+        #| We should probably make the following two methods private 
+        #| and build .role and .component properties on top of them. 
+        #| That would be a little bit more elegant.  Oh well.        
 
             #|------------------------------------------------------------------
             #|
@@ -2227,8 +2174,6 @@ class ThreadActor(threading.Thread):
             #|      Set the role of this ThreadActor to the given string.
             #|      May be called only from within the ThreadActor thread,
             #|      itself.  If not, a WrongThreadWarning is raised.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def set_role(self, role:str):   # May throw WrongThreadWarning.
 
@@ -2268,8 +2213,6 @@ class ThreadActor(threading.Thread):
             #|      string.  May be called only from within the
             #|      ThreadActor thread, itself.  If not, a
             #|      WrongThreadWarning is raised.
-            #|
-            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def set_component(self, comp:str):  # May throw WrongThreadWarning.
 
@@ -3233,7 +3176,7 @@ if hasattr(sys, '_getframe'):
 
             #|------------------------------------------------------------------
             #|
-            #|      _limitLength(s:str, limit:int)->str     [private function]
+            #|  _limitLength(s:str, limit:int)->str           [private function]
             #|
             #|          Given a string <s> and an integer <limit>,
             #|          return a version of <s> that is limited to

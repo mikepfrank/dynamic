@@ -51,9 +51,10 @@
 #| End of module documentation string.
 #|------------------------------------------------------------------------------
 
+
     #|--------------------------------------------------------------------------
     #|
-    #|      RAW_DEBUG:bool                             [module global]
+    #|      RAW_DEBUG:bool                             [module global parameter]
     #|
     #|          Raw debugging flag.  This is a very low-level
     #|          facility, preliminary to any more sophisticated
@@ -63,13 +64,16 @@
     #|          suppressed easily.
     #|
     #|          Please note that this is the only global that
-    #|          appears before the "Globals" code sections, so
+    #|          appears before the "Globals" code section, so
     #|          that we can begin using it right away.
     #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-global RAW_DEBUG    # Declare this to be a module-level global.
+global  RAW_DEBUG   # Declare this to be a module-level global.
+
 RAW_DEBUG = False   # Change this to True as needed during initial development.
+
+    # Conditionally display some initial diagnostics if RAW_DEBUG is on...
 
 if RAW_DEBUG:
     print("Turned on raw debugging...")
@@ -78,19 +82,20 @@ if __name__ == "__main__":
     if RAW_DEBUG:
         print("__main__: Loading dynamic-demo.py...")
 
+
     #|==========================================================================
     #|
-    #|   Imports					    [code section]
+    #|   1. Module imports.                                [module code section]
     #|
-    #|       Load and import names of (and/or names from) various
-    #|       other python modules and pacakges for use from the
-    #|       present module.
+    #|          Load and import names of (and/or names from) various
+    #|          other python modules and pacakges for use from within
+    #|          the present module.
     #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        #|=================================================
-	#|   Imports of standard python library modules.
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #|======================================================================
+        #|  1.1. Imports of standard python modules.    [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 if __name__ == "__main__":
     if RAW_DEBUG:
@@ -98,9 +103,10 @@ if __name__ == "__main__":
         
 from sys import stderr      # Used for error output to console.
 
-        #|================================================
-	#|   Imports of our own custom modules.
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        #|======================================================================
+        #|  1.2. Imports of custom application modules. [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 if __name__ == "__main__": 
     if RAW_DEBUG:
@@ -125,48 +131,73 @@ from    exampleNetworks import ExampleNetwork_MemCell
     # used for development and testing.  ExampleNetwork_MemCell is a minimally-
     # simple example network to be used for initial development purposes.
 
+
     #|==========================================================================
     #|
-    #|   Globals					    [code section]
+    #|  2.  Global constants, variables, and objects.      [module code section]
     #|
-    #|      Declare and/or define various global variables and
-    #|      constants.  Top-level global declarations are not
-    #|      strictly required, but they serve to verify that
-    #|      these names were not previously used, and also
-    #|      serve as documentation.
+    #|          Declare and/or define various global variables and
+    #|          constants.  Top-level global declarations are not
+    #|          strictly required, but they serve to verify that
+    #|          these names were not previously used, and also
+    #|          serve as documentation.
     #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-
         #|======================================================================
         #|
-        #|  Special globals.                                    [code section]
+        #|  2.1.  Special globals.                      [module code subsection]
         #|
-        #|      These globals have special meanings defined by the
-        #|      Python language.
+        #|          These globals have special meanings defined by the
+        #|          Python language.
         #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global  __all__         # List of public symbols exported by this module.
-__all__ = ['is_top']    # Boolean; is this file running at top level?
+
+__all__ = ['is_top']    # Boolean; is this module running at top level?
 
 
         #|======================================================================
         #|
-        #|  Module globals.                                    [code section]
+        #|   2.2.  Public module globals.               [module code subsection]
         #|
-        #|      These globals are specific to the present module.
+        #|      These are the globals specific to this module that we
+        #|      encourage other modules to access and utilize.
+        #|
+        #|      The documentation for these should be included in the
+        #|      module documentation string at the top of this file.
         #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global  is_top      # Boolean; is this module running at top level?
 
+
+        #|======================================================================
+        #|
+        #|  2.3.  Private globals.                      [module code subsection]
+        #|
+        #|          In this section, we define global variables that
+        #|          are used within this module, but that are not
+        #|          exported nor intended to be used by other modules.
+        #|
+        #|          Since these are private, they aren't documented
+        #|          in the module's documentation string.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    # The logmaster-based logger object that we'll use for logging
+    # within this module.  Initialized in _main().
+    
+global  _logger
+
+
     #|==========================================================================
     #|
-    #|   Module-level function definitions.                   [code section]
+    #|  3.  Module-level function definitions.             [module code section]
     #|
-    #|      These functions are at top level within the module; 
-    #|      they are not part of any particular class.
+    #|          These functions are defined at top level within the
+    #|          module; they are not part of any particular class.
     #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
@@ -209,17 +240,17 @@ def _main():
         # main thread's role to "startup" and set the thread component to
         # "demoApp".
 
-    logger = appLogger  # Get our application logger.
+    _logger = appLogger  # Get our application logger.
 
     #----------------------------------------------
     # Application startup:  Display splash text.
 
-    logger.info("Dynamic demo application is starting up...")
+    _logger.info("Dynamic demo application is starting up...")
 
     print() # Just visual whitespace; no need to log it.
-    logger.normal("Welcome to the Dynamic demo program, v0.1.")
-    logger.normal("Copyright (c)2016 by Michael P. Frank.")
-    logger.normal("All Rights Reserved.")
+    _logger.normal("Welcome to the Dynamic demo program, v0.1.")
+    _logger.normal("Copyright (c)2016 by Michael P. Frank.")
+    _logger.normal("All Rights Reserved.")
     print()
 
     #------------------------------------------------------
@@ -240,16 +271,16 @@ def _main():
         # testing during development.  Tell it that it's going to
         # be using that simulation context that we just created.
 
-    logger.normal("Creating an ExampleNetwork_MemCell instance...")                
+    _logger.normal("Creating an ExampleNetwork_MemCell instance...")                
     net = ExampleNetwork_MemCell(context=sc)
 
-    logger.debug("Initial node q momentum is: %f" % 
+    _logger.debug("Initial node q momentum is: %f" % 
                   net.node('q').coord.momentum.value)
 
         #---------------------------------------------------------
         # Run the built-in .test() method of the example network.
 
-    logger.normal("Requesting simulator to run a simple test...")
+    _logger.normal("Requesting simulator to run a simple test...")
     
     logmaster.setThreadRole('running')
     
@@ -257,7 +288,7 @@ def _main():
 
     logmaster.setThreadRole('shutdown')
 
-    logger.normal("Dynamic demo application is shutting down...")
+    _logger.normal("Dynamic demo application is shutting down...")
 
     # End of main code of demo application.
     #---------------------------------------
@@ -267,14 +298,15 @@ def _main():
 
 #--/ End function main().
 
+
     #|==========================================================================
     #|
-    #|   Main script body.                              [script code section]
+    #|   4.  Main script body.                             [script code section]
     #|
-    #|      Above this section should only be definitions and
-    #|      assignments.  Below is the main executable body of
-    #|      the script.  It just calls the main() function (if
-    #|      this script is not just being loaded as a submodule).
+    #|          Above this section should only be definitions and
+    #|          assignments.  Below is the main executable body of
+    #|          the script.  It just calls the main() function (if
+    #|          this script is not just being loaded as a submodule).
     #|  
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
