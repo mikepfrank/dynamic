@@ -113,23 +113,23 @@ if __name__ == "__main__":
         print("__main__: Importing custom application modules...", file=stderr)
 
 import  logmaster
-from    logmaster   import configLogMaster,appLogger,info,normal
+from    logmaster           import  configLogMaster, appLogger, info, normal
     # The logmaster module defines our logging framework; we import
     # several definitions that we need from it.
 
 import  appdefs
-from    appdefs     import appName
+from    appdefs             import  appName
     # Name of the present application.  Used for configuring logmaster.
 
 import  simulationContext
-from    simulationContext   import SimulationContext
+from    simulationContext   import  SimulationContext
     # Used for tracking global state of the simulation.
 
 import  exampleNetworks
-from    exampleNetworks import ExampleNetwork_MemCell
+from    exampleNetworks     import  MemCellNet
     # The exampleNetworks module defines various simple example modules to be
-    # used for development and testing.  ExampleNetwork_MemCell is a minimally-
-    # simple example network to be used for initial development purposes.
+    # used for development and testing.  MemCell is a minimally-simple example
+    # network to be used for initial development purposes.
 
 
     #|==========================================================================
@@ -235,6 +235,10 @@ def _main():
         print("__main__._main(): Configuring the 'logmaster' logging module...",
               file=stderr)
 
+    # Uncomment the first line below and comment the second to turn on
+    # log-file debug messages.
+    
+    #configLogMaster(logdebug = True, role = 'startup', component = appName)
     configLogMaster(loginfo = True, role = 'startup', component = appName)
         # Configure the logger to turn on log-file info output, set this
         # main thread's role to "startup" and set the thread component to
@@ -272,7 +276,7 @@ def _main():
         # be using that simulation context that we just created.
 
     _logger.normal("Creating an ExampleNetwork_MemCell instance...")                
-    net = ExampleNetwork_MemCell(context=sc)
+    net = exampleNetworks.MemCellNet(context=sc)
 
     _logger.debug("Initial node q momentum is: %f" % 
                   net.node('q').coord.momentum.value)

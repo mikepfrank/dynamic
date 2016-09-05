@@ -269,6 +269,7 @@ class DynamicNetwork:
 
 # Module-level helper function to return a string representation of the name
 # of a given network, or a string indicating an error if it's not a network!
+# (Should we throw a WarningException in this case instead??)
 
 def netName(obj):
     if obj == None:

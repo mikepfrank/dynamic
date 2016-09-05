@@ -258,8 +258,8 @@
                 the system, respectively.  
 
 
-    EXCEPTION CLASSES
-    -----------------
+    EXCEPTION CLASSES:
+    ------------------
 
         Applications may subclass or mixin these classes to create
         their own exception classes that automatically generate log
@@ -284,8 +284,8 @@
                   logmaster.FatalException      [module public exception class]
 
 
-    PUBLIC CLASSES
-    --------------
+    PUBLIC CLASSES:
+    ---------------
 
         Public classes exported by this module, other than exception
         classes.  See the classes' docstrings for additional details.
@@ -1266,6 +1266,7 @@ class ErrorException(LoggedException):
     
         #|======================================================================
         #|  Class variables.   (in class ErrorException)    [class code section]
+        #|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
             #|------------------------------------------------------------------
             #|
@@ -1275,6 +1276,8 @@ class ErrorException(LoggedException):
             #|          is of course logging.ERROR.  This overrides the
             #|          default value of logging.NOTSET that otherwise
             #|          would have been inherited from LoggedException.
+            #|
+            #|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
     loglevel = logging.ERROR
     
@@ -1575,6 +1578,7 @@ class LoggingContext(threading.local):
         #|======================================================================
         #|                       (in class LoggingContext)
         #|      Class attributes.                           [class code section]
+        #|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
     defComp = "(unsetComp)"    # By default, we don't know which system component this thread is being created to manage.
     defRole = "(unsetRole)"    # By default, we don't know what role this thread is supposed to be playing.
@@ -1593,7 +1597,7 @@ class LoggingContext(threading.local):
         #|                  A dictionary containing the attribute-value
         #|                  mapping for this LoggingContext object.
         #|
-        #|
+        #|----------------------------------------------------------------------
 
     
         #|======================================================================
