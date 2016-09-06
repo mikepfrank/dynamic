@@ -9,12 +9,14 @@ class UnaryDifferentiableFunction(BaseDifferentiableFunction):
     def __init__(inst, name:str=None, argName:str=None,
                  function:Callable=None, derivative:Callable=None):
 
+        if name == None and function == None:    name = 'f'
+
             # If no argument name or function was provided, then
             # just use default name 'x' for the function argument.
             # This can also be changed later, if desired, using
             # the inst.argName property setter (defined below).
 
-        if name == None and function == None:    name = 'x'
+        if argName == None and function == None:    argName = 'x'
 
             # Turn the argument name and derivative, if known,
             # into a singleton argument name list and partial

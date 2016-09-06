@@ -3,6 +3,10 @@ logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 from dynamicCoordinate import DynamicCoordinate
 
+class DynamicNetwork: pass  # Forward declaration to avoid circularity
+
+class NodeNameCollision(Exception): pass
+
 #   In Dynamic, a (simple) "node" has the following features (at least):
 #
 #       * A name (optional)
@@ -34,10 +38,12 @@ class DynamicNode:
     #   to initialize the node's .name data member.  Initially the
     #   node has an empty list of links.
 
-    def __init__(inst, network, name:str=None):
+    def __init__(inst, network:DynamicNetwork, name:str=None):
 
         logger.debug("Creating a new dynamic node named %s in network %s..." %
                         (name, str(network)))
+
+        inst.network = network      # Remember our network
         
         if name != None:  inst.name = name
         inst.links = []     # Node has an empty list of links initially.
@@ -61,6 +67,8 @@ class DynamicNode:
         logger.debug("Node %s is going to evolve to timestep %d...", inst.name, timestep)
         inst.coord.evolveTo(timestep)
 
+    # The following two methods should really be turned into a .name property...
+
     def getName(this):      # Get something that can be used as a node name.
         if hasattr(this,'name'):
             return this.name
@@ -69,8 +77,24 @@ class DynamicNode:
 
     def renameTo(this, name:str):
         if not hasattr(this, 'name') or this.name != name:
-            logger.debug("Renaming node '%s' to '%s'" % (str(this), name))
-            inst.name = name
+
+            # Before we rename the node, make sure there is not another node
+            # already in this node's network with the same name.  If there is,
+            # throw an error (NodeNameCollision).
+            
+            if this.network != None:
+                if this.network.node(name) != None:
+                    raise NodeNameCollision("DynamicNode.renameTo(): "
+                                            "Can't rename node %s to %s because "
+                                            "that name is already used in network %s."
+                                            % (str(this), name, str(this.network)))
+            
+            logger.info("Renaming node '%s' to '%s'" % (str(this), name))
+            oldName = this.name
+            this.name = name
+
+            if this.network != None:
+                this.network.noticeNodeNameChange(this, oldName)
 
     def __str__(this):
         if hasattr(this,'name'):

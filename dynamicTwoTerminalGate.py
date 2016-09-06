@@ -1,10 +1,18 @@
 
+from binaryDifferentiableFunction import BinaryDifferentiableFunction
+
+from linkport           import Port
+
+from dynamicNode        import DynamicNode
+from dynamicComponent   import DynamicComponent
+from dynamicNetwork     import DynamicNetwork
+
 #-- A DynamicTwoTerminalGate has two nodes called "input" and "output"
 #   with a single interaction term between them.  It's assumed that there's
 #   no internal state other than the position/velocity values associated
 #   with the two nodes.
 
-class DynamicTwoTerminalGate(BaseComponent):
+class DynamicTwoTerminalGate(DynamicComponent):
 
     #-- Data members:
     #       interaction [BinaryPotentialEnergyTerm] -
@@ -16,17 +24,133 @@ class DynamicTwoTerminalGate(BaseComponent):
     #   a simple dynamic node to be our output node, and link
     #   it to our output port.
 
-    def __init__(inst, inputNode):
+    def __init__(inst, inputNode:DynamicNode, name:str=None,
+                 network:DynamicNetwork=None, inPortName:str='input',
+                 outPortName:str='output',
+                 interaction:BinaryDifferentiableFunction=None):
+
+            # First do generic initialization for dynamic components.
+
+        DynamicComponent.__init__(inst, name=name, network=network)
 
             # Create our two ports, named "input" and "output".
 
-        inst.addPorts('input', 'output')
+        inst._addPorts(inPortName, outPortName)
+
+            # Remember our port name for future reference.
+
+        inst.inPortName  = inPortName
+        inst.outPortName = outPortName
+
+            # Link our input node to our input port.
+
+        inst.inputNode = inputNode
+        inst.link(inPortName, inputNode)
 
             # Create and remember our output node named "out".
 
-        inst.outputNode = DynamicNode('out')
+        inst.outputNode = DynamicNode(network, name='out')
 
             # Link our port named "output" to our output node.
 
-        inst.link('output', inst.outputNode)
+        inst.link(outPortName, inst.outputNode)
+
+            # Set our interaction function to the given function.
+
+        if interaction != None:  inst.interaction = interaction
+
+            # Add our output node to the network.
+
+        if network != None:  network.addNode(inst.outputNode)
+
+    @property
+    def inPortName(this):
+        if hasattr(this, '_inPortName'):
+            return this._inPortName
+        else:
+            return None
+
+    @inPortName.setter
+    def inPortName(this, inPortName:str):
+        this._inPortName = inPortName               # Remember our portname.
+        if this.inPort != None:                   # If our port has been created,
+            this.inPort.name = inPortName           #   actually set the port's name.
+        if this.interaction != None:              # If our potential has been set,
+            this.interaction.argName1 = inPortName   #   set its argument name.
+
+    @property
+    def outPortName(this):
+        if hasattr(this, '_outPortName'):
+            return this._outPortName
+        else:
+            return None
+
+    @outPortName.setter
+    def outPortName(this, outPortName:str):
+        this._outPortName = outPortName               # Remember our portname.
+        if this.outPort != None:                   # If our port has been created,
+            this.outPort.name = outPortName           #   actually set the port's name.
+        if this.interaction != None:              # If our potential has been set,
+            this.interaction.argName2 = outPortName   #   set its argument name.
+
+    @property
+    def inPort(this) -> Port:
+        ports = this.ports      # Get our ports.
+        #print("ports is %s" % (str(ports)))
+        nPorts = len(ports)     # Count how many ports we have.
+        if nPorts == 0:         # If we have zero ports,
+            return None         # return that our port is None.
+        #print("%d ports" % nPorts)
+        if nPorts != 2:
+            raise WrongNumberOfPortsException("Two-terminal gate %s was found to have %d ports (%s)!" %
+                                        (this, nPorts, str(ports)))
+        assert nPorts == 2              # We should have exactly two ports.
+        return list(ports.values())[0]  # Return the first port.
+
+    @property
+    def outPort(this) -> Port:
+        ports = this.ports      # Get our ports.
+        #print("ports is %s" % (str(ports)))
+        nPorts = len(ports)     # Count how many ports we have.
+        if nPorts == 0:         # If we have zero ports,
+            return None         # return that our port is None.
+        #print("%d ports" % nPorts)
+        if nPorts != 2:
+            raise WrongNumberOfPortsException("Two-terminal gate %s was found to have %d ports (%s)!" %
+                                        (this, nPorts, str(ports)))
+        assert nPorts == 2              # We should have exactly two ports.
+        return list(ports.values())[1]  # Return the second port.
+
+    @property
+    def interaction(this):      # The interaction between input & output terminals.
+        if hasattr(this, '_interaction'):
+            return this._interaction
+        else:
+            return None
+
+    @interaction.setter
+    def interaction(this, interaction:BinaryDifferentiableFunction):
+
+        if this.interaction != None:
+            del this.interaction
+
+        if interaction != None:
+
+            if this.inPortName != None:
+                interaction.argName1 = this.inPortName
+
+            if this.outPortName != None:
+                interaction.argName2 = this.outPortName
+
+            this._interaction = interaction
+
+            this._addInteraction(interaction)
+
+    @interaction.deleter
+    def interaction(this):
+
+        if this.interaction != None:
+            this._removeInteraction(this._interaction)
+
+        del this._interaction
         

@@ -1,19 +1,19 @@
 from numbers            import Real    # Used by DynamicNetwork.thermalize().
 
 import logmaster
-from   logmaster          import getLogger, ErrorException
+from   logmaster          import ErrorException
 
 global logger
-logger = getLogger(logmaster.sysName + '.network')
+logger = logmaster.getLogger(logmaster.sysName + '.network')
 
 from dynamicNode        import DynamicNode
 from dynamicComponent   import DynamicComponent
 from linkport           import Link 
 from hamiltonian        import HamiltonianTerm,Hamiltonian
 
-class SimulationContext: pass
+class SimulationContext: pass       # Forward declaration to avoid circularity
 
-__all__ = ['DynamicNetwork']
+__all__ = ['DynamicNetwork', 'netName']
 
 class NetworkException(Exception): pass
 
@@ -191,6 +191,13 @@ class DynamicNetwork:
 
         self._nodes[nodeName] = node
 
+    # This method registers that a node has changed names from the
+    # given <oldName> to its new name.
+
+    def noticeNodeNameChange(self, node:DynamicNode, oldName:str=None):
+        del self._nodes[oldName]        # There's no longer a node w old name in network
+        self.addNode(node, node.name)
+
     #-- inst.addLink(link:Link) - Add the given link to the network
     #       (and its connected items).
 
@@ -233,7 +240,8 @@ class DynamicNetwork:
         if nodeName in self._nodes:
             return self._nodes[nodeName]
         else:
-            raise NoSuchNode("There is no node named %s in network %s" % (nodeName, str(self)))
+            return None
+            #raise NoSuchNode("There is no node named %s in network %s" % (nodeName, str(self)))
 
     #-- inst.test() - Test this network by initializing it and then
     #       simulating it forwards in time a few steps.

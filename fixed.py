@@ -1,60 +1,218 @@
+#|==============================================================================
+#|                          TOP OF FILE:    fixed.py
+#|------------------------------------------------------------------------------
+#|   The below module documentation string will be displayed by pydoc3.
+#|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+"""
+    FILE NAME:              fixed.py            [Python 3 module source file]
 
-    # ***** THIS IS THE NEXT FILE TO CLEAN UP *****
+    MODULE NAME:            fixed
+
+    SOFTWARE SYSTEM:        Dynamic         (simulator for dynamic networks)
+
+    SOFTWARE COMPONENT:     Dynamic.fixed   (fixed-precision arithmetic package)
+
+
+    MODULE DESCRIPTION:
+    -------------------
+
+        The fixed module provides a new numeric type defined by the
+        class Fixed, a subclass of numbers.Rational.  Instances of
+        Fixed represent fixed-point numbers; that is, they are all
+        integer multiples of the same (fractional) quantum.
+        Currently, the quantum must be of the form 1/D (where D is
+        an integer), to ensure that 1.0 can be exactly represented.
+        At present, the value of D is 1,000,000,000 (one billion);
+        thus, elements of Fixed have a precision of 0.000,000,001
+        (9 decimal places).
+
+        The purpose of Fixed, within the Dynamic system, is to ensure
+        that addition is bit-level reversible.  (Addition of floating-
+        point numbers is not reversible, due to the fact that the sum
+        may be rounded if the binary exponent increased.)
+
+
+    BASIC MODULE USAGE:
+    -------------------
+
+        import fixed; from fixed import *
+
+        a = Fixed(1/3)      # Rounded down to 0.333,333,333
+        
+        b = Fixed(2/3)      # Rounded up to 0.666,666,667
+
+        c = a + b           # Adding Fixeds makes a Fixed.
+
+        print(str(c))       # Outputs '1'
+
+
+    PUBLIC CLASSES:
+    ---------------
+
+            See the individual classes' docstrings for additional details.
+
+
+        Regular classes:
+        ----------------
+
+            Fixed                                       [module public class]
+
+                A simple class for fixed-point numbers.
+                
+
+        Exception classes:
+        ------------------
+
+            FixedError                          [module public exception class]
+
+                Base class for error exceptions in the fixed module.
+                These errors are automatically logged upon creation.
+
+            InitialValueError                   [module public exception class]
+
+                An error exception indicating that something was wrong
+                with an initial-value argument passed to an initializ-
+                er of a class in the fixed module.
+
+            NoInitialValueError                 [module public exception class]
+
+                An error exception indicating that no initial value
+                argument was passed to an initializer of a class in
+                the fixed module, and one was expected.
+        
+                                                                             """
+#|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#| End of module documentation string.
+#|------------------------------------------------------------------------------
+
+
+    #|==========================================================================
+    #|   1. Module imports.                                [module code section]
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        #|======================================================================
+        #|  1.1. Imports of standard python modules.    [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 import math         # Defines ceil, floor, etc.
-import numbers      # Defines the Rational abstract class.
+import numbers      # Defines the Rational abstract base class.
 import operator     # Module defining standard arithmetic operators
 import fractions    # Includes the Fraction class.
 
-import logmaster
-from logmaster import ErrorException
+        #|======================================================================
+        #|  1.2. Imports of custom application modules. [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-_logger = logmaster.getLogger(logmaster.sysName + '.fixed')
+import logmaster                        # Provides logging capabilities.
+from logmaster import ErrorException    # We use this name a couple of times.
 
-__all__ = [
+
+    #|==========================================================================
+    #|  2.  Global constants, variables, and objects.      [module code section]
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        #|======================================================================
+        #|  2.1.  Special globals.                      [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+__all__ = [                 # List of all explicitly-exported public names.
     'Fixed',
     'FixedError',           # Exception classes.
     'InitialValueError',
     'NoInitialValueError'
     ]
 
-# Exception classes.
+        #|======================================================================
+        #|  2.3.  Private globals.                      [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+_logger = logmaster.getLogger(logmaster.sysName + '.fixed')     # Module logger.
+
+
+    #|==========================================================================
+    #|  3.  Class definitions.                             [module code section]
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        #|======================================================================
+        #|  3.1.  Exception classes.                    [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|  FixedError                              [public exception class]
+            #|
+            #|      Base class for error exceptions in the fixed
+            #|      module.  These errors are automatically logged
+            #|      upon creation.
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     # Alternatively to the below, we could subclass logmaster.LoggedException
-    # and then mixin ErrorException.  This would allow us to do module-specific
-    # logged exceptions at other levels as well (info, warning, critical, etc.)
-    # So far we haven't needed that capability, though.
+    # to create FixedException, and then mixin ErrorException with that to get
+    # FixedError.  This would allow us to do module-specific logged exceptions
+    # at other levels as well (info, warning, critical, etc.)  So far we
+    # haven't needed that capability, though.
 
 class FixedError(ErrorException):       # Error in this fixed-point module.
-    """This class is for errors detected in 'fixed', the fixed-point
+    """This base class is for errors detected in 'fixed', the fixed-point
        arithmetic module."""
     def __init__(inst, msg:str=None):
         ErrorException.__init__(msg=msg, logger=_logger)
+
+
+            #|------------------------------------------------------------------
+            #|  InitialValueError                       [public exception class]
+            #|
+            #|      An error exception indicating that something was
+            #|      wrong with an initial-value argument passed to an
+            #|      initializer of a class in the fixed module.
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class InitialValueError(FixedError):
     """An initial value that was passed as an argument to a
        constructor in this module ('fixed') was unacceptable."""
     pass
 
+            #|------------------------------------------------------------------
+            #|  NoInitialValueError                     [public exception class]
+            #|
+            #|      An error exception indicating that no initial
+            #|      value argument was passed to an initializer of a
+            #|      class in the fixed module, and one was expected.
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
 class NoInitialValueError(InitialValueError):
     """No initial value or an initial value of None was provided to a
         constructor, but a value other than None was required."""
     pass
 
-#-- Class for fixed-point numbers with a specific fractional quantum.
-#
-#       NOTE: To simplify user code, all instances of Fixed are required
-#   to have the same quantum! This way the user does not have to specify
-#   the quantum when creating fixed-point number instances.
-#
-#       It may be worth considering whether it would be useful to
-#   have a base class that is abstract (leaves the denominator
-#   unspecified), and then have various subclasses of it that give
-#   different default values to the quantum, or even allow the user
-#   to specify the quantum during some class-initialization step.
-#   This way, fixed-point numbers of different precision could be
-#   used within one application.  We're not yet exploring this,
-#   though.
+
+        #|======================================================================
+        #|   3.2.  Normal public classes.               [module code subsection]
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|  Fixed                                           [public class]
+            #|
+            #|      Class for fixed-point numbers with a specific
+            #|      fractional quantum (currently 1e-9).
+            #|
+            #|      NOTE: To simplify user code, all instances of
+            #|      Fixed within the system are required to have the
+            #|      same quantum! This way the user does not have to
+            #|      specify the quantum when creating fixed-point
+            #|      number instances.
+            #|
+            #|      It may be worth considering whether it would be
+            #|      useful to have a base Fixed class that is abstract
+            #|      (leaves the denominator unspecified, as an ab-
+            #|      stract property), and then have various subclas-
+            #|      ses of it that give different values to the quan-
+            #|      tum, or even allow the user to specify the quantum
+            #|      dynamically during some class-initialization step.
+            #|      This way, fixed-point numbers of different precis-
+            #|      ion could be used within one application.  We're
+            #|      not yet exploring this option, though.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class Fixed(numbers.Rational):
     
@@ -66,15 +224,37 @@ class Fixed(numbers.Rational):
        so all Fixed numbers are defined to a precision of 1e-9
        (0.000000001), or nine decimal places."""
 
-    #-- Private class attributes (static data members).
-    #
-    #       Fixed._denominator:Integer - The denominator D of the quantum 1/D.
-    #           (Please don't change this after the class is initialized.)
+        #|======================== Within class: Fixed =========================
+        #|  Private class attributes.                       [class code section]
+        #|
+        #|      These are similar to static data members in C++.
+        #|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+
+            #|------------------------------------------------------------------
+            #|  Fixed._denominator:Integer             [private class attribute]
+            #|
+            #|      The denominator D of the quantum 1/D.  (Please
+            #|      don't change this after instances have been
+            #|      created, or insanity will ensue.)
+            #|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
     _denominator = int(1e9)      # Define all numbers to 1 billionth of a unit.
 
-    #-- Private instance data members.
-    #       inst._numerator:Integer - The numerator N of the fixed value N/D.
+        #|======================== Within class: Fixed =========================
+        #|  Private instance attributes.                   [class documentation]
+        #|
+        #|      These are similar to data members in C++.
+        #|
+        #|          inst._numerator:Integer         [private instance attribute]
+        #|
+        #|              The numerator N of this fixed-precision value
+        #|              N/D.
+        #|
+        #|======================================================================
+    
+        #|======================== Within class: Fixed =========================
+        #|  Special methods.                                [class code section]
+        #|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
     def __init__(inst, value=None, denom=None):
         
@@ -164,12 +344,32 @@ class Fixed(numbers.Rational):
 
         #__/ End if denom==None ... else ...
 
-        # ***** CONTINUE CLEANING UP BELOW HERE *****
-
     def __repr__(self):     # return faithful string representation
-        return('Fixed(%d,%d)'%(self._numerator, Fixed._denominator))
+
+        """The faithful string representation of a Fixed looks like
+           Fixed(<N>/<D>), where <N>/<D> is the fractional represen-
+           tation of the value of the Fixed in lowest terms."""
+
+        return 'Fixed(%d/%d)'%(self.numerator, self.denominator)
+
+# The following is no longer used, since the above is usually more readable.
+
+##        """The faithful string representation of a Fixed, which looks
+##           like "Fixed(<N>,<D>)", includes both the numerator <N> and
+##           the (supposedly fixed) denominator <D>.  This provides for
+##           the ability to parse this output into a future version of
+##           the Fixed class that supports alternate denominators.  It
+##           also is more human-readable than if the denominator were
+##           not provided.  Note that the Fixed initializer explicitly
+##           supports the notation used here."""
+##        
+##        return 'Fixed(%d,%d)'%(self._numerator, Fixed._denominator)
 
     def __str__(self):      # return simple string representation
+        
+        """The simple string representation of a Fixed is whatever
+           the fractions.Fraction class returns."""
+
         frac = fractions.Fraction(self._numerator, Fixed._denominator)
         return str(frac)
 
@@ -177,12 +377,14 @@ class Fixed(numbers.Rational):
         frac = fractions.Fraction(self._numerator, Fixed._denominator)
         return frac.__format__(fmtSpec)
 
-    #-- Subclasses of numbers.Rational have to define all these methods:
+    #-- NOTE: Subclasses of numbers.Rational have to define all these methods:
     #
     #       __abs__, __add__, __ceil__, __eq__, __floor__, __floordiv__,
     #       __le__, __lt__, __mod__, __mul__, __neg__, __pos__, __pow__,
     #       __radd__, __rfloordiv__, __rmod__, __rmul__, __round__,
     #       __rpow__, __rtruediv__, __truediv__, __trunc__
+
+        # ***** CONTINUE CLEANING UP BELOW HERE *****
 
     def __abs__(self):
         result = Fixed(self)    # Make a copy of this fixed-point number.
@@ -276,7 +478,7 @@ class Fixed(numbers.Rational):
 
     def __rpow__(x, y, mod=None):
         xfrac = fractions.Fraction(x._numerator, Fixed._denominator)
-        result = Fixed(y ** xfrac)
+        result = Fixed(pow(y, xfrac, mod))
         return result
 
     def __rtruediv__(x, y):
@@ -314,4 +516,9 @@ class Fixed(numbers.Rational):
     @property
     def quantum(self):
         return fractions.Fraction(1, Fixed._denominator)
+
+#__/ End class Fixed.
     
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#                   BOTTOM OF FILE:    fixed.py
+#===============================================================================

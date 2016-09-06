@@ -38,6 +38,8 @@
 #|
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
+import random   # Python random-number generator module.
+
 from fixed  import Fixed     # Fixed-precision math class.
 
 import logmaster
@@ -226,9 +228,15 @@ class DynamicCoordinate:
 
         inst.hamiltonian = hamiltonian
 
+            # Generate an initial momentum value by sampling from thermal distribution.
+            # Later this should be temperature-dependent, but units are arbitrary for now
+            # anyway so just assume some arbitrary fixed unit temperature.
+
+        momval = random.normalvariate(0, 1)     # Normally distributed about origin, unit sigma.
+
             # Create our dynamical guts, namely a CanonicalCoordinatePair (q,p).
         
-        inst.ccp = CanonicalCoordinatePair(name, momval=Fixed(1),
+        inst.ccp = CanonicalCoordinatePair(name, momval=Fixed(momval),
                                            hamiltonian=hamiltonian,
                                            context=context)
 

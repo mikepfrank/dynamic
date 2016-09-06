@@ -4,7 +4,6 @@
 #|   The below module documentation string will be displayed by pydoc3.
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 """
-
     FILE NAME:      logmaster.py                [Python 3 module source file]
   
     MODULE NAME:    logmaster

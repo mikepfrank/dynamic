@@ -4,7 +4,6 @@
 #|   The below module documentation string will be displayed by pydoc3.
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 """
-
     FILE NAME:      dynamic-demo.py         [Python application source code]
 
     FULL PATH:      $GIT_ROOT/dynamic/dynamic-demo.py
@@ -275,8 +274,11 @@ def _main():
         # testing during development.  Tell it that it's going to
         # be using that simulation context that we just created.
 
-    _logger.normal("Creating an ExampleNetwork_MemCell instance...")                
-    net = exampleNetworks.MemCellNet(context=sc)
+    #_logger.normal("Creating an exampleNetworks.MemCellNet instance...")                
+    #net = exampleNetworks.MemCellNet(context=sc)
+
+    _logger.normal("Creating an exampleNetworks.InverterNet instance...")                
+    net = exampleNetworks.InverterNet(context=sc)
 
     _logger.debug("Initial node q momentum is: %f" % 
                   net.node('q').coord.momentum.value)

@@ -318,16 +318,24 @@ class SimulationContext:
             # Some simple diagnostic output (not general): Display
             # position and momentum values of the node named 'q'.
             
-        _logger.normal("%d, %.9f, %d, %.9f" %
-                      (self.network._nodes['q'].coord.position.time,
+        _logger.normal("%d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f" %
+                      (self.network._nodes['p'].coord.position.time,
+                       self.network._nodes['p'].coord.position(),
+                       self.network._nodes['p'].coord.momentum.time,
+                       self.network._nodes['p'].coord.momentum(),
+                       self.network._nodes['q'].coord.position.time,
                        self.network._nodes['q'].coord.position(),
                        self.network._nodes['q'].coord.momentum.time,
-                       self.network._nodes['q'].coord.momentum()))
+                       self.network._nodes['q'].coord.momentum()
+                       ))
 
     def test(self):
         """Displays the state of the node 'q' from times 0 to 1000,
            stepping forward 2 time units at a time.  (This ensures
            that both position & momentum are updated between points.)"""
+
+        _logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
+        
         self.printDiagnostics()
         #for t in range(10):
         for t in range(500):

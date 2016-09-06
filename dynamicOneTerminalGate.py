@@ -8,7 +8,7 @@ from dynamicNetwork                 import DynamicNetwork,netName
 
 logger = logmaster.getLogger(logmaster.sysName + '.network')
 
-class TooManyPortsException(Exception): pass
+class WrongNumberOfPortsException(Exception): pass
 
 #-- A DynamicOneTerminalGate has one node called "output"
 #   together with a single built-in potential energy function.
@@ -82,7 +82,7 @@ class DynamicOneTerminalGate(DynamicComponent):
 
             # Add our output node to the network.
 
-        network.addNode(inst.outputNode)
+        if network != None:  network.addNode(inst.outputNode)
 
     @property
     def portName(this):
@@ -108,7 +108,7 @@ class DynamicOneTerminalGate(DynamicComponent):
             return None         # return that our port is None.
         #print("%d ports" % nPorts)
         if nPorts > 1:
-            raise TooManyPortsException("One-terminal gate %s was found to have %d ports (%s)!" %
+            raise WrongNumberOfPortsException("One-terminal gate %s was found to have %d ports (%s)!" %
                                         (this, nPorts, str(ports)))
         assert nPorts == 1              # We should have exactly one port.
         return list(ports.values())[0]  # Return that port.
@@ -142,7 +142,7 @@ class DynamicOneTerminalGate(DynamicComponent):
             
             this._potential = potential
             
-            this._addInteraction(this._potential)
+            this._addInteraction(potential)
                 # Add the potential to this component's interaction list.
 
     @potential.deleter
@@ -153,8 +153,5 @@ class DynamicOneTerminalGate(DynamicComponent):
 
         del this._potential
     
-
-
-
 
         

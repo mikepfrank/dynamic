@@ -37,7 +37,8 @@ class DynamicMemCell(DynamicOneTerminalGate):
     #   memory cell; the output node is also created.
     #   By default we have zero bias, and unit "stiffness."
 
-    def __init__(inst, name:str=None, network:DynamicNetwork=None, biasval = 0.0, stiffness = 1.0):
+    def __init__(inst, name:str=None, network:DynamicNetwork=None,
+                 biasval = 0.0, stiffness = 1.0):
 
         netname = netName(network)
 
@@ -66,4 +67,6 @@ class DynamicMemCell(DynamicOneTerminalGate):
         logger.debug("DynamicMemCell.__init__(): Output node momentum is: %f" % 
                       inst.outputNode.coord.ccp._momVar.value)
 
-        
+    #__/ End DynamicMemCell.__init__()
+
+#__/ End class DynamicMemCell

@@ -93,6 +93,7 @@ _logger = logmaster.getLogger(logmaster.sysName + '.examples')
 
 from dynamicNetwork     import  DynamicNetwork, netName     # Dynamic networks.
 from dynamicMemCell     import  DynamicMemCell              # Memory-cell component.
+from dynamicNOTGate     import  DynamicNOTGate              # Inverter component.
 from simulationContext  import  SimulationContext           # Context for simulation.
 
 
@@ -217,6 +218,29 @@ class MemCellNet(DynamicNetwork):
         
 #__/ End class MemCellNet.
 
+class InverterNet(DynamicNetwork):
+    def __init__(inst, context:SimulationContext=None):
+        DynamicNetwork.__init__(inst, name='exampleNet_inverter',
+                                title="Example network: Inverter",
+                                context=context)
+        netname = netName(inst)     # Should retrieve name set above.
+
+        inst._memCell = DynamicMemCell('memcell', network=inst)
+
+        inNode = inst._memCell.outputNode     # Output node of memcell = input to inverter.
+
+        inNode.renameTo('p')    # Call the inverter's input node 'p'.
+
+        inst._notGate = DynamicNOTGate(inNode, 'notgate', network=inst)
+
+        outNode = inst._notGate.outputNode
+
+        outNode.renameTo('q')   # Call the inverter's output node 'q'.
+    
+    #__/ End method InverterNet.__init__().
+
+#__/ End class InverterNet.
+        
 
         # ***** CONTINUE CLEANUP BELOW HERE *****
         
