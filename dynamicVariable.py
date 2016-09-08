@@ -170,6 +170,20 @@ class DynamicVariable(BaseDynamicFunction):
 
         inst.context = context
 
+    def renameTo(me, name:str):
+        me.name = name
+
+    @property
+    def value(me):
+        if hasattr(me, '_value'):
+            return me._value
+        else:
+            return None
+
+    @value.setter
+    def value(me,value):
+        me._value = value
+
     @property
     def timeDeriv(self):
         if hasattr(self,'_timeDeriv'):
@@ -315,3 +329,12 @@ class DynamicVariable(BaseDynamicFunction):
         this.value = this.value - 2 * this.timeDeriv(this.time - 1) * context.timedelta
         this.time  = this.time - 2
 
+    def __str__(me):
+        
+        name = me.name if me.name != None else '_' # placeholder
+
+        if me.value is None:
+            return name
+        else:
+            return "%s=%f@%d" % (str(me.name), float(me.value), int(me.time))
+    

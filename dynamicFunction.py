@@ -38,11 +38,22 @@ class BaseDynamicFunction(metaclass=ABCMeta):
         logger.debug("BaseDynamicFunction.__init__(): Setting name of BDF %s to %s..." %
                     (str(inst), name))
 
-        inst.name = name
+        if name != None: inst.name = name
         inst._function = function
 
+    @property
+    def name(inst):
+        if hasattr(inst, '_name'):
+            return inst._name
+        else:
+            return None
+
+    @name.setter
+    def name(inst, name:str):
+        inst._name = name
+
     def __str__(inst):
-        if hasattr(inst, 'name') and inst.name != None:
+        if inst.name != None:
             return inst.name
         else:
             return object.__str__(inst)    # Default object string method.

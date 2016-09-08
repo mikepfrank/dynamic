@@ -1,3 +1,6 @@
+import logmaster
+_logger = logmaster.getLogger(logmaster.sysName + '.network')
+
 from dynamicNode    import DynamicNode
 
 __all__ = ['Link', 'Port']
@@ -41,6 +44,9 @@ class Port:
         return (hasattr(this,'link') and
                 this.link != None and
                 this.link.node != None)
+
+    def __str__(this):
+        return "%s(%s)" % (this.name, str(this.component))
 
     # A Link connects a port (of a primitive component) to a node.
     
@@ -116,7 +122,12 @@ class Link:
 
         if node != None:
             this._node = node
-            node.addLink(this)
+                # Are we not already in the node's links?
+                # (Watch out for inefficiency here; maybe
+                # make the .links list a dictionary, or some
+                # efficient set type eventually.)
+            if this not in node.links:      
+                node.addLink(this)
 
     @node.deleter
     def node(this):
@@ -125,3 +136,6 @@ class Link:
         del this._node
 
 
+    def printInfo(this):
+        _logger.normal("\t\tLink: Node %s <-> Port %s" % (str(this.node), str(this.port)))
+        

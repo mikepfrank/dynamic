@@ -93,6 +93,8 @@ class DynamicNode:
             oldName = this.name
             this.name = name
 
+            this.coord.renameTo(name)
+
             if this.network != None:
                 this.network.noticeNodeNameChange(this, oldName)
 
@@ -109,3 +111,13 @@ class DynamicNode:
 
     def removeLink(this, link):
         this.links.remove(link)
+
+    def printInfo(this):
+        logger.normal("Detailed information for node %s:" % str(this))
+        logger.normal("\tLinks are:")
+        for link in this.links:
+            link.printInfo()
+        logger.normal("\tCoordinate information is:")
+        this.coord.printInfo()
+        logger.normal("\tNetwork's Hamiltonian is:")
+        this.network.hamiltonian.printInfo()

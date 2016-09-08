@@ -155,7 +155,7 @@ class FixedError(ErrorException):       # Error in this fixed-point module.
     """This base class is for errors detected in 'fixed', the fixed-point
        arithmetic module."""
     def __init__(inst, msg:str=None):
-        ErrorException.__init__(msg=msg, logger=_logger)
+        ErrorException.__init__(inst, msg=msg, logger=_logger)
 
 
             #|------------------------------------------------------------------

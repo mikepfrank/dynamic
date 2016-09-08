@@ -105,6 +105,11 @@ class CanonicalCoordinatePair:
         logger.debug("CanonicalCoordinatePair.__init__(): Just before exiting, " + 
                       "momentum value is %f" % inst._momVar.value)
 
+    def renameTo(me, name:str):
+        me.name = name
+        me._posVar.renameTo(name)
+        me._momVar.renameTo('p'+name)
+
     # When we talk about evolving a CCP to a specific timestep, what we mean by this
     # is to evolve its position variable to that timestep.
 
@@ -177,6 +182,9 @@ class DynamicCoordinate:
     #
     #       .context:SimulationContext - The simulation context
     #           that this dynamical coordinate exists in the context of.
+    #
+    #       position [Fixed] - Generalized position of this coordinate
+    #       velocity [Fixed] - Generalized velocity of this coordinate
 
     # Public data members:
     #
@@ -187,8 +195,6 @@ class DynamicCoordinate:
     #       ccp [CanonicalCoordinatePair] - This object holds the
     #           coordinate's position and momentum degrees of freedom.
     #
-    #       position [Fixed] - Generalized position of this coordinate
-    #       velocity [Fixed] - Generalized velocity of this coordinate
     #
     #       .kinetic_term - A term in the system's Hamiltonian that
     #           depends only on the generalized velocity of this
@@ -258,9 +264,14 @@ class DynamicCoordinate:
         termName = KEfunc.name + '(' + v.name + ')'
         KEHterm = HamiltonianTerm(termName, [v], KEfunc)
 
+        inst.kinetic_term = KEHterm
+
             # Introduce this new kinetic energy term into the Hamiltonian.
 
         hamiltonian.addTerm(KEHterm)
+
+    def renameTo(me, name:str):
+        me.ccp.renameTo(name)
 
     def evolveTo(inst, timestep:int):
         inst.ccp.evolveTo(timestep)
@@ -292,5 +303,8 @@ class DynamicCoordinate:
             else:
                 raise ReinitializationException()
 
-
-
+    def printInfo(me):
+        logger.normal("\t\tPosition variable: %s" % str(me.position))
+        logger.normal("\t\tMomentum variable: %s" % str(me.momentum))
+        #logger.normal("\t\tHamiltonian:")
+        #me.hamiltonian.printInfo()

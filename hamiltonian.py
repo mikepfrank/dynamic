@@ -318,3 +318,8 @@ class Hamiltonian(DifferentiableDynamicFunction):
             return self._varTerms[v]
         else:
             return []
+
+    def printInfo(me):
+        logger.normal("\tHamiltonian %s has these terms:" % str(me))
+        for t in me._terms:
+            t.printInfo()

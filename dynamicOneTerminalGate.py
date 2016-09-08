@@ -72,9 +72,15 @@ class DynamicOneTerminalGate(DynamicComponent):
         logger.debug("DynamicOneTerminalGate.__init__(): "+
                       "Output node momentum is %f" % inst.outputNode.coord.ccp._momVar.value)
 
+        logger.normal("DynamicOneTerminalGate.__init__: Before linking output node:")
+        inst.outputNode.printInfo()
+
             # Link our port named <portName> to our output node.
 
         inst.link(portName, inst.outputNode)
+
+        logger.normal("DynamicOneTerminalGate.__init__: After linking output node:")
+        inst.outputNode.printInfo()
 
             # Set our potential energy function to the given function.
 

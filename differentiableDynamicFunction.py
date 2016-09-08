@@ -268,5 +268,11 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
         return None
 
-
-            
+    def printInfo(me):
+        msg = "\t\t%s[" % me.name
+        for v in me._varList:
+            msg += v.name
+            if v is not me._varList[-1]:
+                msg += ','
+        msg += ']'
+        logger.normal(msg)

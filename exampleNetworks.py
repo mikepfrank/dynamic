@@ -219,24 +219,36 @@ class MemCellNet(DynamicNetwork):
 #__/ End class MemCellNet.
 
 class InverterNet(DynamicNetwork):
+    
     def __init__(inst, context:SimulationContext=None):
+        
         DynamicNetwork.__init__(inst, name='exampleNet_inverter',
                                 title="Example network: Inverter",
                                 context=context)
+        
         netname = netName(inst)     # Should retrieve name set above.
 
         inst._memCell = DynamicMemCell('memcell', network=inst)
 
         inNode = inst._memCell.outputNode     # Output node of memcell = input to inverter.
 
+        _logger.normal("Before creating NOT gate, input node details are:")
+        inNode.printInfo()  # Temporary diagnostic for debugging.
+
         inNode.renameTo('p')    # Call the inverter's input node 'p'.
+
+        _logger.normal("Renamed input node from q to p; now its details are:")
+        inNode.printInfo()
 
         inst._notGate = DynamicNOTGate(inNode, 'notgate', network=inst)
 
         outNode = inst._notGate.outputNode
 
         outNode.renameTo('q')   # Call the inverter's output node 'q'.
-    
+
+        _logger.normal("Finished creating %s.  Now input node details are:" % netname)    
+        inNode.printInfo()  # Temporary diagnostic for debugging.
+
     #__/ End method InverterNet.__init__().
 
 #__/ End class InverterNet.

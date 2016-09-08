@@ -34,10 +34,10 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
 
         logger.debug("Initializing the HamiltonianVariable named %s..." % name)
 
+        DynamicVariable.__init__(inst, name, value, time, context=context)
+
         if hamiltonian != None:  inst.hamiltonian = hamiltonian
             # Goes ahead and sets our time derivative as a side-effect.
-
-        DynamicVariable.__init__(inst, name, value, time, context=context)
 
     @property
     def hamiltonian(self):
@@ -63,6 +63,7 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
 
     @abstractmethod
     def setTimeDeriv(self): pass
+
 
 # Forward declarations to avoid circularity.
 
