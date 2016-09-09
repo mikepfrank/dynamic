@@ -1,3 +1,5 @@
+import logmaster
+_logger = logmaster.getLogger(logmaster.sysName + '.simulator')
 
 from binaryDifferentiableFunction import BinaryDifferentiableFunction
 
@@ -31,10 +33,18 @@ class DynamicTwoTerminalGate(DynamicComponent):
 
             # First do generic initialization for dynamic components.
 
+        _logger.normal("DynamicTwoTerminalGate.__init__(): Initializing "
+                       "component named %s in network %s." %
+                       (name, str(network)))
+        
         DynamicComponent.__init__(inst, name=name, network=network)
 
             # Create our two ports, named "input" and "output".
 
+        _logger.normal("DynamicTwoTerminalGate.__init__(): Creating two "
+                       "ports named %s and %s..." %
+                       (inPortName, outPortName))
+        
         inst._addPorts(inPortName, outPortName)
 
             # Remember our port name for future reference.
@@ -44,12 +54,29 @@ class DynamicTwoTerminalGate(DynamicComponent):
 
             # Link our input node to our input port.
 
+        _logger.normal("DynamicTwoTerminalGate.__init__(): Linking input "
+                       "node %s to our port named %s..." %
+                       (str(inputNode), inPortName))
+
         inst.inputNode = inputNode
         inst.link(inPortName, inputNode)
 
+        _logger.normal("DynamicTwoTerminalGate.__init__(): Right after "
+                       "linking input node, it is as follows:")
+        inputNode.printInfo()
+
             # Create and remember our output node named "out".
 
-        inst.outputNode = DynamicNode(network, name='out')
+        initialOutputNodeName = 'out'
+
+        _logger.normal("DynamicTwoTerminalGate.__init__(): Creating output "
+                       "node initially named %s..." % initialOutputNodeName)
+        
+        inst.outputNode = DynamicNode(network, name=initialOutputNodeName)
+
+        _logger.normal("DynamicTwoTerminalGate.__init__(): Linking new "
+                       "output node %s to our port named %s..." %
+                       (str(inst.outputNode), outPortName))
 
             # Link our port named "output" to our output node.
 
@@ -57,11 +84,19 @@ class DynamicTwoTerminalGate(DynamicComponent):
 
             # Set our interaction function to the given function.
 
+        _logger.normal("DynamicTwoTerminalGate.__init__(): Setting "
+                       "interaction function to %s..." %
+                       str(interaction))
+
         if interaction != None:  inst.interaction = interaction
+        
+# The below shouldn't be needed since the node was created in the network already.
+#
+##            # Add our output node to the network.
+##
+##        if network != None:  network.addNode(inst.outputNode)
 
-            # Add our output node to the network.
-
-        if network != None:  network.addNode(inst.outputNode)
+    #__/ End method DynamicTwoTerminalGate.__init__().
 
     @property
     def inPortName(this):

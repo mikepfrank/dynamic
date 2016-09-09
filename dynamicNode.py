@@ -63,6 +63,8 @@ class DynamicNode:
         logger.debug("DynamicNode.__init__(): Coordinate momentum is %f" %
                       inst.coord.ccp._momVar.value)
 
+        network.addNode(inst)   # Add this node to the network
+
     def evolveTo(inst, timestep:int):
         logger.debug("Node %s is going to evolve to timestep %d...", inst.name, timestep)
         inst.coord.evolveTo(timestep)

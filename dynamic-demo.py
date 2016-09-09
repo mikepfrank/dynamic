@@ -237,8 +237,8 @@ def _main():
     # Uncomment the first line below and comment the second to turn on
     # log-file debug messages.
     
-    configLogMaster(logdebug = True, role = 'startup', component = appName)
-    #configLogMaster(loginfo = True, role = 'startup', component = appName)
+    #configLogMaster(logdebug = True, role = 'startup', component = appName)
+    configLogMaster(loginfo = True, role = 'startup', component = appName)
         # Configure the logger to turn on log-file info output, set this
         # main thread's role to "startup" and set the thread component to
         # "demoApp".
@@ -290,7 +290,7 @@ def _main():
     
     logmaster.setThreadRole('running')
     
-    #sc.test()  # This method exercises some basic simulation capabilities.
+    sc.test()  # This method exercises some basic simulation capabilities.
 
     logmaster.setThreadRole('shutdown')
 

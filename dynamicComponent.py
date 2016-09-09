@@ -127,7 +127,7 @@ class DynamicComponent:
         logger.debug("Linking port '%s' of component '%s' to node '%s'..."
                      % (portName, str(this), str(node)))
 
-        Link(this._ports[portName], node)
+        Link(this.portNamed(portName), node)
 
     #-- inst.portLinked(portName) - Returns True if our port named 'portName' is linked
     #       to some node currently; returns False otherwise (including if we have no such port).

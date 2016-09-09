@@ -249,6 +249,9 @@ class InverterNet(DynamicNetwork):
         _logger.normal("Finished creating %s.  Now input node details are:" % netname)    
         inNode.printInfo()  # Temporary diagnostic for debugging.
 
+        _logger.normal("Meanwhile, output node details are:")    
+        outNode.printInfo()  # Temporary diagnostic for debugging.
+
     #__/ End method InverterNet.__init__().
 
 #__/ End class InverterNet.
