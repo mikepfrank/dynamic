@@ -52,6 +52,10 @@ class BaseDynamicFunction(metaclass=ABCMeta):
     def name(inst, name:str):
         inst._name = name
 
+    def renameTo(me, name:str):
+        logger.info("BaseDynamicFunction.renameTo(): %s is renaming itself to %s...", me.name, name)
+        me.name = name    # This invokes the above @name.setter
+
     def __str__(inst):
         if inst.name != None:
             return inst.name
@@ -191,7 +195,7 @@ class SummerDynamicFunction(BaseDynamicFunction):
 
     def evaluateWith(inst, *args, **kwargs):
 
-        logger.debug("SummerDynamicFunction.evaluateWith(): Evaluating summer with arguments: %s %s" %
+        logger.info("SummerDynamicFunction.evaluateWith(): Evaluating summer with arguments: %s %s" %
                      (str(args), str(kwargs)))
         
         if len(inst._terms) == 0:
@@ -203,12 +207,19 @@ class SummerDynamicFunction(BaseDynamicFunction):
 
         assert not firstTerm == None
         
-        cumSum = firstTerm.evaluateWith(*args, **kwargs)
+        termVal = firstTerm.evaluateWith(*args, **kwargs)
+        logger.info("SummerDynamicFunction.evaluateWith(): Term %s "
+                    "evaluates to %f." % (str(firstTerm), float(termVal)))
+        
+        cumSum = termVal
 
         while True:
             term = next(termIterator,None)
             if term == None:  break
-            cumSum = cumSum + term.evaluateWith(*args, **kwargs)
+            termVal = term.evaluateWith(*args, **kwargs)
+            logger.info("SummerDynamicFunction.evaluateWith(): Term %s "
+                        "evaluates to %f." % (str(term), float(termVal)))
+            cumSum = cumSum + termVal
             
         return cumSum
 

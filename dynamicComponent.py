@@ -124,7 +124,7 @@ class DynamicComponent:
 
     def link(this, portName:str, node:DynamicNode):
 
-        logger.debug("Linking port '%s' of component '%s' to node '%s'..."
+        logger.info("Linking port '%s' of component '%s' to node '%s'..."
                      % (portName, str(this), str(node)))
 
         Link(this.portNamed(portName), node)

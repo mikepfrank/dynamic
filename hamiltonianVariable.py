@@ -8,6 +8,7 @@ logger = logmaster.getLogger(logmaster.sysName + '.simulator')
 
 from fixed                          import Fixed     # Fixed-precision math class.
 from linearFunction                 import ProportionalFunction
+from dynamicFunction                import BaseDynamicFunction
 from dynamicVariable                import DynamicVariable
 from hamiltonian                    import Hamiltonian
 from differentiableDynamicFunction  import DifferentiableDynamicFunction
@@ -193,6 +194,8 @@ class MomentumVariable(HamiltonianVariable):
     #       variable is associated with in canonical coordinates.
     #       Accessed through the .conjugatePosition @property.
     #
+    #   ._velVar - The velocity variable derived from this momentum variable.
+    #
     # Public data members:
     #
     #   .hamiltonian - The Hamiltonian energy function of the system
@@ -252,6 +255,16 @@ class MomentumVariable(HamiltonianVariable):
 
             self._timeDeriv = momTimeDeriv            
 
+    # When a momentum variable's name changes, so should its derived velocity variable.
+    # But really the following should be done in some more general way... Like,
+    # a variable should track all the DerivedDynamicFunctions that are derived
+    # from it, and notify them all of things they might want to know about
+    # like name changes
+
+    def renameTo(me, name:str):
+        BaseDynamicFunction.renameTo(me, name)
+        if hasattr(me,'_velVar'):
+            me._velVar.renameYourself()
         
 
 #  A VelocityVariable is a variable v that is related to a
@@ -282,7 +295,20 @@ class VelocityVariable(DifferentiableDynamicFunction):
 
         DifferentiableDynamicFunction.__init__(inst, velVarName, [momVar], velFunc)
 
+            # This makes it easy for our momentum variable to notify us of name changes...
+            # But really the following should be done in some more general way... Like,
+            # a variable should track all the DerivedDynamicFunctions that are derived
+            # from it, and notify them all of things they might want to know about
+            # like name changes
+
+        momVar._velVar = inst
+
     @property
     def value(inst):
         return inst()
 
+        # Hey buddy, your underlying variable's name has changed, so you really
+        # ought to rename yourself accordingly.
+    def renameYourself(me):   
+        velVarName = 'v' + me._momVar.name[1:]
+        me.renameTo(velVarName)

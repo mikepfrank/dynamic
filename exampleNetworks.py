@@ -235,7 +235,7 @@ class InverterNet(DynamicNetwork):
         _logger.normal("Before creating NOT gate, input node details are:")
         inNode.printInfo()  # Temporary diagnostic for debugging.
 
-        inNode.renameTo('p')    # Call the inverter's input node 'p'.
+        inNode.renameTo('X')    # Call the inverter's input node 'X'.
 
         _logger.normal("Renamed input node from q to p; now its details are:")
         inNode.printInfo()
@@ -244,7 +244,7 @@ class InverterNet(DynamicNetwork):
 
         outNode = inst._notGate.outputNode
 
-        outNode.renameTo('q')   # Call the inverter's output node 'q'.
+        outNode.renameTo('Y')   # Call the inverter's output node 'Y'.
 
         _logger.normal("Finished creating %s.  Now input node details are:" % netname)    
         inNode.printInfo()  # Temporary diagnostic for debugging.

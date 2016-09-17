@@ -74,13 +74,18 @@ class CanonicalCoordinatePair:
         inst.name = name
 
         if isinstance(name,str):
+            qname = 'q' + name
+        else:
+            qname = None
+
+        if isinstance(name,str):
             pname = 'p' + name
         else:
             pname = None
 
         #-- Create the position and momentum variables.
             
-        q = PositionVariable(name, value=posval, hamiltonian=hamiltonian, context=context)
+        q = PositionVariable(qname, value=posval, hamiltonian=hamiltonian, context=context)
         p = MomentumVariable(pname, value=momval, hamiltonian=hamiltonian, context=context)
 
         logger.debug("CanonicalCoordinatePair.__init__(): Just after creating " + 
@@ -107,7 +112,7 @@ class CanonicalCoordinatePair:
 
     def renameTo(me, name:str):
         me.name = name
-        me._posVar.renameTo(name)
+        me._posVar.renameTo('q'+name)
         me._momVar.renameTo('p'+name)
 
     # When we talk about evolving a CCP to a specific timestep, what we mean by this

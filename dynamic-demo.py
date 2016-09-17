@@ -280,8 +280,8 @@ def _main():
     _logger.normal("Creating an exampleNetworks.InverterNet instance...")                
     net = exampleNetworks.InverterNet(context=sc)
 
-    _logger.debug("Initial node q momentum is: %f" % 
-                  net.node('q').coord.momentum.value)
+##    _logger.debug("Initial node X momentum is: %f" % 
+##                  net.node('X').coord.momentum.value)
 
         #---------------------------------------------------------
         # Run the built-in .test() method of the example network.

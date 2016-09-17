@@ -170,8 +170,9 @@ class DynamicVariable(BaseDynamicFunction):
 
         inst.context = context
 
-    def renameTo(me, name:str):
-        me.name = name
+# Now this is in BaseDynamicFunction
+##    def renameTo(me, name:str):
+##        me.name = name
 
     @property
     def value(me):
@@ -278,15 +279,15 @@ class DynamicVariable(BaseDynamicFunction):
             logger.error("DynamicVariable.stepForward: " + errStr)
             raise UnsetTimeDerivativeError(errStr)
 
-        logger.debug(("DynamicVariable.stepForward():  " +
+        logger.info(("DynamicVariable.stepForward():  For variable %s:  " +
                       "Attempt to evaluate time derivative function %s at time step %d...")
-                     % (str(this.timeDeriv), (this.time + 1)))
+                     % (str(this), str(this.timeDeriv), (this.time + 1)))
 
         derivVal = this.timeDeriv(this.time + 1)
 
-        logger.debug(("DynamicVariable.stepForward():  " +
+        logger.info(("DynamicVariable.stepForward():  For variable %s at time %d:  " +
                      "Got the time derivative value %f...")
-                     % float(derivVal))
+                     % (str(this), this.time + 1, float(derivVal)))
 
 ##        logger.normal("Stepping variable %s from %f @ time %d to %f @ time %d (delta = %f)" %
 ##                      (this.name, this.value, this.time,
