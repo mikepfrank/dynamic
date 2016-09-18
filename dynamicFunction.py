@@ -208,18 +208,21 @@ class SummerDynamicFunction(BaseDynamicFunction):
         assert not firstTerm == None
         
         termVal = firstTerm.evaluateWith(*args, **kwargs)
-        logger.info("SummerDynamicFunction.evaluateWith(): Term %s "
+        logger.info("SummerDynamicFunction.evaluateWith(): #1 term %s "
                     "evaluates to %f." % (str(firstTerm), float(termVal)))
         
         cumSum = termVal
 
+        ti=2
         while True:
             term = next(termIterator,None)
             if term == None:  break
             termVal = term.evaluateWith(*args, **kwargs)
-            logger.info("SummerDynamicFunction.evaluateWith(): Term %s "
-                        "evaluates to %f." % (str(term), float(termVal)))
+            logger.info("SummerDynamicFunction.evaluateWith(): #%d term %s "
+                        "evaluates to %f (cum. sum = %f)."
+                        % (ti, str(term), float(termVal), float(cumSum)))
             cumSum = cumSum + termVal
+            ti=ti+1
             
         return cumSum
 

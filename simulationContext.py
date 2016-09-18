@@ -338,7 +338,7 @@ class SimulationContext:
         
         self.printDiagnostics()
         #for t in range(10):
-        for t in range(500):
+        for t in range(1000):
             self.stepForward(2)
             self.printDiagnostics()
 

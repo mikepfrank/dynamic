@@ -237,7 +237,7 @@ class InverterNet(DynamicNetwork):
 
         inNode.renameTo('X')    # Call the inverter's input node 'X'.
 
-        _logger.normal("Renamed input node from q to p; now its details are:")
+        _logger.normal("Renamed input node from q to X; now its details are:")
         inNode.printInfo()
 
         inst._notGate = DynamicNOTGate(inNode, 'notgate', network=inst)
