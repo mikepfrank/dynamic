@@ -8,7 +8,7 @@ from dynamicNetwork                 import *    # We reference class DynamicNetw
 
 class DynamicNOTFunction(BinaryDifferentiableFunction):
 
-    def __init__(inst, stiffness):
+    def __init__(inst, stiffness:Real):
 
             # Set up some names
 
@@ -19,7 +19,7 @@ class DynamicNOTFunction(BinaryDifferentiableFunction):
             # Set up our function.
 
         inst.stiffness = stiffness
-        function = lambda x,y:  0.5 * stiffness * (x + y - 1)**2
+        function = lambda x,y:  0.5 * inst.stiffness * (x + y - 1)**2
 
             # Set up our partial derivatives with respect to x and y.
 

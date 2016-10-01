@@ -58,7 +58,7 @@
     #|   1. Module imports.                                [module code section]
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-import  logmaster   # Provides logging capabilities.
+import logmaster; from logmaster import *   # Provides logging capabilities.
 
 from fixed          import Fixed                # Fixed-point arithmetic.
 from dynamicNetwork import DynamicNetwork       # A network of dynamic nodes.
@@ -84,7 +84,7 @@ global  _logger
     # The logmaster-based logger object that we'll use for logging
     # within this module.
     
-_logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+_logger = getLogger(logmaster.sysName + '.simulator')
     # The simulationContext module is part of our core simulation facility.
 
 
@@ -310,37 +310,46 @@ class SimulationContext:
 
         # A simple test:  Simply step the simulation forward 10 steps.
 
-    def printDiagnostics(self):
-        """A quick-and-dirty diagnostic method which assumes that
-           there is a node named 'q' in the simulated network, and
-           displays its position and momentum coordinates."""
-        
-            # Some simple diagnostic output (not general): Display
-            # position and momentum values of the node named 'q'.
-            
-        _logger.normal("%d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f" %
-                      (self.network._nodes['X'].coord.position.time,
-                       self.network._nodes['X'].coord.position(),
-                       self.network._nodes['X'].coord.momentum.time,
-                       self.network._nodes['X'].coord.momentum(),
-                       self.network._nodes['Y'].coord.position.time,
-                       self.network._nodes['Y'].coord.position(),
-                       self.network._nodes['Y'].coord.momentum.time,
-                       self.network._nodes['Y'].coord.momentum()
-                       ))
+# Moved this code into the example networks themselves.
+##    def printDiagnostics(self):
+##        """A quick-and-dirty diagnostic method which assumes that
+##           there is a node named 'q' in the simulated network, and
+##           displays its position and momentum coordinates."""
+##        
+##            # Some simple diagnostic output (not general): Display
+##            # position and momentum values of the node named 'q'.
+##            
+##        _logger.normal("%d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f" %
+##                      (self.network.nodes['X'].coord.position.time,
+##                       self.network.nodes['X'].coord.position(),
+##                       self.network.nodes['X'].coord.momentum.time,
+##                       self.network.nodes['X'].coord.momentum(),
+##                       self.network.nodes['Y'].coord.position.time,
+##                       self.network.nodes['Y'].coord.position(),
+##                       self.network.nodes['Y'].coord.momentum.time,
+##                       self.network.nodes['Y'].coord.momentum()
+##                       ))
 
     def test(self):
-        """Displays the state of the node 'q' from times 0 to 1000,
+        """Displays the states of the nodes from times 0 to 1000,
            stepping forward 2 time units at a time.  (This ensures
            that both position & momentum are updated between points.)"""
 
-        _logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
+        self.network.initStats()
+
+        if doNorm:
+            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
+            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, C.qt, C.q, C.pt, C.p")
         
-        self.printDiagnostics()
+        self.network.printDiagnostics()
         #for t in range(10):
-        for t in range(1000):
+#        for t in range(1000):
+        for t in range(10000):
             self.stepForward(2)
-            self.printDiagnostics()
+            self.network.printDiagnostics()
+            self.network.gatherStats()
+
+        self.network.printStats()
 
 #__/ End class SimulationContext.
 

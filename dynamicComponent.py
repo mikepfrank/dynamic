@@ -1,6 +1,6 @@
 from typing                     import Iterable
 
-import logmaster
+import logmaster; from logmaster import *
 
 from differentiableFunction     import BaseDifferentiableFunction
 from linkport                   import Link,Port
@@ -11,7 +11,7 @@ import dynamicNetwork
 
 __all__ = ['DynamicComponent']
 
-logger = logmaster.getLogger(logmaster.sysName + '.network')
+logger = getLogger(logmaster.sysName + '.network')
 
 #-- This is a base class from which to derive subclasses for specific
 #   types of Dynamic components.  The general features of a component
@@ -52,9 +52,10 @@ class DynamicComponent:
         if network != None: inst._network = network
 
         netname = dynamicNetwork.netName(network)
-        
-        logger.debug("Initializing a new DynamicComponent named '%s' in network '%s'" %
-                     (str(name), netname))
+
+        if doDebug:        
+            logger.debug("Initializing a new DynamicComponent named '%s' in network '%s'" %
+                         (str(name), netname))
         
         inst._ports = dict()        # Initially-empty dictionary mapping port name to port object.
         inst._interactions = []     # Initially-empty list of interaction functions.
@@ -105,9 +106,10 @@ class DynamicComponent:
     #       named <portName>.  It's initially not linked to anything.
 
     def _addPort(this, portName:str):
-        
-        logger.debug("Adding a port named '%s' to component '%s'..."
-                     % (portName, str(this)))
+
+        if doDebug:
+            logger.debug("Adding a port named '%s' to component '%s'..."
+                         % (portName, str(this)))
         
         this._ports[portName] = Port(this, portName)
 
@@ -124,8 +126,9 @@ class DynamicComponent:
 
     def link(this, portName:str, node:DynamicNode):
 
-        logger.info("Linking port '%s' of component '%s' to node '%s'..."
-                     % (portName, str(this), str(node)))
+        if doInfo:
+            logger.info("Linking port '%s' of component '%s' to node '%s'..."
+                         % (portName, str(this), str(node)))
 
         Link(this.portNamed(portName), node)
 
@@ -182,7 +185,8 @@ class DynamicComponent:
             else:
                 varnames += ', ' + posVar.name
 
-        logger.debug("New term name for interaction %s combines %s and %s..." % (interaction, interaction.name, varnames))
+        if doDebug:
+            logger.debug("New term name for interaction %s combines %s and %s..." % (interaction, interaction.name, varnames))
         
         termname = interaction.name + '(' + varnames + ')'
 
@@ -191,7 +195,8 @@ class DynamicComponent:
         
         hamTerm = HamiltonianTerm(termname, varList, interaction)
 
-        logger.debug("Just created a new Hamiltonian term %s..." % str(hamTerm))
+        if doDebug:
+            logger.debug("Just created a new Hamiltonian term %s..." % str(hamTerm))
 
         return hamTerm
 
@@ -201,8 +206,9 @@ class DynamicComponent:
 
     def _addInteraction(this, potential:BaseDifferentiableFunction):
 
-        logger.debug("Adding interaction function %s to component %s..." %
-                     (str(potential), this.name))
+        if doDebug:
+            logger.debug("Adding interaction function %s to component %s..." %
+                         (str(potential), this.name))
 
         interactionIndex = len(this._interactions)
 
@@ -217,7 +223,8 @@ class DynamicComponent:
 
         if this.interactionPortsLinked(interactionIndex):
 
-            logger.debug("Interaction ports are linked; adding term to network's Hamiltonian...")
+            if doDebug:
+                logger.debug("Interaction ports are linked; adding term to network's Hamiltonian...")
 
                 # This returns the Hamiltonian term for this interaction if we haven't
                 # previously constructed it.
@@ -229,7 +236,8 @@ class DynamicComponent:
             this.network._addHamiltonianTerm(term)
 
         else:
-            logger.warn("Interaction ports not yet linked; can't create Hamiltonian term yet...")
+            if doWarn:
+                logger.warn("Interaction ports not yet linked; can't create Hamiltonian term yet...")
 
     # Removes a given interaction function from this component's list of interactions functions.
 

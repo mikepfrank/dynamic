@@ -17,7 +17,7 @@ from dynamicNetwork     import DynamicNetwork
 class DynamicTwoTerminalGate(DynamicComponent):
 
     #-- Data members:
-    #       interaction [BinaryPotentialEnergyTerm] -
+    #       interaction [BinaryDifferentiableFunction] -
     #           Interaction potential energy function between the
     #           input and output node's coordinates (x,y).
 

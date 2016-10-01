@@ -1,5 +1,5 @@
-import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.network')
+import logmaster; from logmaster import *
+logger = getLogger(logmaster.sysName + '.network')
 
 from dynamicCoordinate import DynamicCoordinate
 
@@ -40,8 +40,9 @@ class DynamicNode:
 
     def __init__(inst, network:DynamicNetwork, name:str=None):
 
-        logger.debug("Creating a new dynamic node named %s in network %s..." %
-                        (name, str(network)))
+        if doDebug:
+            logger.debug("Creating a new dynamic node named %s in network %s..." %
+                            (name, str(network)))
 
         inst.network = network      # Remember our network
         
@@ -60,13 +61,17 @@ class DynamicNode:
         inst.coord = DynamicCoordinate(network.hamiltonian, name,
                                        context=network.context)
 
-        logger.debug("DynamicNode.__init__(): Coordinate momentum is %f" %
-                      inst.coord.ccp._momVar.value)
+        if doDebug:
+            logger.debug("DynamicNode.__init__(): Coordinate momentum is %f" %
+                          inst.coord.ccp._momVar.value)
 
         network.addNode(inst)   # Add this node to the network
 
     def evolveTo(inst, timestep:int):
-        logger.debug("Node %s is going to evolve to timestep %d...", inst.name, timestep)
+
+        if doDebug:
+            logger.debug("Node %s is going to evolve to timestep %d...", inst.name, timestep)
+            
         inst.coord.evolveTo(timestep)
 
     # The following two methods should really be turned into a .name property...
@@ -90,8 +95,10 @@ class DynamicNode:
                                             "Can't rename node %s to %s because "
                                             "that name is already used in network %s."
                                             % (str(this), name, str(this.network)))
-            
-            logger.info("Renaming node '%s' to '%s'" % (str(this), name))
+
+            if doInfo:            
+                logger.info("Renaming node '%s' to '%s'" % (str(this), name))
+                
             oldName = this.name
             this.name = name
 
@@ -115,11 +122,13 @@ class DynamicNode:
         this.links.remove(link)
 
     def printInfo(this):
-        logger.normal("Detailed information for node %s:" % str(this))
-        logger.normal("\tLinks are:")
-        for link in this.links:
-            link.printInfo()
-        logger.normal("\tCoordinate information is:")
-        this.coord.printInfo()
-        logger.normal("\tNetwork's Hamiltonian is:")
-        this.network.hamiltonian.printInfo()
+
+        if doInfo:
+            logger.info("Detailed information for node %s:" % str(this))
+            logger.info("\tLinks are:")
+            for link in this.links:
+                link.printInfo()
+            logger.info("\tCoordinate information is:")
+            this.coord.printInfo()
+            logger.info("\tNetwork's Hamiltonian is:")
+            this.network.hamiltonian.printInfo()

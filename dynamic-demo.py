@@ -112,7 +112,7 @@ if __name__ == "__main__":
         print("__main__: Importing custom application modules...", file=stderr)
 
 import  logmaster
-from    logmaster           import  configLogMaster, appLogger, info, normal
+from    logmaster           import  * # configLogMaster, appLogger, info, normal
     # The logmaster module defines our logging framework; we import
     # several definitions that we need from it.
 
@@ -238,9 +238,10 @@ def _main():
     # log-file debug messages.
     
     #configLogMaster(logdebug = True, role = 'startup', component = appName)
-    configLogMaster(loginfo = True, role = 'startup', component = appName)
-        # Configure the logger to turn on log-file info output, set this
-        # main thread's role to "startup" and set the thread component to
+    configLogMaster(role = 'startup', component = appName)
+        # Configure the logger with default settings (NORMAL and higher
+        # output to console, INFO and higher to log file), set this main
+        # thread's role to "startup" and set the thread component to
         # "demoApp".
 
     _logger = appLogger  # Get our application logger.
@@ -248,13 +249,14 @@ def _main():
     #----------------------------------------------
     # Application startup:  Display splash text.
 
-    _logger.info("Dynamic demo application is starting up...")
+    if doInfo: _logger.info("Dynamic demo application is starting up...")
 
-    print() # Just visual whitespace; no need to log it.
-    _logger.normal("Welcome to the Dynamic demo program, v0.1.")
-    _logger.normal("Copyright (c)2016 by Michael P. Frank.")
-    _logger.normal("All Rights Reserved.")
-    print()
+    if doNorm:
+        print() # Just visual whitespace; no need to log it.
+        _logger.normal("Welcome to the Dynamic demo program, v0.1.")
+        _logger.normal("Copyright (c)2016 by Michael P. Frank.")
+        _logger.normal("All Rights Reserved.")
+        print()
 
     #------------------------------------------------------
     # Below follows the main code of the demo application.
@@ -274,11 +276,16 @@ def _main():
         # testing during development.  Tell it that it's going to
         # be using that simulation context that we just created.
 
-    #_logger.normal("Creating an exampleNetworks.MemCellNet instance...")                
-    #net = exampleNetworks.MemCellNet(context=sc)
+##    _logger.normal("Creating an exampleNetworks.MemCellNet instance...")                
+##    net = exampleNetworks.MemCellNet(context=sc)
 
-    _logger.normal("Creating an exampleNetworks.InverterNet instance...")                
-    net = exampleNetworks.InverterNet(context=sc)
+##    _logger.normal("Creating an exampleNetworks.InverterNet instance...")                
+##    net = exampleNetworks.InverterNet(context=sc)
+
+    if doNorm:
+        _logger.normal("Creating an exampleNetworks.AndGateNet instance...")
+        
+    net = exampleNetworks.AndGateNet(context=sc)
 
 ##    _logger.debug("Initial node X momentum is: %f" % 
 ##                  net.node('X').coord.momentum.value)
@@ -286,7 +293,8 @@ def _main():
         #---------------------------------------------------------
         # Run the built-in .test() method of the example network.
 
-    _logger.normal("Requesting simulator to run a simple test...")
+    if doNorm:
+        _logger.normal("Requesting simulator to run a simple test...")
     
     logmaster.setThreadRole('running')
     
@@ -294,7 +302,8 @@ def _main():
 
     logmaster.setThreadRole('shutdown')
 
-    _logger.normal("Dynamic demo application is shutting down...")
+    if doNorm:
+        _logger.normal("Dynamic demo application is shutting down...")
 
     # End of main code of demo application.
     #---------------------------------------

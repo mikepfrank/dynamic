@@ -2,14 +2,14 @@ from typing     import Any,Callable,Iterable
 from functools  import partial
 from inspect    import getargspec
 
-import logmaster
+import logmaster; from logmaster import *
 
 __all__ = ['FunctionNotDefinedError',
            'TooManyArgumentsError',
            'UnknownArgumentsError',
            'PartiallyEvaluatableFunction']
 
-logger = logmaster.getLogger(logmaster.sysName + '.partialEval')
+logger = getLogger(logmaster.sysName + '.partialEval')
 
 class FunctionNotDefinedError(Exception): pass
     # At final-evaluation time, the actual function was still not defined.
@@ -37,6 +37,8 @@ class PartiallyEvaluatableFunction():   # Is callable().
         inst._name = name
 
         if argList == None:
+##            logger.normal("PartiallyEvaluatableFunction.__init__(): About to get the arg spec of function %s..." %
+##                         str(function))
             argList = getargspec(function).args
             
         inst._argList = list(argList)
@@ -87,7 +89,8 @@ class PartiallyEvaluatableFunction():   # Is callable().
                 argName = inst._argList[argIndex]
                 argDefs[argName] = argVal
             else:
-                logger.debug("Debug warning: Ignoring extra argument %s to %s..." % (str(argVal), str(inst)))
+                if doDebug:
+                    logger.debug("Debug warning: Ignoring extra argument %s to %s..." % (str(argVal), str(inst)))
             argIndex = argIndex + 1
 
             # OK, let's get our remaining list of formal argument names, if any.
@@ -114,8 +117,9 @@ class PartiallyEvaluatableFunction():   # Is callable().
             # If there are any extra keyword arguments left, they don't belong!
 
         if len(remkwargs) > 0:
-            logger.warn("Ignoring unexpected keyword arguments %s supplied to PartiallyEvaluatableFunction %s" %
-                        (str(kwargs), str(inst)))
+            if doWarn:
+                logger.warn("Ignoring unexpected keyword arguments %s supplied to PartiallyEvaluatableFunction %s" %
+                            (str(kwargs), str(inst)))
 ##            raise UnknownArgumentsError("Unknown keyword arguments %s were supplied to PartiallyEvaluatableFunction %s" %
 ##                                            (str(kwargs), str(inst)))
 

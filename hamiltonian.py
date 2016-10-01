@@ -35,8 +35,8 @@
 
 from typing import Callable,Iterable,Iterator,Set
 
-import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+import logmaster; from logmaster import *
+logger = getLogger(logmaster.sysName + '.simulator')
     # The hamiltonian module is part of our core simulation component.
 
 from dynamicFunction                import BaseDynamicFunction,SummerDynamicFunction
@@ -147,12 +147,18 @@ class Hamiltonian(DifferentiableDynamicFunction):
         def __iter__(inst): return inst
         def __next__(inst):
             term = next(inst._termIter)
-            logger.info("Hamiltonian.TermsPartialDerivIterator: Now taking the "
-                        "partial derivative of term %s wrt variable %s..." %
-                        (str(term),str(inst._variable)))
+
+            if doDebug:
+                logger.debug("Hamiltonian.TermsPartialDerivIterator: Now taking the "
+                             "partial derivative of term %s wrt variable %s..." %
+                             (str(term),str(inst._variable)))
+
             pd = term.dynPartialDerivWRT(inst._variable)
-            logger.info("Hamiltonian.TermsPartialDerivIterator: d%s/d%s = %s" %
-                        (str(term),str(inst._variable),str(pd)))
+
+            if doDebug:
+                logger.debug("Hamiltonian.TermsPartialDerivIterator: d%s/d%s = %s" %
+                             (str(term),str(inst._variable),str(pd)))
+                
             return pd
         
     # This public embedded class generates an Iterable for a given Hamiltonian
@@ -167,11 +173,16 @@ class Hamiltonian(DifferentiableDynamicFunction):
             inst._variable = var
         def __iter__(inst):
             inst._termList = inst._hamiltonian.termsContaining(inst._variable)
-            if len(inst._termList) == 0:
-                logger.warn("Hamiltonian.TermsPartialDerivIterable.__iter__(): " + 
-                            "This Hamiltonian has no terms containing variable %s!" % str(var))
-            logger.info("Hamiltonian.TermsPartialDerivIterable.__iter__(): "
-                        "The list of terms containing %s is %s" % (inst._variable, inst._termList))
+            
+            if doWarn:
+                if len(inst._termList) == 0:
+                    logger.warn("Hamiltonian.TermsPartialDerivIterable.__iter__(): " + 
+                                "This Hamiltonian has no terms containing variable %s!" % str(var))
+
+            if doDebug:
+                logger.debug("Hamiltonian.TermsPartialDerivIterable.__iter__(): "
+                             "The list of terms containing %s is %s" % (inst._variable, inst._termList))
+                
             return Hamiltonian.TermsPartialDerivIterator(inst._termList, inst._variable)
         def __len__(inst):
             return len(inst._termList)
@@ -186,12 +197,14 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
     def addTerm(inst, term:HamiltonianTerm):
 
-        logger.info("Adding term %s to Hamiltonian %s..." %
-                     (str(term), str(inst)))
+        if doDebug:
+            logger.debug("Adding term %s to Hamiltonian %s..." %
+                         (str(term), str(inst)))
 
         if term not in inst._terms:
 
-            logger.info("This is a new term, really adding it...")
+            if doDebug:
+                logger.debug("This is a new term, really adding it...")
             
             inst._terms |= {term}
 
@@ -209,8 +222,9 @@ class Hamiltonian(DifferentiableDynamicFunction):
                     varListStr += ','
             varListStr += ']'
 
-            logger.info("Set ._varList of %s to %s." %
-                         (str(inst), varListStr))
+            if doDebug:
+                logger.debug("Set ._varList of %s to %s." %
+                             (str(inst), varListStr))
 
                 # For each of the new term's variables, remember that
                 # this term is in the set of terms that references
@@ -234,8 +248,9 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
     def _register(inst, var:BaseDynamicFunction, term:HamiltonianTerm):
 
-        logger.info("Hamiltonian._register():  Registering that variable %s influences term %s..." %
-                     (str(var), str(term)))
+        if doDebug:
+            logger.debug("Hamiltonian._register():  Registering that variable %s influences term %s..." %
+                         (str(var), str(term)))
 
             # If we're already aware that this variable is associated
             # with some set of terms that it influences, make note of
@@ -258,8 +273,9 @@ class Hamiltonian(DifferentiableDynamicFunction):
                 termSetStr += ','
         termSetStr += '}'
 
-        logger.info("Hamiltonian._register():  The old set of terms influenced by variable %s was %s." %
-                    (str(var), termSetStr))
+        if doDebug:
+            logger.debug("Hamiltonian._register():  The old set of terms influenced by variable %s was %s." %
+                        (str(var), termSetStr))
 
             # Add the given term into the set of terms that we're aware
             # that this variable influences, and remember that for
@@ -274,7 +290,8 @@ class Hamiltonian(DifferentiableDynamicFunction):
 
         if len(newVarTerms) > len(varTerms):    # Size of set grew?
 
-            logger.info("Hamiltonian._register():  The new term %s is indeed new!" % str(term))
+            if doDebug:
+                logger.debug("Hamiltonian._register():  The new term %s is indeed new!" % str(term))
 
             inst._varTerms[var] = newVarTerms   # Store new set back in the dict.
 
@@ -282,7 +299,8 @@ class Hamiltonian(DifferentiableDynamicFunction):
                 del inst._partials[var]      # Clear any cached partial derivative info.
 
         else:
-            logger.info("Hamiltonian._register():  The new term %s doesn't seem new. Ignoring." % str(term))
+            if doDebug:
+                logger.debug("Hamiltonian._register():  The new term %s doesn't seem new. Ignoring." % str(term))
 
             # The below is just for diagnostic purposes.
 
@@ -294,8 +312,9 @@ class Hamiltonian(DifferentiableDynamicFunction):
                 termSetStr += ','
         termSetStr += '}'
 
-        logger.info("Hamiltonian._register():  The new set of terms influenced by variable %s is %s." %
-                    (str(var), termSetStr))
+        if doDebug:
+            logger.debug("Hamiltonian._register():  The new set of terms influenced by variable %s is %s." %
+                         (str(var), termSetStr))
 
             # If this "variable" is in fact a derived dynamic function,
             # then go into *its* variables and register them as influencing
@@ -368,6 +387,7 @@ class Hamiltonian(DifferentiableDynamicFunction):
             return []
 
     def printInfo(me):
-        logger.normal("\tHamiltonian %s has these terms:" % str(me))
-        for t in me._terms:
-            t.printInfo()
+        if doInfo:
+            logger.info("\tHamiltonian %s has these terms:" % str(me))
+            for t in me._terms:
+                t.printInfo()

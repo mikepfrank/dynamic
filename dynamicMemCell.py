@@ -1,10 +1,11 @@
 import logmaster
+from logmaster import *
 
 from quadraticFunction          import QuadraticFunction
 from dynamicOneTerminalGate     import DynamicOneTerminalGate
 from dynamicNetwork             import DynamicNetwork,netName
 
-logger = logmaster.getLogger(logmaster.sysName + '.network')
+logger = getLogger(logmaster.sysName + '.network')
 
 class DynamicBiasFunction(QuadraticFunction):
 
@@ -42,8 +43,9 @@ class DynamicMemCell(DynamicOneTerminalGate):
 
         netname = netName(network)
 
-        logger.debug("Initializing a new DynamicMemCell named '%s' in network '%s'" %
-                     (str(name), netname))
+        if doDebug:
+            logger.debug("Initializing a new DynamicMemCell named '%s' in network '%s'" %
+                         (str(name), netname))
 
             # Do generic initialization for dynamic one-terminal gates.
             # (Create port & output node, link it to our output port.)
@@ -53,9 +55,10 @@ class DynamicMemCell(DynamicOneTerminalGate):
             # Create the potential energy function relating the input
             # and output nodes.
 
-        logger.debug(("Setting up %s's dynamic bias function with bias "+
-                      "value %f and stiffness %f...") %
-                          (str(inst), biasval, stiffness))
+        if doDebug:
+            logger.debug(("Setting up %s's dynamic bias function with bias "+
+                          "value %f and stiffness %f...") %
+                              (str(inst), biasval, stiffness))
 
         biasFunc = DynamicBiasFunction(biasval, stiffness)
 
@@ -64,8 +67,9 @@ class DynamicMemCell(DynamicOneTerminalGate):
 
         inst.potential = biasFunc
 
-        logger.debug("DynamicMemCell.__init__(): Output node momentum is: %f" % 
-                      inst.outputNode.coord.ccp._momVar.value)
+        if doDebug:
+            logger.debug("DynamicMemCell.__init__(): Output node momentum is: %f" % 
+                          inst.outputNode.coord.ccp._momVar.value)
 
     #__/ End DynamicMemCell.__init__()
 

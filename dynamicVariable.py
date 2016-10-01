@@ -1,8 +1,8 @@
 from fixed  import Fixed     # Fixed-precision math class.
 from typing import Callable,Iterable
 
-import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+import logmaster; from logmaster import *
+logger = getLogger(logmaster.sysName + '.simulator')
     # The dynamicVariable module is part of our core simulation component.
 
 from differentiableFunction import BaseDifferentiableFunction
@@ -145,7 +145,8 @@ class DynamicVariable(BaseDynamicFunction):
                  timeDeriv:BaseDynamicFunction=None,
                  context:SimulationContext=None):
 
-        logger.debug("Initializing the DynamicVariable named %s..." % name)
+        if doDebug:
+            logger.debug("Initializing the DynamicVariable named %s..." % name)
 
             # Do default initialization for BaseDynamicFunctions.
             # We don't specify an underlying function here, since
@@ -265,8 +266,9 @@ class DynamicVariable(BaseDynamicFunction):
             this.evolveTo(this.time + nSteps)
             return
 
-        logger.debug("Stepping variable %s forward from time step %d..." %
-                    (this.name, this.time))
+        if doDebug:
+            logger.debug("Stepping variable %s forward from time step %d..." %
+                        (this.name, this.time))
 
         # print("value=%s, timeDeriv=%s" % (str(this.value), str(this.timeDeriv)))
 
@@ -279,15 +281,17 @@ class DynamicVariable(BaseDynamicFunction):
             logger.error("DynamicVariable.stepForward: " + errStr)
             raise UnsetTimeDerivativeError(errStr)
 
-        logger.info(("DynamicVariable.stepForward():  For variable %s:  " +
-                      "Attempt to evaluate time derivative function %s at time step %d...")
-                     % (str(this), str(this.timeDeriv), (this.time + 1)))
+        if doDebug:
+            logger.debug(("DynamicVariable.stepForward():  For variable %s:  " +
+                          "Attempt to evaluate time derivative function %s at time step %d...")
+                         % (str(this), str(this.timeDeriv), (this.time + 1)))
 
         derivVal = this.timeDeriv(this.time + 1)
 
-        logger.info(("DynamicVariable.stepForward():  For variable %s at time %d:  " +
-                     "Got the time derivative value %f...")
-                     % (str(this), this.time + 1, float(derivVal)))
+        if doDebug:
+            logger.debug(("DynamicVariable.stepForward():  For variable %s at time %d:  " +
+                          "Got the time derivative value %f...")
+                         % (str(this), this.time + 1, float(derivVal)))
 
 ##        logger.normal("Stepping variable %s from %f @ time %d to %f @ time %d (delta = %f)" %
 ##                      (this.name, this.value, this.time,
@@ -304,8 +308,9 @@ class DynamicVariable(BaseDynamicFunction):
         this.value = this.value + 2* derivVal * context.timedelta
         this.time  = this.time + 2
 
-        logger.debug("Stepped variable %s forward to value %f at time %d..." %
-                    (this.name, float(this.value), this.time))
+        if doDebug:
+            logger.debug("Stepped variable %s forward to value %f at time %d..." %
+                        (this.name, float(this.value), this.time))
 
     # Steps backwards in time by one minimal time increment (-2 units).
 

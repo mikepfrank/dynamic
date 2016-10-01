@@ -42,8 +42,8 @@ import random   # Python random-number generator module.
 
 from fixed  import Fixed     # Fixed-precision math class.
 
-import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+import logmaster; from logmaster import *
+logger = getLogger(logmaster.sysName + '.simulator')
     # The dynamicCoordinate module is part of our core simulator component.
 
 from hamiltonian                    import HamiltonianTerm,Hamiltonian
@@ -88,8 +88,9 @@ class CanonicalCoordinatePair:
         q = PositionVariable(qname, value=posval, hamiltonian=hamiltonian, context=context)
         p = MomentumVariable(pname, value=momval, hamiltonian=hamiltonian, context=context)
 
-        logger.debug("CanonicalCoordinatePair.__init__(): Just after creating " + 
-                      "momentum variable, its value is %f" % p.value)
+        if doDebug:
+            logger.debug("CanonicalCoordinatePair.__init__(): Just after creating " + 
+                          "momentum variable, its value is %f" % p.value)
 
         #-- Tie those two lil' guys together.  They'll
         #   respond by automatically setting up their time
@@ -107,8 +108,9 @@ class CanonicalCoordinatePair:
         inst._posVar = q
         inst._momVar = p
 
-        logger.debug("CanonicalCoordinatePair.__init__(): Just before exiting, " + 
-                      "momentum value is %f" % inst._momVar.value)
+        if doDebug:
+            logger.debug("CanonicalCoordinatePair.__init__(): Just before exiting, " + 
+                          "momentum value is %f" % inst._momVar.value)
 
     def renameTo(me, name:str):
         me.name = name
@@ -232,8 +234,9 @@ class DynamicCoordinate:
 
         if mass==None: mass = 1
 
-        logger.debug("Creating a new dynamical coordinate named %s with effective mass %f..."
-                     % (name, mass))
+        if doDebug:
+            logger.debug("Creating a new dynamical coordinate named %s with effective mass %f..."
+                         % (name, mass))
 
             # Remember how to get to our Hamiltonian for future reference.
 
@@ -309,7 +312,8 @@ class DynamicCoordinate:
                 raise ReinitializationException()
 
     def printInfo(me):
-        logger.normal("\t\tPosition variable: %s" % str(me.position))
-        logger.normal("\t\tMomentum variable: %s" % str(me.momentum))
-        #logger.normal("\t\tHamiltonian:")
-        #me.hamiltonian.printInfo()
+        if doInfo:
+            logger.info("\t\tPosition variable: %s" % str(me.position))
+            logger.info("\t\tMomentum variable: %s" % str(me.momentum))
+            #logger.normal("\t\tHamiltonian:")
+            #me.hamiltonian.printInfo()

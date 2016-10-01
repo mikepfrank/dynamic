@@ -104,7 +104,7 @@ import fractions    # Includes the Fraction class.
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 import logmaster                        # Provides logging capabilities.
-from logmaster import ErrorException    # We use this name a couple of times.
+from logmaster import * # ErrorException    # We use this name a couple of times.
 
 
     #|==========================================================================
@@ -393,7 +393,10 @@ class Fixed(numbers.Rational):
 
     def __add__(x,y):
         result = Fixed(x)
-        _logger.debug("Fixed.__add__(): Attempting to convert addend %s to Fixed..." % y)
+
+        if doDebug:
+            _logger.debug("Fixed.__add__(): Attempting to convert addend %s to Fixed..." % y)
+            
         yfixed = Fixed(y)
         result._numerator = result._numerator + yfixed._numerator
         return result

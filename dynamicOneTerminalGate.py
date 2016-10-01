@@ -1,4 +1,5 @@
 import logmaster
+from logmaster import *
 
 from unaryDifferentiableFunction    import UnaryDifferentiableFunction
 from linkport                       import Link,Port
@@ -6,7 +7,7 @@ from dynamicNode                    import DynamicNode
 from dynamicComponent               import DynamicComponent
 from dynamicNetwork                 import DynamicNetwork,netName
 
-logger = logmaster.getLogger(logmaster.sysName + '.network')
+logger = getLogger(logmaster.sysName + '.network')
 
 class WrongNumberOfPortsException(Exception): pass
 
@@ -48,9 +49,10 @@ class DynamicOneTerminalGate(DynamicComponent):
 
         netname = netName(network)
 
-        logger.debug(("Initializing a new DynamicOneTerminalGate named '%s' "
-                     + "with port name '%s' in network '%s'") %
-                     (str(name), portName, netname))
+        if doDebug:
+            logger.debug(("Initializing a new DynamicOneTerminalGate named '%s' "
+                         + "with port name '%s' in network '%s'") %
+                         (str(name), portName, netname))
 
             # First do generic initialization for dynamic components.
 
@@ -69,18 +71,21 @@ class DynamicOneTerminalGate(DynamicComponent):
 
         inst.outputNode = DynamicNode(network, name=portName)
 
-        logger.debug("DynamicOneTerminalGate.__init__(): "+
-                      "Output node momentum is %f" % inst.outputNode.coord.ccp._momVar.value)
+        if doDebug:
+            logger.debug("DynamicOneTerminalGate.__init__(): "+
+                          "Output node momentum is %f" % inst.outputNode.coord.ccp._momVar.value)
 
-        logger.normal("DynamicOneTerminalGate.__init__: Before linking output node:")
-        inst.outputNode.printInfo()
+        if doInfo:
+            logger.info("DynamicOneTerminalGate.__init__: Before linking output node:")            
+            inst.outputNode.printInfo()
 
             # Link our port named <portName> to our output node.
 
         inst.link(portName, inst.outputNode)
 
-        logger.normal("DynamicOneTerminalGate.__init__: After linking output node:")
-        inst.outputNode.printInfo()
+        if doInfo:
+            logger.info("DynamicOneTerminalGate.__init__: After linking output node:")
+            inst.outputNode.printInfo()
 
             # Set our potential energy function to the given function.
 
@@ -129,8 +134,9 @@ class DynamicOneTerminalGate(DynamicComponent):
     @potential.setter
     def potential(this, potential:UnaryDifferentiableFunction):
 
-        logger.debug("Setting %s's potential function to %s..." %
-                     (this.name, str(potential)))
+        if doDebug:
+            logger.debug("Setting %s's potential function to %s..." %
+                         (this.name, str(potential)))
 
         # If the potential was previously set to something else, delete the old potential first.
         

@@ -1,7 +1,7 @@
 from numbers            import Real    # Used by DynamicNetwork.thermalize().
 
 import logmaster
-from   logmaster          import ErrorException
+from   logmaster          import *      # ErrorException
 
 global logger
 logger = logmaster.getLogger(logmaster.sysName + '.network')
@@ -70,8 +70,9 @@ class DynamicNetwork:
 
         netname = netName(inst)
 
-        logger.debug("Initializing a new DynamicNetwork named '%s' (\"%s\")..." %
-                    (netname, str(title)))
+        if doDebug:
+            logger.debug("Initializing a new DynamicNetwork named '%s' (\"%s\")..." %
+                         (netname, str(title)))
 
         inst._nodes = dict()    # Initially empty set of nodes.
         inst._components = []   # Initially empty list of components.
@@ -120,7 +121,11 @@ class DynamicNetwork:
     #       network.
 
     def addComponent(self, part:DynamicComponent):
-        logger.debug("Adding component '%s' into network '%s'..." % (str(part), str(self)))
+
+        if doDebug:
+            logger.debug("Adding component '%s' into network '%s'..." %
+                         (str(part), str(self)))
+            
         self._components.append(part)
         # Here we need to, like, also make sure that all of the component's connected nodes
         # (if any) are also in the network.
@@ -141,8 +146,9 @@ class DynamicNetwork:
 
     def _addHamiltonianTerm(self, term:HamiltonianTerm):
 
-        logger.debug("Adding term %s to network %s's Hamiltonian..." %
-                     (str(term), str(self)))
+        if doDebug:
+            logger.debug("Adding term %s to network %s's Hamiltonian..." %
+                         (str(term), str(self)))
 
             # First make sure this network's Hamiltonian structure
             # has been initialized, so we can start adding terms to it.
@@ -180,14 +186,16 @@ class DynamicNetwork:
 
             newName = "%s%d" % (nodeName, self._seqno)
 
-            logger.debug("Renaming node '%s' to '%s' for uniqueness within network '%s'..." %
-                         (nodeName, newName, str(self)))
+            if doDebug:
+                logger.debug("Renaming node '%s' to '%s' for uniqueness within network '%s'..." %
+                             (nodeName, newName, str(self)))
 
             nodeName = newName
         
         node.renameTo(nodeName)     # Does nothing if node already had that name.
 
-        logger.debug("Adding node '%s' to network '%s'" % (nodeName, str(self)))
+        if doDebug:
+            logger.debug("Adding node '%s' to network '%s'" % (nodeName, str(self)))
 
         self._nodes[nodeName] = node
 
@@ -214,12 +222,14 @@ class DynamicNetwork:
     #-- inst.evolveTo() - Evolve the state of all generalized position
     #       variables in the network forwards to the given timestep.
 
+
     def evolveTo(self, timestep:int):
 
-        logger.debug("Dynamic network is going to evolve to timestep %d..." % timestep)
+        if doDebug:
+            logger.debug("Dynamic network is going to evolve to timestep %d..." % timestep)
 
-        if len(self._nodes) == 0:
-            logger.debug("Debug warning: Dynamic network has no nodes!!!")
+            if len(self._nodes) == 0:
+                logger.debug("Debug warning: Dynamic network has no nodes!!!")
 
         for node in self._nodes.values():
             
@@ -236,8 +246,17 @@ class DynamicNetwork:
 ##                      "to evolve to time-step %d...") % (str(self.hamiltonian), timestep))
 ##        self.hamiltonian.evolveTo(timestep)
 
+        # Get the list of nodes in this network.
+
+    @property
+    def nodes(me):
+        if hasattr(me, '_nodes'):
+            return me._nodes
+        else:
+            return []
+
     def node(self, nodeName:str):
-        if nodeName in self._nodes:
+        if nodeName in self.nodes:
             return self._nodes[nodeName]
         else:
             return None
@@ -248,7 +267,8 @@ class DynamicNetwork:
 
     def test(self):
 
-        logger.info("Thermalizing network '%s' to unit temperature..." % str(self))
+        if doInfo:
+            logger.info("Thermalizing network '%s' to unit temperature..." % str(self))
 
             # Initialize the network by thermalizing the
             # generalized momenta of all coordinates.
@@ -257,7 +277,8 @@ class DynamicNetwork:
 
             # Simulate the network forwards for a few time-steps.
 
-        logger.info("Evolving network '%s' forwards ten time-steps..." % str(self))
+        if doInfo:
+            logger.info("Evolving network '%s' forwards ten time-steps..." % str(self))
 
         for t in range(10):
             self.evolveTo(t)       # Just a few steps, to exercise things.

@@ -2,8 +2,8 @@
 
 from abc import ABCMeta,abstractmethod      # Abstract base class support.
 
-import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+import logmaster; from logmaster import *
+logger = getLogger(logmaster.sysName + '.simulator')
     # The dynamicCoordinate module is part of our core simulator component.
 
 from fixed                          import Fixed     # Fixed-precision math class.
@@ -33,7 +33,8 @@ class HamiltonianVariable(DynamicVariable,metaclass=ABCMeta):
     def __init__(inst, name:str=None, value:Fixed=None, time:int=0,
                  hamiltonian:Hamiltonian=None, context:SimulationContext=None):
 
-        logger.debug("Initializing the HamiltonianVariable named %s..." % name)
+        if doDebug:
+            logger.debug("Initializing the HamiltonianVariable named %s..." % name)
 
         DynamicVariable.__init__(inst, name, value, time, context=context)
 
@@ -105,7 +106,8 @@ class PositionVariable(HamiltonianVariable):
                  hamiltonian:Hamiltonian=None, conjugateMomentum:MomentumVariable=None,
                  context:SimulationContext=None):
 
-        logger.debug("Creating a new PositionVariable named %s..." % name)
+        if doDebug:
+            logger.debug("Creating a new PositionVariable named %s..." % name)
 
         # Remember our conjugate momentum variable.
 
@@ -135,8 +137,9 @@ class PositionVariable(HamiltonianVariable):
         # and we're not already configured to use it, then use it.
 
         if conjMom != None and conjMom != self.conjugateMomentum:
-        
-            logger.debug("Setting conjugate momentum of %s to %s..." % (self, conjMom))
+
+            if doDebug:
+                logger.debug("Setting conjugate momentum of %s to %s..." % (self, conjMom))
 
             self._conjugateMomentum = conjMom
             self.setTimeDeriv()
@@ -206,8 +209,9 @@ class MomentumVariable(HamiltonianVariable):
                  conjugatePosition:PositionVariable=None,
                  context:SimulationContext=None):
 
-        logger.debug("Creating a new MomentumVariable named %s with initial value %f..."
-                     % (name,value))
+        if doDebug:
+            logger.debug("Creating a new MomentumVariable named %s with initial value %f..."
+                         % (name,value))
 
         inst.conjugatePosition = conjugatePosition
 
@@ -228,8 +232,9 @@ class MomentumVariable(HamiltonianVariable):
         # and we're not already configured to use it, then use it.
 
         if conjPos != None and conjPos != self.conjugatePosition:
-            
-            logger.debug("Setting conjugate position of %s to %s..." % (self, conjPos))
+
+            if doDebug:
+                logger.debug("Setting conjugate position of %s to %s..." % (self, conjPos))
 
             self._conjugatePosition = conjPos
             self.setTimeDeriv()

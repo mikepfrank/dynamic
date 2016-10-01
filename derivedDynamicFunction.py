@@ -1,7 +1,7 @@
 from typing             import Callable,Iterable,Iterator,Set
 
-import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+import logmaster; from logmaster import *
+logger = getLogger(logmaster.sysName + '.simulator')
     # The dynamicVariable module is part of our core simulation component.
 
 from partialEvalFunc    import PartiallyEvaluatableFunction
@@ -42,15 +42,17 @@ class DerivedDynamicFunction(BaseDynamicFunction):
 
     def evolveTo(inst, timestep:int):
 
-        logger.debug("DerivedDynamicFunction.evolveTo():  Evolving internal variables to timestep %d..." % timestep)
+        if doDebug:
+            logger.debug("DerivedDynamicFunction.evolveTo():  Evolving internal variables to timestep %d..." % timestep)
         
         for var in inst._varList:
             var.evolveTo(timestep)
 
     def evaluateWith(inst, *args, **kwargs):
 
-        logger.debug("DerivedDynamicFunction.evaluateWith():  Evaluating function %s (%s) with arguments: %s %s" %
-                     (str(inst), str(inst._function), str(args), str(kwargs)))
+        if doDebug:
+            logger.debug("DerivedDynamicFunction.evaluateWith():  Evaluating function %s (%s) with arguments: %s %s" %
+                         (str(inst), str(inst._function), str(args), str(kwargs)))
 
             # What argList to give here in the case of a Hamiltonian
             # whose function doesn't have an explicit argument list?
@@ -61,16 +63,20 @@ class DerivedDynamicFunction(BaseDynamicFunction):
 
             # Prepend the values of our variables to the list of actual arguments provided.
 
-        logger.debug("DerivedDynamicFunction.evaluateWith(): Extending argument list with values of variables: %s"
-                    % str(inst._varList))
+        if doDebug:
+            logger.debug("DerivedDynamicFunction.evaluateWith(): Extending argument list with values of variables: %s"
+                        % str(inst._varList))
         
         args = list(map(lambda v: v(), inst._varList)) + list(args)
 
-        logger.debug("DerivedDynamicFunction.evaluateWith(): Evaluating %s with extended argument list: %s %s" %
-                    (str(inst), str(args), str(kwargs)))
+        if doDebug:
+            logger.debug("DerivedDynamicFunction.evaluateWith(): Evaluating %s with extended argument list: %s %s" %
+                        (str(inst), str(args), str(kwargs)))
 
         value = pef(*args, **kwargs)
-        logger.debug("DerivedDynamicFunction.evaluateWith():  Got value %s = %s." % (str(inst), str(value)))
+
+        if doDebug:
+            logger.debug("DerivedDynamicFunction.evaluateWith():  Got value %s = %s." % (str(inst), str(value)))
         
         return value
 

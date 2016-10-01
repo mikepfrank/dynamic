@@ -7,7 +7,8 @@ __all__ = ['BinaryDifferentiableFunction']
 class BinaryDifferentiableFunction(BaseDifferentiableFunction):
 
     def __init__(inst, name:str=None, argName1:str=None, argName2:str=None,
-                 function:Callable=None, deriv1:Callable=None, deriv2:Callable=None):
+                 function:Callable=None,
+                 deriv1:Callable=None, deriv2:Callable=None):
 
         if function == None:
             

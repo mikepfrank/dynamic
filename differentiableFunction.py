@@ -1,14 +1,14 @@
 from typing     import Callable,Iterable
 from inspect    import getargspec
 
-import logmaster
+import logmaster; from logmaster import *
 
 # Base class from which to derive subclasses for particular types
 # of differentiable functions (of any number of variables).
 
 __all__ = ['BaseDifferentiableFunction']
 
-logger = logmaster.getLogger(logmaster.sysName + '.functions')
+logger = getLogger(logmaster.sysName + '.functions')
 
 class BaseDifferentiableFunction:
 
@@ -96,10 +96,13 @@ class BaseDifferentiableFunction:
     #   list of arguments.
 
     def __call__(this, *argVals):
-        value = this.function(*argVals) 
-        logger.debug(("BaseDifferentiableFunction.__call__(): Evaluated " +
-                       "%s (%s) on %s to get %s") %
-                      (str(this), str(this.function), str(argVals), str(value)))
+        value = this.function(*argVals)
+
+        if doDebug:
+            logger.debug(("BaseDifferentiableFunction.__call__(): Evaluated " +
+                           "%s (%s) on %s to get %s") %
+                          (str(this), str(this.function), str(argVals), str(value)))
+
         return value
 
     # Returns the partial derivative of this differentiable

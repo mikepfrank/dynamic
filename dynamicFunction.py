@@ -3,9 +3,9 @@ from typing import Any,Callable,Iterable
 
 from fixed import Fixed
 
-import logmaster
+import logmaster; from logmaster import *
 
-logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+logger = getLogger(logmaster.sysName + '.simulator')
 
 __all__ = ['BaseDynamicFunction',
            'NullDynamicFunction',
@@ -35,8 +35,9 @@ class BaseDynamicFunction(metaclass=ABCMeta):
 
     def __init__(inst, name:str=None, function:Callable=None):
 
-        logger.debug("BaseDynamicFunction.__init__(): Setting name of BDF %s to %s..." %
-                    (str(inst), name))
+        if doDebug:
+            logger.debug("BaseDynamicFunction.__init__(): Setting name of BDF %s to %s..." %
+                        (str(inst), name))
 
         if name != None: inst.name = name
         inst._function = function
@@ -53,7 +54,10 @@ class BaseDynamicFunction(metaclass=ABCMeta):
         inst._name = name
 
     def renameTo(me, name:str):
-        logger.info("BaseDynamicFunction.renameTo(): %s is renaming itself to %s...", me.name, name)
+
+        if doInfo:
+            logger.info("BaseDynamicFunction.renameTo(): %s is renaming itself to %s...", me.name, name)
+            
         me.name = name    # This invokes the above @name.setter
 
     def __str__(inst):
@@ -64,8 +68,9 @@ class BaseDynamicFunction(metaclass=ABCMeta):
 
     def __call__(inst, timestep:int=None, *args, **kwargs):
 
-        logger.debug("BaseDynamicFunction.__call__(): Evaluating dynamic function %s at timestep %s..."
-                     % (str(inst), str(timestep)))
+        if doDebug:
+            logger.debug("BaseDynamicFunction.__call__(): Evaluating dynamic function %s at timestep %s..."
+                         % (str(inst), str(timestep)))
         
         if timestep != None:
             inst.evolveTo(timestep)
@@ -74,7 +79,8 @@ class BaseDynamicFunction(metaclass=ABCMeta):
 
     def evaluator(inst, *args, **kwargs):
 
-        logger.debug("BaseDynamicFunction.evaluator(): Evaluating dynamic function %s with arguments %s %s..." % (str(inst), str(args), str(kwargs)))
+        if doDebug:
+            logger.debug("BaseDynamicFunction.evaluator(): Evaluating dynamic function %s with arguments %s %s..." % (str(inst), str(args), str(kwargs)))
         
 ##        if len(args) == 0 and len(kwargs) == 0:
 ##            return inst         # No arguments provided: Leave the function unevaluated.
@@ -125,15 +131,17 @@ class NegatorDynamicFunction(BaseDynamicFunction):
 
     def evolveTo(inst, timestep:int):
 
-        logger.debug("NegatorDynamicFunction.evolveTo(): Evolving internal dynamic function %s to timestep %d..." %
-                     (str(inst._internalFunction), timestep))
+        if doDebug:
+            logger.debug("NegatorDynamicFunction.evolveTo(): Evolving internal dynamic function %s to timestep %d..." %
+                         (str(inst._internalFunction), timestep))
         
         inst._internalFunction.evolveTo(timestep)
 
     def evaluateWith(inst, *args, **kwargs):
-        
-        logger.debug("NegatorDynamicFunction.evaluateWith(): Evaluating negator on internal function %s with arguments: %s %s" %
-                     (str(inst._internalFunction), str(args), str(kwargs)))
+
+        if doDebug:
+            logger.debug("NegatorDynamicFunction.evaluateWith(): Evaluating negator on internal function %s with arguments: %s %s" %
+                         (str(inst._internalFunction), str(args), str(kwargs)))
         
         return -inst._internalFunction(*args, **kwargs)
 
@@ -173,7 +181,8 @@ class MultiplierDynamicFunction(BaseDynamicFunction):
         multiplicand = inst._multiplicand.evaluateWith(*args, **kwargs)
         product = multiplier * multiplicand
 
-        logger.debug("MultiplierDynamicFunction.evaluateWith(): Multiplied %f x %f = %f" % (multiplier,multiplicand,product))
+        if doDebug:
+            logger.debug("MultiplierDynamicFunction.evaluateWith(): Multiplied %f x %f = %f" % (multiplier,multiplicand,product))
 
         return product
 
@@ -187,19 +196,24 @@ class SummerDynamicFunction(BaseDynamicFunction):
         inst._terms = terms
 
     def evolveTo(inst, timestep:int):
-        
-        logger.debug("SummerDynamicFunction.evolveTo(): Evolving terms to timestep %d..." % timestep)
+
+        if doDebug:
+            logger.debug("SummerDynamicFunction.evolveTo(): Evolving terms to timestep %d..." % timestep)
         
         for term in inst._terms:
             term.evolveTo(timestep)
 
     def evaluateWith(inst, *args, **kwargs):
 
-        logger.info("SummerDynamicFunction.evaluateWith(): Evaluating summer with arguments: %s %s" %
-                     (str(args), str(kwargs)))
+        if doDebug:
+            logger.debug("SummerDynamicFunction.evaluateWith(): Evaluating summer with arguments: %s %s" %
+                         (str(args), str(kwargs)))
         
         if len(inst._terms) == 0:
-            logger.warn("SummerDynamicFunction.evaluateWith(): There are no terms to sum! Returning 0.")
+            
+            if doWarn:
+                logger.warn("SummerDynamicFunction.evaluateWith(): There are no terms to sum! Returning 0.")
+                
             return Fixed(0)
 
         termIterator = iter(inst._terms)
@@ -208,8 +222,10 @@ class SummerDynamicFunction(BaseDynamicFunction):
         assert not firstTerm == None
         
         termVal = firstTerm.evaluateWith(*args, **kwargs)
-        logger.info("SummerDynamicFunction.evaluateWith(): #1 term %s "
-                    "evaluates to %f." % (str(firstTerm), float(termVal)))
+
+        if doDebug:
+            logger.debug("SummerDynamicFunction.evaluateWith(): #1 term %s "
+                         "evaluates to %f." % (str(firstTerm), float(termVal)))
         
         cumSum = termVal
 
@@ -218,9 +234,12 @@ class SummerDynamicFunction(BaseDynamicFunction):
             term = next(termIterator,None)
             if term == None:  break
             termVal = term.evaluateWith(*args, **kwargs)
-            logger.info("SummerDynamicFunction.evaluateWith(): #%d term %s "
-                        "evaluates to %f (cum. sum = %f)."
-                        % (ti, str(term), float(termVal), float(cumSum)))
+
+            if doDebug:
+                logger.debug("SummerDynamicFunction.evaluateWith(): #%d term %s "
+                             "evaluates to %f (cum. sum = %f)."
+                             % (ti, str(term), float(termVal), float(cumSum)))
+                
             cumSum = cumSum + termVal
             ti=ti+1
             

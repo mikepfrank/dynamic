@@ -201,6 +201,20 @@
                 indirectly using configLogMaster().
 
 
+            logmaster.minLevel:int              [public global constant integer]
+
+                This is the minimum logging level we will display
+                considering both the log file and console levels.
+
+
+            logmaster.{doDebug,doInfo,doNorm,doWarn,doErr}:bool
+                                                [public global constant booleans]
+
+                Each of these booleans is set to True if the present
+                minimum logging level is less than or equal to the
+                specified level.
+
+
             logmaster.consHandler:logging.StreamHandler   [public global object]
             
                 A logging.StreamHandler that sends log lines to the
@@ -432,6 +446,8 @@ __all__ = [
     'CONS_WARN', 'CONS_INFO', 'CONS_DEBUG',
     'LOG_INFO', 'LOG_DEBUG',
     'systemName', 'sysName', 'appName',
+    'log_level', 'console_level', 'minLevel',
+    'doDebug', 'doInfo', 'doNorm', 'doWarn', 'doErr',
     'theLoggingContext', 'mainLogger',       # Public global objects.
     'sysLogger', 'appLogger',
     'logFormatter', 'consHandler',
@@ -483,7 +499,10 @@ __all__ = [
 
 global NORMAL_LEVEL, NORMAL
 
-NORMAL_LEVEL  =  25             # For normal output.  Between INFO and WARNING.
+
+NORMAL_LEVEL  =  int((logging.INFO + logging.WARN)/2)
+    # \_ New level for normal output.  Between INFO and WARNING.
+    
 NORMAL        =  NORMAL_LEVEL   # A more concise synonym.
     # \_ initLogMaster() adds this new level to our logging facility.
 
@@ -663,6 +682,29 @@ global log_level, console_level
 log_level       = logging.INFO      # By default, log file records messages at INFO level and higher.
 console_level   = logging.WARNING   # By default, console displays messages at WARNING level & higher.
 
+global minLevel, doDebug, doInfo, doNorm, doWarn, doErr
+
+def _noticeLevels():
+
+    global minLevel, doDebug, doInfo, doNorm, doWarn, doErr
+    
+    minLevel = min(log_level, console_level)
+    doDebug = (minLevel <= logging.DEBUG)
+    doInfo = (minLevel <= logging.INFO)
+    doNorm = (minLevel <= NORMAL)
+    doWarn = (minLevel <= logging.WARNING)
+    doErr = (minLevel <= logging.ERROR)
+    # Critical and fatal-level messages are always logged or displayed,
+    # so there is no need for 'doCrit' or 'doFatal'.
+
+    # If desired, one can turn on debug logging but comment out the following
+    # to ferret out code that doesn't have an "if do___:" wrapped around it.
+    
+##    doDebug = doInfo = doNorm = doWarn = doErr = False
+    
+#__/ End _noticeLevels().
+
+_noticeLevels()
 
             #|==================================================================
             #|
@@ -1016,7 +1058,7 @@ class LoggedException(Exception):
         if logger==None:
             errmsg = ("LoggedException.__init__(): No default logger " +
                       "was provided for this class of LoggedException.")
-            _moduleLogger.error(errmsg)
+            if doErr: _moduleLogger.error(errmsg)
             traceback.print_stack()  # goes to sys.stderr
             raise TypeError(errmsg)
 
@@ -1033,7 +1075,7 @@ class LoggedException(Exception):
         if level==None:
             errmsg = ("LoggedException.__init__(): No default log level " +
                       "was provided for this class of LoggedException.")
-            _moduleLogger.error(errmsg)
+            if doErr: _moduleLogger.error(errmsg)
             traceback.print_stack()  # goes to sys.stderr
             raise TypeError(errmsg)
 
@@ -1958,10 +2000,11 @@ class ThreadActor(threading.Thread):
             #---------------------------------------------------------
             # Generate a debug-level diagnostic reflecting actor info.
 
-        _moduleLogger.debug("ThreadActor.__init__(): Initialized a new "
-                            "ThreadActor instance with role [%s] for "
-                            "component [%s]..."
-                                 % (inst.role, inst.component))
+        if doDebug:
+            _moduleLogger.debug("ThreadActor.__init__(): Initialized a new "
+                                "ThreadActor instance with role [%s] for "
+                                "component [%s]..."
+                                     % (inst.role, inst.component))
         
         # NOTE: We can't actually update the thread-local logging
         # context yet at this point, because we're not actually
@@ -2144,9 +2187,10 @@ class ThreadActor(threading.Thread):
             #---------------------------------------------------
             # Generate a diagnostic log message at debug level.
 
-        _moduleLogger.debug("ThreadActor.update_context(): Updating "
-                            "logging context to role [%s] & component"
-                            " [%s]..." % (self.role, self.component))
+        if doDebug:
+            _moduleLogger.debug("ThreadActor.update_context(): Updating "
+                                "logging context to role [%s] & component"
+                                " [%s]..." % (self.role, self.component))
 
             #------------------------------------------
             # Now actually update the logging context.
@@ -2198,9 +2242,10 @@ class ThreadActor(threading.Thread):
         
         #__/ End if (in the wrong thread).
         
-        _moduleLogger.debug("ThreadActor.set_role(): Setting role to "
-                            "[%s] for this thread & its logging "
-                            "context." % role)
+        if doDebug:
+            _moduleLogger.debug("ThreadActor.set_role(): Setting role to "
+                                "[%s] for this thread & its logging "
+                                "context." % role)
         
         self.role                    = role     # Provides for easy access.
         theLoggingContext.threadrole = role     # Also store it in the thread-local global LoggingContext.
@@ -2237,9 +2282,10 @@ class ThreadActor(threading.Thread):
         
         #__/ End if (in the wrong thread).
 
-        _moduleLogger.debug("ThreadActor.set_component(): Setting "
-                            "component to [%s] for this thread & its "
-                            "logging context." % component)
+        if doDebug:
+            _moduleLogger.debug("ThreadActor.set_component(): Setting "
+                                "component to [%s] for this thread & its "
+                                "logging context." % component)
         
         self.component              = comp  # Provides for easy access.
         theLoggingContext.component = comp  # Also store it in the thread-local global LoggingContext.
@@ -2740,7 +2786,8 @@ def lvlname_to_loglevel(lvlname):
     if lvlname in logging._levelNames.keys():   
         return logging._levelNames[lvlname]
     else:
-        localLogger.error("There is no logging level named '%s'." % lvlname)
+        if doError:
+            localLogger.error("There is no logging level named '%s'." % lvlname)
         return NOTSET
 
 
@@ -2877,6 +2924,8 @@ def setLogLevels(verbose=False):
         print("logmaster.setLogLevels(): File log level is set to %d (%s)." %
               (log_level, logging.getLevelName(log_level)),
               file=sys.stderr)
+
+    _noticeLevels()
 
 #__/ End setLogLevels().
 

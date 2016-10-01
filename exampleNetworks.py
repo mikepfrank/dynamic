@@ -84,9 +84,11 @@
     # Import our logging facility, and create a logger for the present
     # software component (Dynamic.examples), which we will use.
 
-import logmaster
-_logger = logmaster.getLogger(logmaster.sysName + '.examples')
+import logmaster; from logmaster import *
+_logger = getLogger(logmaster.sysName + '.examples')
 
+
+from fixed import Fixed
 
     #------------------------------------------------------------------
     # Import some names we'll reference from various simulator modules.
@@ -94,6 +96,7 @@ _logger = logmaster.getLogger(logmaster.sysName + '.examples')
 from dynamicNetwork     import  DynamicNetwork, netName     # Dynamic networks.
 from dynamicMemCell     import  DynamicMemCell              # Memory-cell component.
 from dynamicNOTGate     import  DynamicNOTGate              # Inverter component.
+from dynamicANDGate     import  DynamicANDGate              # AND gate component.
 from simulationContext  import  SimulationContext           # Context for simulation.
 
 
@@ -190,8 +193,9 @@ class MemCellNet(DynamicNetwork):
 
             # Verbose diagnostics (entering this initializer).
 
-        _logger.debug("Initializing a new exampleNetworks.MemCellNet in "
-                      "simulation context %s..." % str(context))
+        if doDebug:
+            _logger.debug("Initializing a new exampleNetworks.MemCellNet in "
+                          "simulation context %s..." % str(context))
 
             #--------------------------------------------------------
             # First, do generic initialization for dynamic networks.
@@ -209,14 +213,27 @@ class MemCellNet(DynamicNetwork):
             # Next, go ahead and create our single dynamic memory cell
             # and add it to the network.
 
-        _logger.debug("Creating a new DynamicMemCell in network "
-                      "'%s'..." % netname)
+        if doDebug:
+            _logger.debug("Creating a new DynamicMemCell in network "
+                          "'%s'..." % netname)
         
         inst._memCell = DynamicMemCell('memcell', network=inst)
 
     #__/ End method MemCellNet.__init__().
         
 #__/ End class MemCellNet.
+
+            #|------------------------------------------------------------------
+            #|
+            #|  InverterNet(dynamicNetwork.DynamicNetwork)        [public class]
+            #|                                                  
+            #|      This specialized subclass of DynamicNetwork
+            #|      creates a simple dynamic network which contains
+            #|      just a single dynamic memory cell feeding a
+            #|      single dynamic NOT gate.  This is mainly only
+            #|      useful for testing during initial development.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class InverterNet(DynamicNetwork):
     
@@ -232,30 +249,110 @@ class InverterNet(DynamicNetwork):
 
         inNode = inst._memCell.outputNode     # Output node of memcell = input to inverter.
 
-        _logger.normal("Before creating NOT gate, input node details are:")
-        inNode.printInfo()  # Temporary diagnostic for debugging.
+        if doNorm:
+            _logger.normal("Before creating NOT gate, input node details are:")
+            inNode.printInfo()  # Temporary diagnostic for debugging.
 
         inNode.renameTo('X')    # Call the inverter's input node 'X'.
 
-        _logger.normal("Renamed input node from q to X; now its details are:")
-        inNode.printInfo()
+        if doNorm:
+            _logger.normal("Renamed input node from q to X; now its details are:")
+            inNode.printInfo()
 
         inst._notGate = DynamicNOTGate(inNode, 'notgate', network=inst)
 
         outNode = inst._notGate.outputNode
 
         outNode.renameTo('Y')   # Call the inverter's output node 'Y'.
+        outNode.coord.position.value = Fixed(1)
 
-        _logger.normal("Finished creating %s.  Now input node details are:" % netname)    
-        inNode.printInfo()  # Temporary diagnostic for debugging.
+        if doNorm:
+            _logger.normal("Finished creating %s.  Now input node details are:" % netname)        
+            inNode.printInfo()  # Temporary diagnostic for debugging.
 
-        _logger.normal("Meanwhile, output node details are:")    
-        outNode.printInfo()  # Temporary diagnostic for debugging.
+            _logger.normal("Meanwhile, output node details are:")    
+            outNode.printInfo()  # Temporary diagnostic for debugging.
 
     #__/ End method InverterNet.__init__().
 
-#__/ End class InverterNet.
+    def printDiagnostics(me):
+        if doNorm:
+            _logger.normal("%d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f" %
+                          (me.nodes['X'].coord.position.time,
+                           me.nodes['X'].coord.position(),
+                           me.nodes['X'].coord.momentum.time,
+                           me.nodes['X'].coord.momentum(),
+                           me.nodes['Y'].coord.position.time,
+                           me.nodes['Y'].coord.position(),
+                           me.nodes['Y'].coord.momentum.time,
+                           me.nodes['Y'].coord.momentum()
+                           ))
         
+
+#__/ End class InverterNet.
+
+
+class AndGateNet(DynamicNetwork):
+    
+    def __init__(me, context:SimulationContext=None):
+
+        DynamicNetwork.__init__(me, name='exampleNet_andGate',
+                                title="Example network: AND gate",
+                                context=context)
+
+        netname = netName(me)   # Should retrieve name set above.
+
+        me._memCellA = memCellA = DynamicMemCell('memcellA', network=me, biasval=0.0)
+        me._nodeA = nodeA = memCellA.outputNode
+        nodeA.renameTo('A')
+        #nodeA.coord.position.value = Fixed(1)
+        
+        me._memCellB = memCellB = DynamicMemCell('memcellB', network=me, biasval=1.0)
+        me._nodeB = nodeB = memCellB.outputNode
+        nodeB.renameTo('B')
+        nodeB.coord.position.value = Fixed(1)
+
+        me._andGate = andGate = DynamicANDGate(nodeA, nodeB, 'andgate', network=me)
+        me._nodeQ = nodeQ = andGate.nodeC
+        nodeQ.renameTo('Q')
+        #nodeQ.coord.position.value = Fixed(1)
+
+    def printDiagnostics(me):
+        if doNorm:
+            _logger.normal("%d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f" %
+                           (me.nodes['A'].coord.position.time,
+                            me.nodes['A'].coord.position(),
+                            me.nodes['A'].coord.momentum.time,
+                            me.nodes['A'].coord.momentum(),
+                            me.nodes['B'].coord.position.time,
+                            me.nodes['B'].coord.position(),
+                            me.nodes['B'].coord.momentum.time,
+                            me.nodes['B'].coord.momentum(),
+                            me.nodes['Q'].coord.position.time,
+                            me.nodes['Q'].coord.position(),
+                            me.nodes['Q'].coord.momentum.time,
+                            me.nodes['Q'].coord.momentum()
+                            ))
+
+    def initStats(me):
+        me.nSamples = 0
+        me.totalA = Fixed(0)
+        me.totalB = Fixed(0)
+        me.totalQ = Fixed(0)
+
+    def gatherStats(me):
+        me.nSamples += 1
+        me.totalA += me.nodes['A'].coord.position()
+        me.totalB += me.nodes['B'].coord.position()
+        me.totalQ += me.nodes['Q'].coord.position()
+
+    def printStats(me):
+        if doNorm:
+            _logger.normal("Average positions:  A = %f, B = %f, Q = %f" %
+                           ((me.totalA / me.nSamples),
+                            (me.totalB / me.nSamples),
+                            (me.totalQ / me.nSamples)))
+                        
 
         # ***** CONTINUE CLEANUP BELOW HERE *****
         

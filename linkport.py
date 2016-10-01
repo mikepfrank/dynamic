@@ -1,5 +1,5 @@
-import logmaster
-_logger = logmaster.getLogger(logmaster.sysName + '.network')
+import logmaster; from logmaster import *
+_logger = getLogger(logmaster.sysName + '.network')
 
 from dynamicNode    import DynamicNode
 
@@ -137,5 +137,6 @@ class Link:
 
 
     def printInfo(this):
-        _logger.normal("\t\tLink: Node %s <-> Port %s" % (str(this.node), str(this.port)))
+        if doInfo:
+            _logger.info("\t\tLink: Node %s <-> Port %s" % (str(this.node), str(this.port)))
         

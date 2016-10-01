@@ -2,8 +2,8 @@
 
 from typing import Callable,Iterable,Iterator,Set
 
-import logmaster
-logger = logmaster.getLogger(logmaster.sysName + '.simulator')
+import logmaster; from logmaster import *
+logger = getLogger(logmaster.sysName + '.simulator')
     # The dynamicVariable module is part of our core simulation component.
 
 from differentiableFunction import BaseDifferentiableFunction
@@ -76,16 +76,20 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
         for var in varList:
             if isinstance(var, DifferentiableDynamicFunction):
-                logger.debug(("DifferentiableDynamicFunction.__init__(): " +
-                              "Variable %s of %s is itself a DifferentiableDynamicFunction " +
-                              "so let's also add the variables it depends on.") %
-                             (str(var), str(inst)))
+                
+                if doDebug:
+                    logger.debug(("DifferentiableDynamicFunction.__init__(): " +
+                                  "Variable %s of %s is itself a DifferentiableDynamicFunction " +
+                                  "so let's also add the variables it depends on.") %
+                                 (str(var), str(inst)))
+                    
                 for subvar in var.varList:
                     inst.addVariable(subvar)
 
-        logger.debug(("DifferentiableDynamicFunction.__init__(): "
-                      "Setting ._function attribute of DDF %s to %s")
-                     % (str(inst), str(function)))
+        if doDebug:
+            logger.debug(("DifferentiableDynamicFunction.__init__(): "
+                          "Setting ._function attribute of DDF %s to %s")
+                         % (str(inst), str(function)))
 
         if function != None:
             inst._function = function       # Remember the function, if provided.
@@ -104,9 +108,10 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
     def addVariable(inst, var:DynamicVariable):
 
-        logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
-                      "Adding variable %s to the list of variables that " +
-                      "function %s can be differentiated by...") % (str(var), str(inst)))
+        if doDebug:
+            logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                          "Adding variable %s to the list of variables that " +
+                          "function %s can be differentiated by...") % (str(var), str(inst)))
 
             # Create our variable list if it doesn't exist yet.
 
@@ -122,10 +127,11 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
         if var not in inst._varIndex:
 
-            logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
-                          "Previously %s's variable list was %s.") % (str(var), str(inst._varList)))
-            logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
-                          "Previously %s's variable index was %s.") % (str(var), str(inst._varIndex)))
+            if doDebug:
+                logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                              "Previously %s's variable list was %s.") % (str(var), str(inst._varList)))
+                logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                              "Previously %s's variable index was %s.") % (str(var), str(inst._varIndex)))
             
                 # Figure out what this new variable's index is in the last.
 
@@ -139,9 +145,10 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
             inst._varIndex[var] = index
 
-            logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
-                          "Added variable %s to %s's variable list in the " +
-                          "%d'th position.") % (str(var), str(inst), index))
+            if doDebug:
+                logger.debug(("DifferentiableDynamicFunction.addVariable():  " +
+                              "Added variable %s to %s's variable list in the " +
+                              "%d'th position.") % (str(var), str(inst), index))
 
     # Instance public methods:
     #
@@ -178,15 +185,17 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
         else:
 
-            logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
-                         "Looking up the index of DynamicVariable %s..." % str(v))
+            if doDebug:
+                logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
+                             "Looking up the index of DynamicVariable %s..." % str(v))
 
-            logger.debug("The ._varIndex dict of %s is %s." % (str(self), str(self._varIndex)))
+                logger.debug("The ._varIndex dict of %s is %s." % (str(self), str(self._varIndex)))
 
             varIndex = self._varIndex[v]    # Look up this variable's index in our list.
 
-            logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
-                         "The index of DynamicVariable %s is %d..." % (str(v), varIndex))
+            if doDebug:
+                logger.debug("DifferentiableDynamicFunction.dynPartialDerivWRT(): " +
+                             "The index of DynamicVariable %s is %d..." % (str(v), varIndex))
 
                 # We may have previously constructed the dynamic function for
                 # this particular partial derivative.  If so, just look it up.
@@ -246,15 +255,17 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
 
                     leftPartial = self.dynPartialDerivWRT(var)
 
-                    logger.debug("The partial of %s with respect to %s is %s..." %
-                                (str(self), str(var), str(leftPartial)))
+                    if doDebug:
+                        logger.debug("The partial of %s with respect to %s is %s..." %
+                                    (str(self), str(var), str(leftPartial)))
 
                     # Next, find the partial of var with respect to v.
 
                     rightPartial = var.dynPartialDerivWRT(v)
 
-                    logger.debug("The partial of %s with respect to %s is %s..." %
-                                (str(var), str(v), str(rightPartial)))
+                    if doDebug:
+                        logger.debug("The partial of %s with respect to %s is %s..." %
+                                    (str(var), str(v), str(rightPartial)))
 
                     # Now multiply them.
 
@@ -269,10 +280,11 @@ class DifferentiableDynamicFunction(DerivedDynamicFunction):
         return None
 
     def printInfo(me):
-        msg = "\t\t%s[" % me.name
-        for v in me._varList:
-            msg += v.name
-            if v is not me._varList[-1]:
-                msg += ','
-        msg += ']'
-        logger.normal(msg)
+        if doInfo:
+            msg = "\t\t%s[" % me.name
+            for v in me._varList:
+                msg += v.name
+                if v is not me._varList[-1]:
+                    msg += ','
+            msg += ']'
+            logger.info(msg)
