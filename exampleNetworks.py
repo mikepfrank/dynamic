@@ -97,6 +97,8 @@ from dynamicNetwork     import  DynamicNetwork, netName     # Dynamic networks.
 from dynamicMemCell     import  DynamicMemCell              # Memory-cell component.
 from dynamicNOTGate     import  DynamicNOTGate              # Inverter component.
 from dynamicANDGate     import  DynamicANDGate              # AND gate component.
+from dynamicORGate      import  DynamicORGate               # OR gate component.
+from dynamicXORGate     import  DynamicXORGate              # XOR gate component.
 from simulationContext  import  SimulationContext           # Context for simulation.
 
 
@@ -259,11 +261,8 @@ class InverterNet(DynamicNetwork):
             _logger.normal("Renamed input node from q to X; now its details are:")
             inNode.printInfo()
 
-        inst._notGate = DynamicNOTGate(inNode, 'notgate', network=inst)
-
+        inst._notGate = DynamicNOTGate(inNode, 'notgate', network=inst, outNodeName='Y')
         outNode = inst._notGate.outputNode
-
-        outNode.renameTo('Y')   # Call the inverter's output node 'Y'.
         outNode.coord.position.value = Fixed(1)
 
         if doNorm:
@@ -302,20 +301,17 @@ class AndGateNet(DynamicNetwork):
 
         netname = netName(me)   # Should retrieve name set above.
 
-        me._memCellA = memCellA = DynamicMemCell('memcellA', network=me, biasval=0.0)
+        me._memCellA = memCellA = DynamicMemCell('memcellA', network=me,
+                                                 biasval=0.0, outNodeName='A')
         me._nodeA = nodeA = memCellA.outputNode
-        nodeA.renameTo('A')
-        #nodeA.coord.position.value = Fixed(1)
         
-        me._memCellB = memCellB = DynamicMemCell('memcellB', network=me, biasval=1.0)
+        me._memCellB = memCellB = DynamicMemCell('memcellB', network=me,
+                                                 biasval=1.0, outNodeName='B')
         me._nodeB = nodeB = memCellB.outputNode
-        nodeB.renameTo('B')
-        nodeB.coord.position.value = Fixed(1)
 
-        me._andGate = andGate = DynamicANDGate(nodeA, nodeB, 'andgate', network=me)
+        me._andGate = andGate = DynamicANDGate(nodeA, nodeB, 'andgate',
+                                               network=me, outNodeName='Q')
         me._nodeQ = nodeQ = andGate.nodeC
-        nodeQ.renameTo('Q')
-        #nodeQ.coord.position.value = Fixed(1)
 
     def printDiagnostics(me):
         if doNorm:
@@ -346,38 +342,254 @@ class AndGateNet(DynamicNetwork):
         me.totalB += me.nodes['B'].coord.position()
         me.totalQ += me.nodes['Q'].coord.position()
 
+    def printStatsHeader(me):
+        if doNorm:
+            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
+            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, Q.qt, Q.q, Q.pt, Q.p")
+
     def printStats(me):
         if doNorm:
             _logger.normal("Average positions:  A = %f, B = %f, Q = %f" %
                            ((me.totalA / me.nSamples),
                             (me.totalB / me.nSamples),
                             (me.totalQ / me.nSamples)))
-                        
 
-        # ***** CONTINUE CLEANUP BELOW HERE *****
+class HalfAdderNet(DynamicNetwork):
+
+    def __init__(me, context:SimulationContext=None):
+
+        DynamicNetwork.__init__(me, name='exampleNet_halfAdder',
+                                title="Example network: half adder",
+                                context=context)
+
+        netname = netName(me)   # Should retrieve name set above.
+
+            # In the below, input bits are A, B.
+            # Output bits are S0 and S1.
+
+        me._memCellA = memCellA = DynamicMemCell('memcellA', network=me,
+                                                 biasval=1.0, outNodeName='A')
+        me._nodeA = nodeA = memCellA.outputNode
         
+        me._memCellB = memCellB = DynamicMemCell('memcellB', network=me,
+                                                 biasval=1.0, outNodeName='B')
+        me._nodeB = nodeB = memCellB.outputNode
 
-#-- This example network includes a full adder whose
-#   input nodes are output by memory cells.  NOT YET TESTED.
+        me._XOR = XOR = DynamicXORGate(nodeA, nodeB, 'xor', network=me, outNodeName='S0')
+        me._nodeS0 = nodeS0 = XOR.nodeC
+
+        me._AND = AND = DynamicANDGate(nodeA, nodeB, 'and', network=me, outNodeName='S1')
+        me._nodeS1 = nodeS1 = AND.nodeC
+
+    def printDiagnostics(me):
+        if doNorm:
+            
+            nodes = me.nodes
+            
+            nodeA_c = nodes['A'].coord
+            nodeB_c = nodes['B'].coord
+            nodeS0_c = nodes['S0'].coord
+            nodeS1_c = nodes['S1'].coord
+            
+            _logger.normal(("%d, %.9f, "*7 + "%d, %.9f") %
+                           (nodeA_c.position.time, nodeA_c.position(),
+                            nodeA_c.momentum.time, nodeA_c.momentum(),
+                            nodeB_c.position.time, nodeB_c.position(),
+                            nodeB_c.momentum.time, nodeB_c.momentum(),
+                            nodeS1_c.position.time, nodeS1_c.position(),
+                            nodeS1_c.momentum.time, nodeS1_c.momentum(),
+                            nodeS0_c.position.time, nodeS0_c.position(),
+                            nodeS0_c.momentum.time, nodeS0_c.momentum()
+                            ))
+
+    def initStats(me):
+        me.nSamples = 0
+        me.totalA = Fixed(0)
+        me.totalB = Fixed(0)
+        me.totalS0 = Fixed(0)
+        me.totalS1 = Fixed(0)
+
+    def gatherStats(me):
+        me.nSamples += 1
+        me.totalA += me.nodes['A'].coord.position()
+        me.totalB += me.nodes['B'].coord.position()
+        me.totalS0 += me.nodes['S0'].coord.position()
+        me.totalS1 += me.nodes['S1'].coord.position()
+
+    def printStatsHeader(me):
+        if doNorm:
+            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
+            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, "
+                           "S1.qt, S1.q, S1.pt, S1.p, S0.qt, S0.q, S0.pt, S0.p")
+
+
+    def printStats(me):
+        if doNorm:
+            _logger.normal("Average positions:  A = %f, B = %f, S1 = %f, S0 = %f" %
+                           ((me.totalA / me.nSamples),
+                            (me.totalB / me.nSamples),
+                            (me.totalS1 / me.nSamples),
+                            (me.totalS0 / me.nSamples)
+                            ))
+
+
 
 class FullAdderNet(DynamicNetwork):
 
-    def __init__(inst):
+    def __init__(me, context:SimulationContext=None):
 
-        # First do generic initialization for dynamic networks.
-        DynamicNetwork.__init__(inst)
+        DynamicNetwork.__init__(me, name='exampleNet_fullAdder',
+                                title="Example network: full adder",
+                                context=context)
 
-        #-- Create 3 dynamic memory cells to hold the network's input.
-        Ma = DynamicMemCell(inst)
-        Mb = DynamicMemCell(inst)
-        Mc = DynamicMemCell(inst)
+        netname = netName(me)   # Should retrieve name set above.
 
-        #-- Get our 3 input nodes (which are output nodes of those cells).
-        a = Ma.outputNode
-        b = Mb.outputNode
-        c = Mc.outputNode
+            #|========================================================
+            #|  In the below, input bits are A, B, C.  Output bits are
+            #|  S0 and S1.  Intermediate nodes are X, A1, A2.
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        #-- Create a full-adder operating on those nodes.        
-        FA = FullAdder(inst,a,b,c)
+            # First we pick logical values for the input bits.
+
+        logicA = False;  logicB = True;  logicC = True
+
+            # Calculate what logic values of computed bits should be.
+
+        logicA1 = logicA and logicB
+        logicX  = (logicA or logicB) and not logicA1
+        logicA2 = logicX and logicC
+        logicS0 = (logicX or logicC) and not logicA2
+        logicS1 = logicA1 or logicA2
+
+            # Convert logic values to real-valued generalized-position
+            # coordinates.  (Note this is just to avoid injecting excess
+            # energy on initialization.)
+
+        Aval = float(logicA);  Bval = float(logicB);  Cval = float(logicC)
+
+        A1val = float(logicA1);  Xval  = float(logicX);  A2val = float(logicA2)
+        S0val = float(logicS0);  S1val = float(logicS1)
+
+            # Now we create the network.  First, the input cells.
+
+        me._memCellA = memCellA = DynamicMemCell('memcellA', network=me,
+                                                 biasval=Aval, outNodeName='A')
+        me._nodeA = nodeA = memCellA.outputNode
         
+        me._memCellB = memCellB = DynamicMemCell('memcellB', network=me,
+                                                 biasval=Bval, outNodeName='B')
+        me._nodeB = nodeB = memCellB.outputNode
+
+        me._memCellC = memCellC = DynamicMemCell('memcellC', network=me,
+                                                 biasval=Cval, outNodeName='C')
+        me._nodeC = nodeC = memCellC.outputNode
+
+            # Circuit for the first half-adder.  Really, we should abstract
+            # this out to a half-adder sub-network...
+
+        me._XOR1 = XOR1 = DynamicXORGate(nodeA, nodeB, 'xor1', network=me, outNodeName='X', initOutPos=Xval)
+        me._nodeX = nodeX = XOR1.nodeC
+
+        me._AND1 = AND1 = DynamicANDGate(nodeA, nodeB, 'and1', network=me, outNodeName='A1', initOutPos=A1val)
+        me._nodeA1 = nodeA1 = AND1.nodeC
+
+            # Circuit for the second half-adder.
+
+        me._XOR2 = XOR2 = DynamicXORGate(nodeX, nodeC, 'xor2', network=me, outNodeName='S0', initOutPos=S0val)
+        me._nodeS0 = nodeS0 = XOR2.nodeC
+
+        me._AND2 = AND2 = DynamicANDGate(nodeX, nodeC, 'and2', network=me, outNodeName='A2', initOutPos=A2val)
+        me._nodeA2 = nodeA2 = AND2.nodeC
+
+            # Circuit to compute carry-out bit (S1).
+
+        me._OR = OR = DynamicORGate(nodeA1, nodeA2, 'or', network=me, outNodeName='S1', initOutPos=S1val)
+        me._nodeS1 = nodeS1 = OR.nodeC
+
+    def printDiagnostics(me):
+        if doNorm:
+            
+            nodes = me.nodes
+            
+            nodeA_c = nodes['A'].coord
+            nodeB_c = nodes['B'].coord
+            nodeC_c = nodes['C'].coord
+            nodeS0_c = nodes['S0'].coord
+            nodeS1_c = nodes['S1'].coord
+            
+            _logger.normal(("%d, %.9f, "*9 + "%d, %.9f") %
+                           (nodeA_c.position.time, nodeA_c.position(),
+                            nodeA_c.momentum.time, nodeA_c.momentum(),
+                            nodeB_c.position.time, nodeB_c.position(),
+                            nodeB_c.momentum.time, nodeB_c.momentum(),
+                            nodeC_c.position.time, nodeC_c.position(),
+                            nodeC_c.momentum.time, nodeC_c.momentum(),
+                            nodeS1_c.position.time, nodeS1_c.position(),
+                            nodeS1_c.momentum.time, nodeS1_c.momentum(),
+                            nodeS0_c.position.time, nodeS0_c.position(),
+                            nodeS0_c.momentum.time, nodeS0_c.momentum()
+                            ))
+
+    def initStats(me):
+        me.nSamples = 0
+        me.totalA = Fixed(0)
+        me.totalB = Fixed(0)
+        me.totalC = Fixed(0)
+        me.totalS0 = Fixed(0)
+        me.totalS1 = Fixed(0)
+
+    def gatherStats(me):
+        me.nSamples += 1
+        me.totalA += me.nodes['A'].coord.position()
+        me.totalB += me.nodes['B'].coord.position()
+        me.totalC += me.nodes['C'].coord.position()
+        me.totalS0 += me.nodes['S0'].coord.position()
+        me.totalS1 += me.nodes['S1'].coord.position()
+
+    def printStatsHeader(me):
+        if doNorm:
+            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
+            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, C.qt, C.q, C.pt, C.p, "
+                           "S1.qt, S1.q, S1.pt, S1.p, S0.qt, S0.q, S0.pt, S0.p")
+
+
+    def printStats(me):
+        if doNorm:
+            _logger.normal("Average positions:  A = %f, B = %f, C = %f, S1 = %f, S0 = %f" %
+                           ((me.totalA / me.nSamples),
+                            (me.totalB / me.nSamples),
+                            (me.totalC / me.nSamples),
+                            (me.totalS1 / me.nSamples),
+                            (me.totalS0 / me.nSamples)
+                            ))
+
+
+       
+
+##        # ***** CONTINUE CLEANUP BELOW HERE *****
+##        
+##
+###-- This example network includes a full adder whose
+###   input nodes are output by memory cells.  NOT YET TESTED.
+##
+##class FullAdderNet(DynamicNetwork):
+##
+##    def __init__(inst):
+##
+##        # First do generic initialization for dynamic networks.
+##        DynamicNetwork.__init__(inst)
+##
+##        #-- Create 3 dynamic memory cells to hold the network's input.
+##        Ma = DynamicMemCell(inst)
+##        Mb = DynamicMemCell(inst)
+##        Mc = DynamicMemCell(inst)
+##
+##        #-- Get our 3 input nodes (which are output nodes of those cells).
+##        a = Ma.outputNode
+##        b = Mb.outputNode
+##        c = Mc.outputNode
+##
+##        #-- Create a full-adder operating on those nodes.        
+##        FA = FullAdder(inst,a,b,c)
+##        
         

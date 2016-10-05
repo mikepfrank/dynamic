@@ -46,7 +46,8 @@ class DynamicNOTGate(DynamicTwoTerminalGate):
     #   created.
 
     def __init__(inst, inputNode:DynamicNode, name:str=None, 
-                 network:DynamicNetwork=None, stiffness:Real = 1.0):
+                 network:DynamicNetwork=None, stiffness:Real = 1.0,
+                 outNodeName:str=None):
 
         netname = netName(network)
 
@@ -56,7 +57,8 @@ class DynamicNOTGate(DynamicTwoTerminalGate):
             # Do generic initialization for dynamic two-terminal gates.
             # (Create ports & output node, link it to our output port.)
 
-        DynamicTwoTerminalGate.__init__(inst, inputNode, name=name, network=network)
+        DynamicTwoTerminalGate.__init__(inst, inputNode, name=name,
+                                        network=network, outNodeName=outNodeName)
 
             # Create the potential energy function relating the input
             # and output nodes.

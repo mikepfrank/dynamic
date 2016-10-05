@@ -29,7 +29,8 @@ class DynamicTwoTerminalGate(DynamicComponent):
     def __init__(inst, inputNode:DynamicNode, name:str=None,
                  network:DynamicNetwork=None, inPortName:str='input',
                  outPortName:str='output',
-                 interaction:BinaryDifferentiableFunction=None):
+                 interaction:BinaryDifferentiableFunction=None,
+                 outNodeName:str=None):
 
             # First do generic initialization for dynamic components.
 
@@ -67,7 +68,7 @@ class DynamicTwoTerminalGate(DynamicComponent):
 
             # Create and remember our output node named "out".
 
-        initialOutputNodeName = 'out'
+        initialOutputNodeName = outNodeName or 'out'
 
         _logger.normal("DynamicTwoTerminalGate.__init__(): Creating output "
                        "node initially named %s..." % initialOutputNodeName)

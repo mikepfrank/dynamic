@@ -227,8 +227,8 @@ def _main():
         print("__main__._main(): Entered application's _main() routine...",
               file=stderr)
 
-    #---------------------------------
-    # Configure the logging facility.
+        #---------------------------------
+        # Configure the logging facility.
 
     if RAW_DEBUG:
         print("__main__._main(): Configuring the 'logmaster' logging module...",
@@ -246,8 +246,8 @@ def _main():
 
     _logger = appLogger  # Get our application logger.
 
-    #----------------------------------------------
-    # Application startup:  Display splash text.
+        #----------------------------------------------
+        # Application startup:  Display splash text.
 
     if doInfo: _logger.info("Dynamic demo application is starting up...")
 
@@ -258,8 +258,8 @@ def _main():
         _logger.normal("All Rights Reserved.")
         print()
 
-    #------------------------------------------------------
-    # Below follows the main code of the demo application.
+            #=====================================================
+            # Below follows the main code of the demo application.
 
         #-----------------------------------------------------------------
         # First create a new simulation context object, initially empty.
@@ -282,10 +282,18 @@ def _main():
 ##    _logger.normal("Creating an exampleNetworks.InverterNet instance...")                
 ##    net = exampleNetworks.InverterNet(context=sc)
 
+##    if doNorm:
+##        _logger.normal("Creating an exampleNetworks.AndGateNet instance...")     
+##    net = exampleNetworks.AndGateNet(context=sc)
+
+##    if doNorm:
+##        _logger.normal("Creating an exampleNetworks.HalfAdderNet instance...")     
+##    net = exampleNetworks.HalfAdderNet(context=sc)
+
     if doNorm:
-        _logger.normal("Creating an exampleNetworks.AndGateNet instance...")
-        
-    net = exampleNetworks.AndGateNet(context=sc)
+        _logger.normal("Creating an exampleNetworks.FullAdderNet instance...")     
+    net = exampleNetworks.FullAdderNet(context=sc)
+
 
 ##    _logger.debug("Initial node X momentum is: %f" % 
 ##                  net.node('X').coord.momentum.value)
@@ -305,8 +313,8 @@ def _main():
     if doNorm:
         _logger.normal("Dynamic demo application is shutting down...")
 
-    # End of main code of demo application.
-    #---------------------------------------
+            # End of main code of demo application.
+            #=======================================
     
     if RAW_DEBUG:
         print("__main__._main(): Exiting from _main()...", file=stderr)

@@ -331,16 +331,14 @@ class SimulationContext:
 ##                       ))
 
     def test(self):
-        """Displays the states of the nodes from times 0 to 1000,
+        """Displays the states of the nodes from times 0 to 10,000,
            stepping forward 2 time units at a time.  (This ensures
            that both position & momentum are updated between points.)"""
 
         self.network.initStats()
 
-        if doNorm:
-            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
-            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, C.qt, C.q, C.pt, C.p")
-        
+        self.network.printStatsHeader()
+
         self.network.printDiagnostics()
         #for t in range(10):
 #        for t in range(1000):

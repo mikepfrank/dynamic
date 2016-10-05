@@ -1,0 +1,56 @@
+After initializing all nodes to match expected output, we get:
+
+# ABC  	Stats output
+- ---  	------------
+0 000  	Average positions:  A = 0.059381, B = 0.128017, C = 0.046752, S1 = -0.008505, S0 = -0.004441		
+1 001	Average positions:  A = -0.088903, B = -0.021598, C = 0.877170, S1 = -0.300861, S0 = 1.628909
+2 010	Average positions:  A = -0.002173, B = 1.054275, C = 0.024118, S1 = 0.292792, S0 = 0.984445
+3 011	Average positions:  A = 0.270067, B = 0.937041, C = 1.372668, S1 = 1.869165, S0 = 1.642239
+4 100	Average positions:  A = 0.924340, B = 0.020952, C = 0.035875, S1 = 0.251345, S0 = 0.583294
+5 101	Average positions:  A = 1.082063, B = -0.042989, C = 0.944415, S1 = 2.159791, S0 = -0.576772
+6 110   Average positions:  A = 1.006802, B = 0.983366, C = -0.006492, S1 = 0.941025, S0 = -0.015979
+7 111	Average positions:  A = 0.834348, B = 0.827989, C = 0.939107, S1 = 1.120565, S0 = 0.208029
+
+
+#    A     B     C   |   S1    S0 	Notes
+-   ---   ---   ---  |  ---   ---	--
+0   0.1   0.1   0.0  |  0.0   0.0	OK
+1  -0.1   0.0  (0.9) |  0.3  (1.6)	OK, but S0 is larger than expected
+2   0.0  (1.1)  0.0  |  0.3  (1.0) 	OK
+3   0.3  (0.9) (1.4) | (1.9) (1.6)  S0 IS WRONG (interpreted as 1, should be 0)
+4  (0.9)  0.0   0.0  |  0.3  (0.6)	OK (although S0 is weak)
+5  (1.1)  0.0  (0.9) | (2.2) -0.6   OK, but outputs are stronger than expected
+6  (1.0) (1.0)  0.0  | (0.9)  0.0 	OK
+7  (0.8) (0.8) (0.9) | (1.1)  0.2   S0 is WRONG (interpreted as 0, should be 1)
+
+
+Rerunning case 7:
+	Average positions:  A = 0.792729, B = 0.758104, C = 1.076460, S1 = 1.808602, S0 = -0.199379
+	(S0 still too small)
+
+Rerunning case 7 again:	
+	Average positions:  A = 0.968055, B = 0.964427, C = 0.936396, S1 = 1.034057, S0 = 0.817292
+	(That time it worked)
+	
+Let's try case 3 again:
+	Average positions:  A = 0.182224, B = 0.836372, C = 1.095636, S1 = 1.409341, S0 = -0.422131
+	(That time it worked)
+	
+Most of the time, it seems to work...
+	Perhaps the outputs just need to be a little bit more constrained, to reasonable regions...?
+	What if each node had a weak quadratic bias potential centered on 0.5...
+	Oh but wait, that means O(N) input energy is needed to get nodes to have strong values...
+
+Another run of case 3 (illustrates excursions)
+	Average positions:  A = -0.116287, B = 1.028236, C = 1.191293, S1 = 1.844433, S0 = 0.008386
+
+	#    A     B     C   |   S1    S0 	Notes
+-   ---   ---   ---  |  ---   ---	--
+0   0.1   0.1   0.0  |  0.0   0.0	OK
+1  -0.1   0.0  (0.9) |  0.3  (1.6)	OK, but S0 is larger than expected
+2   0.0  (1.1)  0.0  |  0.3  (1.0) 	OK
+3   0.3  (0.9) (1.4) | (1.9) (1.6)  S0 IS WRONG (interpreted as 1, should be 0)
+4  (0.9)  0.0   0.0  |  0.3  (0.6)	OK (although S0 is weak)
+5  (1.1)  0.0  (0.9) | (2.2) -0.6   OK, but outputs are stronger than expected
+6  (1.0) (1.0)  0.0  | (0.9)  0.0 	OK
+7  (0.8) (0.8) (0.9) | (1.1)  0.2   S0 is WRONG (interpreted as 0, should be 1)

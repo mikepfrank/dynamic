@@ -7,7 +7,7 @@ from dynamicNode                    import DynamicNode
 from dynamicComponent               import DynamicComponent
 from dynamicNetwork                 import DynamicNetwork,netName
 
-logger = getLogger(logmaster.sysName + '.network')
+logger = getLogger(sysName + '.network')
 
 class WrongNumberOfPortsException(Exception): pass
 
@@ -45,7 +45,8 @@ class DynamicOneTerminalGate(DynamicComponent):
 
     def __init__(inst, name:str=None, portName:str='q',
                  network:DynamicNetwork=None,
-                 potential:UnaryDifferentiableFunction=None):
+                 potential:UnaryDifferentiableFunction=None,
+                 outNodeName:str=None):
 
         netname = netName(network)
 
@@ -67,9 +68,10 @@ class DynamicOneTerminalGate(DynamicComponent):
         inst.portName = portName
 
             # Create and remember our output node, initially with the
-            # same name as our output port that we'll connect it to.
+            # same name as our output port that we'll connect it to
+            # as the default, if no other name is specified.
 
-        inst.outputNode = DynamicNode(network, name=portName)
+        inst.outputNode = DynamicNode(network, name=outNodeName or portName)
 
         if doDebug:
             logger.debug("DynamicOneTerminalGate.__init__(): "+

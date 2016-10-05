@@ -3,6 +3,9 @@
 import logmaster
 _logger = logmaster.getLogger(logmaster.sysName + '.simulator')
 
+from numbers            import Real
+from fixed              import Fixed
+
 from ternaryDifferentiableFunction import TernaryDifferentiableFunction
 
 from linkport           import Port
@@ -10,6 +13,8 @@ from linkport           import Port
 from dynamicNode        import DynamicNode
 from dynamicComponent   import DynamicComponent
 from dynamicNetwork     import DynamicNetwork
+
+from rangeBinder        import RangeBinder
 
     # A generic DynamicThreeTerminalGate has three ports named
     # "portA", "portB", and "portC" with a single three-way
@@ -33,7 +38,8 @@ class DynamicThreeTerminalGate(DynamicComponent):
     def __init__(me, nodeA:DynamicNode, nodeB:DynamicNode,
                  name:str = None, network:DynamicNetwork = None,
                  portAName:str='portA', portBName:str='portB', portCName:str='portC',
-                 interaction:TernaryDifferentiableFunction=None):
+                 interaction:TernaryDifferentiableFunction=None,
+                 outNodeName:str=None, initOutPos:Real=None):
 
         DynamicComponent.__init__(me, name=name, network=network)
 
@@ -49,9 +55,16 @@ class DynamicThreeTerminalGate(DynamicComponent):
         me.link(portAName, nodeA)
         me.link(portBName, nodeB)
 
-        initialNodeCName = 'nodeC'
+        initialNodeCName = outNodeName or 'nodeC'
 
-        me.nodeC = DynamicNode(network, name=initialNodeCName)
+        me.nodeC = outNode = DynamicNode(network, name=initialNodeCName)
+
+        if initOutPos is not None:
+            outNode.coord.position.value = Fixed(initOutPos)
+
+        # Bind output node's range to not drift too far from [0,1].
+        # It would be nice to have a BooleanNode subclass that did this for us.
+        me.nodeC.rangeBinder = RangeBinder(me.nodeC)
 
         me.link(portCName, me.nodeC)
 

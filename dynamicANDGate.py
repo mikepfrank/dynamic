@@ -17,7 +17,7 @@ class DynamicANDFunction(TernaryDifferentiableFunction):
         argName2 = 'y'  # Second input coordinate.
         argName3 = 'z'  # Output coordinate.
 
-            # Set up our function.
+            # Set up our function.  At minimum energy, z=xy.
 
         me.stiffness = stiffness
         function = lambda x, y, z:  0.5 * me.stiffness * (z - x*y)**2
@@ -40,13 +40,16 @@ class DynamicANDFunction(TernaryDifferentiableFunction):
 
 class DynamicANDGate(DynamicThreeTerminalGate):
 
-    def __init__(me, inputNodeA:DynamicNode, inputNodeB:DynamicNode, name:str=None,
-                 network:DynamicNetwork=None, stiffness:Real = 1.0):
+    def __init__(me, inputNodeA:DynamicNode, inputNodeB:DynamicNode,
+                 name:str=None, network:DynamicNetwork=None,
+                 stiffness:Real = 1.0, outNodeName:str=None,
+                 initOutPos:Real=None):
 
         netname = netName(network)
 
         DynamicThreeTerminalGate.__init__(me, inputNodeA, inputNodeB, name=name,
-                                          network=network)
+                                          network=network, outNodeName=outNodeName,
+                                          initOutPos=initOutPos)
 
         andFunc = DynamicANDFunction(stiffness)
 
