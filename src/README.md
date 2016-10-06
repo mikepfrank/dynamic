@@ -101,7 +101,7 @@ user interface featuring animated visualizations.
 
 ## 4. Top-level modules.
 
-This modules live in top level source directory for the Dynamic project 
+These modules live in top level source directory for the Dynamic project 
 and have not yet been moved into packages.
 
 ### 4.1. Fixed-point arithmetic module (`fixed.py`).
