@@ -1,4 +1,4 @@
-# Dynamic
+# Dynamic repository (`dynamic/`).
 
 Dynamic is a simple simulator for dynamical systems construed as computations.
 
