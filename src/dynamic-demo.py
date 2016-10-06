@@ -44,7 +44,8 @@
     Revision history:
     -----------------
 
-          6/21/16 (M. Frank) - Started writing initial version.
+          6/21/16 (M.P. Frank) - Started writing initial version.
+          10/6/16 (MPF) - At this point, full-adder demo works.  No GUI yet.
                                                                             """
 #|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #| End of module documentation string.
