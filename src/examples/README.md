@@ -1,6 +1,7 @@
 # Dynamic examples package (`dynamic/src/examples/`).
 
 This directory defines the `examples` package of the Dynamic system.
+It depends on the `..boolean` package.
 
 ## 1. Working modules.
 
