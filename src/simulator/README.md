@@ -32,7 +32,7 @@ by applying a time-derivative function.  The core
 centered-difference leapfrog-style state-updating algorithm 
 for time integration is here.
 
-### 1.4. Derived dynamic function module (`derivedDynamicFunction.py`).
+### 1.4. Derived dynamic functions module (`derivedDynamicFunction.py`).
 
 This module defines a class for derived dynamic functions, that is,
 dynamic functions of one or more dynamic variables, which are evaluated
@@ -43,7 +43,7 @@ and then evaluating the function.
 
 This module defines a class for differentiable dynamic functions,
 which are derived dynamic functions that are also differentiable
-with respect to any of their variables, and whose partial derivatives
+with respect to any of their variables, and whose partial derivative
 with respect to any given variable is itself another derived dynamic 
 function.
 
