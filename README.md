@@ -49,4 +49,46 @@ information is contained in the trajectory.
 
 ## 6. Software Architecture
 
-For notes on the software architecture of Dynamic, see the Notes.txt file.
+For notes on the software architecture of Dynamic, see the docs/Notes.txt file.
+
+## 7. File Hierarchy
+
+Contents of the 'dynamic' repository are as follows:
+
+### 7.1. Batch subdirectory (`batch/`).
+
+Contains MS-DOS style batch (.BAT) files to facilitate working with the source tree
+in Windows environments.
+
+### 7.2. Data subdirectory (`data/`).
+
+Contains various raw output data from the simulation as well as Excel workbooks.
+
+### 7.3. Documentation subdirectory (`docs/`).
+
+Contains miscellaneous notes and other documentation.
+
+### 7.4. Log subdirectory (`log/`).
+
+This directory is initially empty and exists solely to be the location
+where log files will be written.
+
+### 7.5. Old source subdirectory (`old/`).
+
+Old source files; no longer used.  Deprecated; to be deleted.
+
+### 7.6. Old logs subdirectory (`old-logs/`).
+
+Old log files from test runs; no longer needed.  Can be deleted.
+
+### 7.7. Main source file hierarchy (`src/`).
+
+Current source file tree.
+
+### 7.8. Test directory (`test/`).
+
+Auxilliary source files for testing.
+
+### 7.9. README file (`README.md`).
+
+This file.
