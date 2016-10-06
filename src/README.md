@@ -99,18 +99,18 @@ This low-level package defines various classes of differentiable functions.
 This package (under construction) will provide an interactive graphical 
 user interface featuring animated visualizations.
 
-## 2. Top-level modules.
+## 4. Top-level modules.
 
 This modules live in top level source directory for the Dynamic project 
 and have not yet been moved into packages.
 
-### 2.1. Fixed-point arithmetic module (`fixed.py`).
+### 4.1. Fixed-point arithmetic module (`fixed.py`).
 
 A simple module providing fixed-point arithmetic with 9 decimal places of
 precision.  This makes it easy to ensure state updates are bit-reversible.
 Referenced from several places in the simulator.
 
-### 2.2. Partially-evaluatable function module (`partialEvalFunc.py`).
+### 4.2. Partially-evaluatable function module (`partialEvalFunc.py`).
 
 This module allows defining "partially-evaluatable functions" whose 
 arguments can be supplied incrementally, rather than all at once.  (This 
@@ -119,12 +119,12 @@ at the moment, and could be removed if necessary.)  It is currently
 referenced by the derivedDynamicFunction.py module in the simulator 
 package.
 
-### 2.3. Logging facility (`logmaster.py`).
+### 4.3. Logging facility (`logmaster.py`).
 
 A general logging framework to aid in debugging.  This will be particularly
 essential when debugging  multithreaded GUI-based applications.
 
-### 2.4. Application definitions (`appdefs.py`).
+### 4.4. Application definitions (`appdefs.py`).
 
 This file (expected by the logmaster module) defines some constants naming
 the overall software system (`Dynamic`) and the main application component
