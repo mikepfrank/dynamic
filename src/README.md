@@ -65,16 +65,16 @@ essential when debugging  multithreaded GUI-based applications.
 ### 2.4. Partially-evaluatable function module (`partialEvalFunc.py`).
 
 This module allows defining "partially-evaluatable functions" whose 
-arguments can be supplied incrementally, rather than all at once.  
-(This is actually not used in the simulator in any particularly 
-essential way at the moment, and could be removed if necessary.)
+arguments can be supplied incrementally, rather than all at once.  (This 
+is actually not used in the simulator in any particularly essential way 
+at the moment, and could be removed if necessary.)
 
 ## 3. Application scripts.
 
-These scripts (currently there is just one) implement the complete standalone 
-Python applications that are provided as part of the Dynamic system that the
-user can execute.  (On Windows platforms, we recommend using the batch files
-provided in `..\bat\` to work with the application script.)
+These top-level scripts (currently there is just one) implement the complete
+standalone Python applications that are provided as part of the Dynamic system
+that the user can execute.  (On Windows platforms, we recommend using the batch
+files provided in `..\bat\` to work with the application script.)
 
 ### 3.1. Main demo script (`dynamic-demo.py`).
 
