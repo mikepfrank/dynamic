@@ -7,18 +7,18 @@ It depends on the `..network` and `..function` packages.
 ## 1. Module hierarchy.
 
 The dependency diagram of modules within this package is as follows:
-				 _______________
-	Package 	/               \
-	module:		|    boolean    |
-				| (__init__.py) |
-				\_______________/
-	Modules in			|
-	package:			|
-						V
-				dynamicXORGate.py
-				dynamicORGate.py
-				dynamicANDGate.py
-				dynamicNOTGate.py
+					 _______________
+		Package 	/               \
+		module:		|    boolean    |
+					| (__init__.py) |
+					\_______________/
+		Modules in			|
+		package:			|
+							V
+					dynamicXORGate.py
+					dynamicORGate.py
+					dynamicANDGate.py
+					dynamicNOTGate.py
 				
 Overall the `boolean` package uses the `network` package.
 				
