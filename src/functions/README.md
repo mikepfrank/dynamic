@@ -9,7 +9,8 @@ part of the simulator package.
 
 ## 1. Module hierarchy.
 
-The dependency diagram of modules within this package is as follows.		
+The dependency diagram of modules within this package is as follows.
+
 					 _______________
 	Package 		/               \
 	module:		 	|   functions   |
@@ -35,10 +36,10 @@ The dependency diagram of modules within this package is as follows.
 
 Besides standard Python libraries, the `functions` only uses the 
 top-level `logmaster.py` module.
-					
+
 The `functions` package is used by the `simulator` package as well as 
 by the higher-level `boolean` and `examples` packages.
-				
+
 ## 2. Working modules.
 
 The following modules have been tested and are part of the

@@ -8,6 +8,7 @@ It depends on the `..simulator` package.
 
 The dependency diagram of modules within this package is roughly as follows
 (indirect dependencies may not all be shown):
+
 				 _______________
 	Package 	/               \
 	module:		|    network    |
@@ -30,8 +31,9 @@ The dependency diagram of modules within this package is roughly as follows
 						|
 						V
 				  dynamicNode.py
-				
-					
+
+The `network` package uses the `simulator` package.
+
 The `network` package is used by the higher-level `boolean` and 
 `examples` packages.
 

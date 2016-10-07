@@ -9,6 +9,7 @@ interaction functions and updated according to Hamilton's equations.
 
 The dependency diagram of modules within this package is roughly as follows
 (indirect dependencies may not all be shown):
+
 				 _______________
 	Package 	/               \
 	module:		|   simulator   |
@@ -38,10 +39,10 @@ The dependency diagram of modules within this package is roughly as follows
 	  dynamicFunction.py	|
 							V
 					simulationContext.py
-				
+
 The `simulator` package uses the `functions` package, as well as the 
 top-level module `fixed.py`.
-				
+
 The `simulator` package is used by the `network` package as well as 
 by the main application script `dynamic-demo.py`.
 
