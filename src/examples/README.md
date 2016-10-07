@@ -6,21 +6,22 @@ It depends on the `..boolean` package.
 ## 1. Module hierarchy.
 
 The dependency diagram of modules within this package is as follows:
+
 				 _______________
-		Package 	/               \
-		module:		|    examples   |
-					| (__init__.py) |
-					\_______________/
-		Modules in		|		|
-		package:		|		|
-						|		V
-						|	exampleNetworks.py
-						|		|
-						V		V
-			 rangeBinder.py	  dynamicMemCell.py
-				
+	Package 	/               \
+	module:		|    examples   |
+				| (__init__.py) |
+				\_______________/
+	Modules in		|		|
+	package:		|		|
+					|		V
+					|	exampleNetworks.py
+					|		|
+					V		V
+		 rangeBinder.py	  dynamicMemCell.py
+
 The `examples` package uses the `boolean` and `function` packages.
-				
+
 The `examples` package is used by the main application script `dynamic-demo.py`.
 
 ## 2. Working modules.
