@@ -7,7 +7,8 @@ subdirectories for the various larger packages making up the simulation.
 ## 1. Software architecture.
 
 A rough picture of the software architecture is shown below (not including standard
-Python modules used).  Subsequent sections of this file describe the parts of this diagram.
+Python modules used).  Subsequent sections of this file describe the parts of this
+diagram.  See the `README.md` files within individual packages for further detail.
 
 		
 	Application script:		   dynamic-demo.py
