@@ -12,32 +12,34 @@ diagram.  See the `README.md` files within individual packages for further detai
 
 		
 	Application script:		   dynamic-demo.py
-									  |
-								 _____V_____ 
-	Packages:					/			\
-								| examples  |
-								\___________/
-									  |
-								 _____V_____ 
-								/			\
-								|  boolean  |
-								\___________/
-									  |
-								 _____V_____ 
-								/			\
-								|  network  |
-								\___________/
-									  |
-								 _____V_____ 
-								/			\
-								| simulator |
-								\___________/
-									  |
-								 _____V_____ 
-								/			\
-								| functions |
-								\___________/
-
+								 |	       |
+							   __/         \______
+	Packages:				  / 	              \
+							 /	 ___________       \
+							/	/			\       \
+							|	| examples  |<--+    \
+							|	\___________/   |     \
+							|		  |			|      \
+							|	 _____V_____ 	|	   |
+							|	/			\	|	   |
+							|	|  boolean  |	|	   |
+							|	\___________/	|	   |
+							|		  |			|	   |
+							|	 _____V_____ 	|	   |
+							|	/			\	/	   |
+							|	|  network  |  /	   |
+							|	\___________/ /		   |
+							|		  |      /		   |
+							|	 _____V_____/ 		   |
+							|	/			\		   |
+							+-->| simulator |          |
+								\___________/		   |
+								/	  |		\		   |
+							   / _____V_____ \		 __V__
+							  /	/			\ \		/	  \
+							  |	| functions | |		| gui |
+							  |	\___________/ |		\_____/
+							  V				  V
 	Top-level			   fixed.py   partialEvalFunc.py
 		modules:			  	  |        |
 								  V        V
@@ -58,11 +60,12 @@ files provided in `..\bat\` to work with the application script.)
 This is the main application provided for demonstration and testing purposes.
 Currently, this just creates an example network (full adder) and simulates
 it for 20,000 time steps, producing diagnostic output to the text console.
-It depends on the `examples` and `simulation` packages.
+It depends on the `logmaster`, `gui` and `simulation` packages.
 
 ## 3. Package subdirectories.
 
-All of these packages depend on the `logmaster` top-level module.
+All of these packages depend on the `logmaster` top-level module.  They are 
+listed here roughly in order from higheset-level to lowest-level.
 
 ### 3.1. Examples package (`examples/`).
 
@@ -89,7 +92,8 @@ the components introduce interactions between the nodes.  Depends on the
 This package implements the core of the simulation framework.  It allows 
 creating canonical coordinates (generalized position/momentum pairs) that
 are updated according to Hamiltonian functions expressed as sums of terms.
-Depends on the `functions` package and the `fixed` module.
+Depends on the `functions` package and the `fixed` module.  Also refers 
+upwards to the `examples` package.
 
 ### 3.5. Functions package (`functions/`).
 
@@ -97,7 +101,7 @@ This low-level package defines various classes of differentiable functions.
 
 ### 3.6. GUI package (`gui/`).
 
-This package (under construction) will provide an interactive graphical 
+This package (still under construction) will provide an interactive graphical 
 user interface featuring animated visualizations.
 
 ## 4. Top-level modules.
