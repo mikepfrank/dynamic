@@ -100,9 +100,9 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     if RAW_DEBUG:
         print("__main__: Importing standard Python library modules...")
-        
+
+import sys        
 from sys import stderr      # Used for error output to console.
-#from os import chdir        # Used to cd to appropriate directory for file output.
 
 
         #|======================================================================
@@ -113,21 +113,30 @@ if __name__ == "__main__":
     if RAW_DEBUG:
         print("__main__: Importing custom application modules...", file=stderr)
 
-from    logmaster           import  configLogMaster, appLogger, setThreadRole, doInfo, doNorm
-    # The logmaster module defines our logging framework; we import
-    # some definitions that we need from it.
-    # (configLogMaster, appLogger, setThreadRole, doInfo, doNorm)
+    #|----------------------------------------------------------------
+    #|  The following modules, although custom, are generic utilities,
+    #|  not specific to the present application.
 
-from    appdefs             import  appName
+from logmaster import (appLogger, configLogMaster, setComponent,
+                       setThreadRole, doInfo, doNorm, updateStderr)
+    #   \
+    #   The logmaster module defines our logging framework; we import
+    #   some definitions that we need from it (configLogMaster, appLogger,
+    #   setThreadRole, doInfo, doNorm).  Cleaner than import *.
+
+    #|----------------------------------------------------------------
+    #|  The following modules are specific to the present application.
+
+from appdefs                        import  appName
     # Name of the present application.  Used for configuring logmaster.
 
-from    simulator.simulationContext import  SimulationContext
-    # Used for tracking global state of the simulation.
+from simulator.simmor               import  Simmor
+    # Manages the whole simulation.
 
-from    examples.exampleNetworks    import  FullAdderNet
-    # The exampleNetworks module defines various simple example modules to be
-    # used for development and testing.  Here we import the one that we will
-    # use here for our demo.
+    #--------------------------------------
+    # Import GUI modules we're using here.
+
+from    gui         import guiapp, tikiterm, dyngui, worklist
 
 
     #|==========================================================================
@@ -189,6 +198,7 @@ global  is_top      # Boolean; is this module running at top level?
     
 global  _logger
 
+global  _guibot
 
     #|==========================================================================
     #|
@@ -198,6 +208,119 @@ global  _logger
     #|          module; they are not part of any particular class.
     #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+def _initLogging():
+    global _logger
+    
+        #---------------------------------
+        # Configure the logging facility.
+
+    if RAW_DEBUG:
+        print("__main__._initLogging(): Configuring the 'logmaster' logging module...",
+              file=stderr)
+
+    # Uncomment the first line below and comment the second to turn on
+    # log-file debug messages.
+    
+    configLogMaster(logdebug = True, role = 'startup', component = appName)
+    #configLogMaster(role = 'startup', component = appName)
+        # Configure the logger with default settings (NORMAL and higher
+        # output to console, INFO and higher to log file), set this main
+        # thread's role to "startup" and set the thread component to
+        # "demoApp".
+
+    _logger = appLogger  # Get our application logger.
+
+
+def _initGui():
+    global _guibot
+    
+            #|====================================================
+            #|  The following code initializes the GUI framework.
+
+        #-------------------------------------------------------------
+        # Declares (in the log file) that we are now working on behalf
+        # of the GUI component.
+
+    setComponent('GUI')
+
+        #-------------------------------------------------------------
+        # Create & start the guiapp module's guibot worker thread.
+        # (This is done after the above b/c it may produce debug log
+        # messages.)
+
+    if doInfo:
+        _logger.info("Starting the GUI application's worker thread...")
+
+    guiapp.initGuiApp()         # This creates the guibot, in guiapp.guibot.
+    _guibot = guiapp.guibot     # Private global copy in this module.
+
+        #-------------------------------------------------------------    
+        # Create our main terminal window for interactive standard I/O
+        # to user.  This must be done after the call to initGuiApp().
+
+    if doInfo:
+        _logger.info("Creating new GUI-based console window...")
+
+    console = tikiterm.TikiTerm(title="Dynamic Demo Console",
+                                width=90, height=30)
+        # Note the window size of 90x30 chars is a bit bigger than a
+        # standard 80x24 console.  This is big enough to show our
+        # splash logo and some text below it.
+
+    if doInfo:
+        _logger.info("Redirecting stdout & stderr streams to "
+                     "GUI-based console...")
+
+        #|--------------------------------------------------------------------------
+        #|  Display a message in the default console window to explain to the
+        #|  user the status of this now mostly-superfluous window.  Note this
+        #|  is the last thing that is done before stdout is redirected.
+
+    if doNorm:        
+        print("\n"
+              "You may now minimize this console window; "
+              "it's no longer needed.\n"
+              "NOTE: Closing this window will kill the %s application.\n"
+              % appName)
+
+        #-------------------------------------------------------------
+        # Before we actually reassign stdin/stdout/stderr streams to 
+        # use our new console, we first make sure we have a record of
+        # our original stdin/stdout/stderr streams (if any), so we can
+        # restore them later if/when the console window closes.
+
+    # If the default stdout is not already set (e.g. we're running under IDLE),
+    if sys.__stdout__ == None:   
+        sys.__stdout__ = sys.stdout     # Set it to our actual current stdout.
+        
+    if sys.__stderr__ == None:          # Likewise with stderr.
+        sys.__stderr__ = sys.stderr
+        
+    if sys.__stdin__  == None:          # And also stdin.
+        sys.__stdin__  = sys.stdin
+
+
+        #-------------------------------------------------------------
+        # Have our new console take over the stdin, stdout and stderr
+        # stream functions.       
+
+    console.grab_stdio()
+    updateStderr()  # Tells logmaster we have a new stderr now.
+        # ^- Without this, we could not see abnormal log messages on
+        #    our new console.
+
+        #----------------------------------------------
+        # Display splash logo image in console window.
+        
+    _guibot(lambda:dyngui.setLogoImage(console))
+    print() # This just ends the line that the image is on.
+
+        # OK, GUI-related initial setup is done.  
+
+def _waitGuiEnd():      # Wait for the user to exit the GUI.
+    _guibot.join()
+
 
         #|----------------------------------------------------------------------
         #|
@@ -226,33 +349,7 @@ def _main():
         print("__main__._main(): Entered application's _main() routine...",
               file=stderr)
 
-        #-------------------------------------------------------------
-        # We assume here that the current working directory is the top
-        # of the source tree, where this file resides.  We then change
-        # the current working directory to point to the 'run/' direc-
-        # tory (parallel to the source tree) so that our log file will
-        # be created there.
-
-    #chdir('..'); chdir('run')
-
-        #---------------------------------
-        # Configure the logging facility.
-
-    if RAW_DEBUG:
-        print("__main__._main(): Configuring the 'logmaster' logging module...",
-              file=stderr)
-
-    # Uncomment the first line below and comment the second to turn on
-    # log-file debug messages.
-    
-    #configLogMaster(logdebug = True, role = 'startup', component = appName)
-    configLogMaster(role = 'startup', component = appName)
-        # Configure the logger with default settings (NORMAL and higher
-        # output to console, INFO and higher to log file), set this main
-        # thread's role to "startup" and set the thread component to
-        # "demoApp".
-
-    _logger = appLogger  # Get our application logger.
+    _initLogging()      # Configure the logmaster module.
 
         #----------------------------------------------
         # Application startup:  Display splash text.
@@ -266,55 +363,34 @@ def _main():
         _logger.normal("All Rights Reserved.")
         print()
 
+
+    _initGui()  # Initialize the graphical user interface.
+    
             #=====================================================
             # Below follows the main code of the demo application.
 
+        #---------------------------------------------------------------
+        # Create a "simmor" object, which will create, run and manage
+        # simulations for us.
+
+    simmor = Simmor()
+
         #-----------------------------------------------------------------
-        # First create a new simulation context object, initially empty.
-        # This stores global parameters of the simulation (such as the
-        # time delta value) and tracks global variables of the simulation
-        # (such as the current time-step number).  We'll let it take its
-        # default values for now.  At this point, the network to be
-        # simulated has not been created yet.
+        # Tell the simmor to do a simple default demonstration of the
+        # simulator's capabilities.
 
-    sc = SimulationContext()
-
-        #---------------------------------------------------------
-        # Create an extremely simple example network for initial
-        # testing during development.  Tell it that it's going to
-        # be using that simulation context that we just created.
-
-##    _logger.normal("Creating an exampleNetworks.MemCellNet instance...")                
-##    net = exampleNetworks.MemCellNet(context=sc)
-
-##    _logger.normal("Creating an exampleNetworks.InverterNet instance...")                
-##    net = exampleNetworks.InverterNet(context=sc)
-
-##    if doNorm:
-##        _logger.normal("Creating an exampleNetworks.AndGateNet instance...")     
-##    net = exampleNetworks.AndGateNet(context=sc)
-
-##    if doNorm:
-##        _logger.normal("Creating an exampleNetworks.HalfAdderNet instance...")     
-##    net = exampleNetworks.HalfAdderNet(context=sc)
-
-    if doNorm:
-        _logger.normal("Creating an exampleNetworks.FullAdderNet instance...")     
-    net = FullAdderNet(context=sc)
-
-
-##    _logger.debug("Initial node X momentum is: %f" % 
-##                  net.node('X').coord.momentum.value)
-
-        #---------------------------------------------------------
-        # Run the built-in .test() method of the example network.
-
-    if doNorm:
-        _logger.normal("Requesting simulator to run a simple test...")
+    simmor.doDemo()
     
-    setThreadRole('running')
-    
-    sc.test()  # This method exercises some basic simulation capabilities.
+    setComponent('appName')
+
+        #------------------------------------------------------------
+        # At this point we have nothing left to do, so we join with
+        # the guibot thread and wait for the user to exit the GUI.
+        # Better would be to run a command-processing loop reading
+        # user commands from stdin.
+
+    setThreadRole('waiting')
+    _waitGuiEnd()
 
     setThreadRole('shutdown')
 

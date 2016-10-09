@@ -8,9 +8,8 @@ from fixed              import Fixed
 
 from functions.ternaryDifferentiableFunction import TernaryDifferentiableFunction
 
-from .linkport           import Port
-
 from .dynamicNode        import DynamicNode
+from .dynamicPort        import DynamicPort         as Port
 from .dynamicComponent   import DynamicComponent
 from .dynamicNetwork     import DynamicNetwork
 

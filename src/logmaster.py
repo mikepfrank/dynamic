@@ -495,6 +495,31 @@ __all__ = [
                 #|      These constants identify a new logging level for
                 #|      normal program output.  (Above INFO, below WARNING.)
                 #|
+                #|      NOTE: It might be imagined that NORMAL should be
+                #|      between WARNING and ERROR instead, so that the
+                #|      console log level can be set to NORMAL to cause
+                #|      warnings to be suppressed from the console without
+                #|      suppressing normal output.  However, this is
+                #|      ensured anyway since the NormalLogger.normal()
+                #|      method prints the given message to stdout
+                #|      unconditionally, in addition to maybe logging it
+                #|      using appropriate handlers.  So, if we want to
+                #|      suppress warnings from the console, we can just
+                #|      set the console log level to ERROR, and we will
+                #|      still see normal output (but not warnings).
+                #|
+                #|      Having NORMAL be between INFO and WARNING instead
+                #|      is useful because it means that if the file log
+                #|      level is set to WARNING, warnings (which may be
+                #|      useful for detecting possible problems) will be
+                #|      logged, while normal output (which may be
+                #|      excessive) will not be.  If we wish to log normal
+                #|      output as well as warnings, we can set the file
+                #|      log level to NORMAL.  And if we also want verbose
+                #|      output, we can set the file log level to INFO.
+                #|      And for maximum diagnostics for debugging, we set
+                #|      the file log level to DEBUG.
+                #|
                 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 global NORMAL_LEVEL, NORMAL
@@ -682,16 +707,39 @@ global log_level, console_level
 log_level       = logging.INFO      # By default, log file records messages at INFO level and higher.
 console_level   = logging.WARNING   # By default, console displays messages at WARNING level & higher.
 
+
+                #|--------------------------------------------------------------
+                #|
+                #|  minLevel,                  [public global constant integers]
+                #|
+                #|  do{Debug,Info,             [public global constant Booleans]
+                #|      Norm,Warn,Err}
+                #|
+                #|      The minLevel global is the minimum of the
+                #|      current console logging level and the current
+                #|      log-file logging level.  Any messages below
+                #|      this level (except normal out) do not need to
+                #|      be generated at all.
+                #|
+                #|      The various do* globals are Booleans indicating
+                #|      whether we need to generate log messages at the
+                #|      corresponding level.
+                #|
+                #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
 global minLevel, doDebug, doInfo, doNorm, doWarn, doErr
+
+    # The below function needs to be moved to the functions section.
 
 def _noticeLevels():
 
     global minLevel, doDebug, doInfo, doNorm, doWarn, doErr
     
-    minLevel = min(log_level, console_level)
+    minLevel = min(log_level, console_level)    # Calculate min logging level
+    
     doDebug = (minLevel <= logging.DEBUG)
     doInfo = (minLevel <= logging.INFO)
-    doNorm = (minLevel <= NORMAL)
+    doNorm = True # Not (minLevel <= NORMAL) b/c we always display normal output
     doWarn = (minLevel <= logging.WARNING)
     doErr = (minLevel <= logging.ERROR)
     # Critical and fatal-level messages are always logged or displayed,
@@ -704,6 +752,7 @@ def _noticeLevels():
     
 #__/ End _noticeLevels().
 
+    # Move this to the main body section
 _noticeLevels()
 
             #|==================================================================

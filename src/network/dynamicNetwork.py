@@ -6,9 +6,11 @@ from   logmaster          import *      # ErrorException
 global logger
 logger = logmaster.getLogger(logmaster.sysName + '.network')
 
-from .dynamicNode        import DynamicNode
-from .dynamicComponent   import DynamicComponent
-from .linkport           import Link 
+from .dynamicNode       import  DynamicNode         as Node
+from .dynamicLink       import  DynamicLink         as Link
+from .dynamicPort       import  DynamicPort         as Port
+from .dynamicComponent  import  DynamicComponent    as Component
+
 from simulator.hamiltonian        import HamiltonianTerm,Hamiltonian
 
 class SimulationContext: pass       # Forward declaration to avoid circularity
@@ -120,7 +122,7 @@ class DynamicNetwork:
     #       discrete component (and its connected nodes) to the
     #       network.
 
-    def addComponent(self, part:DynamicComponent):
+    def addComponent(self, part:Component):
 
         if doDebug:
             logger.debug("Adding component '%s' into network '%s'..." %
@@ -160,12 +162,12 @@ class DynamicNetwork:
         
         self.hamiltonian.addTerm(term)
     
-    #-- inst.addNode(node:DynamicNode) - Adds the given node to the
+    #-- inst.addNode(node:Node) - Adds the given node to the
     #       network (and its connected links).  If no name is provided,
     #       use the existing name; if the name is not unique, append
     #       a sequence number chosen to make it unique.
 
-    def addNode(self, node:DynamicNode, nodeName:str=None):
+    def addNode(self, node:Node, nodeName:str=None):
     
         # First, make sure the given node is not already in the network.
         # If it is already in the network, we just return without doing anything.
@@ -202,7 +204,7 @@ class DynamicNetwork:
     # This method registers that a node has changed names from the
     # given <oldName> to its new name.
 
-    def noticeNodeNameChange(self, node:DynamicNode, oldName:str=None):
+    def noticeNodeNameChange(self, node:Node, oldName:str=None):
         del self._nodes[oldName]        # There's no longer a node w old name in network
         self.addNode(node, node.name)
 

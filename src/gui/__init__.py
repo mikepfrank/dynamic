@@ -17,7 +17,15 @@
 # using syntax like "from ..<package> import <module>".
 
 __all__ = [
-    'circuitViewer'
+    'circuitViewer',    # Not yet implemented tho
+    'desque',       # Double-ended synchronous queues.
+    'dyngui',       # Application-specific GUI stuff.
+    'flag',         # Checkable, waitable condition variables.
+    'guiapp',       # Thread to consolidate GUI ops.
+    'terminal',     # Generic Terminal class
+    'tikiterm',     # TkInter-based terminal windows
+    'utils',        # Miscellaneous utilities
+    'worklist'      # Queues of callables to call
     ]
 
 #print("__path__ is %s" % __path__)

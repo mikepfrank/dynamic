@@ -2,10 +2,12 @@ import logmaster
 from logmaster import *
 
 from functions.unaryDifferentiableFunction    import UnaryDifferentiableFunction
-from .linkport                       import Link,Port
-from .dynamicNode                    import DynamicNode
-from .dynamicComponent               import DynamicComponent
-from .dynamicNetwork                 import DynamicNetwork,netName
+
+from .dynamicNode       import  DynamicNode
+from .dynamicLink       import  DynamicLink         as Link
+from .dynamicPort       import  DynamicPort         as Port
+from .dynamicComponent  import  DynamicComponent
+from .dynamicNetwork    import  DynamicNetwork, netName
 
 logger = getLogger(sysName + '.network')
 

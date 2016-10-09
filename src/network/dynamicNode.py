@@ -3,7 +3,11 @@ logger = getLogger(logmaster.sysName + '.network')
 
 from simulator.dynamicCoordinate import DynamicCoordinate
 
-class DynamicNetwork: pass  # Forward declaration to avoid circularity
+    # Forward declarations to avoid circularity
+
+class   Network:    pass    # Real definition is in dynamicNetwork.DynamicNetwork  
+class   Link:       pass    # Real definition is in dynamicLink.DynamicLink  
+
 
 class NodeNameCollision(Exception): pass
 
@@ -38,7 +42,7 @@ class DynamicNode:
     #   to initialize the node's .name data member.  Initially the
     #   node has an empty list of links.
 
-    def __init__(inst, network:DynamicNetwork, name:str=None):
+    def __init__(inst, network:Network, name:str=None):
 
         if doDebug:
             logger.debug("Creating a new dynamic node named %s in network %s..." %
@@ -113,12 +117,12 @@ class DynamicNode:
         else:
             return '(unnamed node)'
 
-    def addLink(this, link):
+    def addLink(this, link:Link):
         this.links.append(link)
         if link.node != this:
             link.node = this
 
-    def removeLink(this, link):
+    def removeLink(this, link:Link):
         this.links.remove(link)
 
     def printInfo(this):

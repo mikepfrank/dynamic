@@ -3,9 +3,8 @@ _logger = logmaster.getLogger(logmaster.sysName + '.simulator')
 
 from functions.binaryDifferentiableFunction import BinaryDifferentiableFunction
 
-from .linkport           import Port
-
 from .dynamicNode        import DynamicNode
+from .dynamicPort        import DynamicPort         as Port
 from .dynamicComponent   import DynamicComponent
 from .dynamicNetwork     import DynamicNetwork
 

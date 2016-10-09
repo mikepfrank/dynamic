@@ -3,11 +3,14 @@ from typing                     import Iterable
 import logmaster; from logmaster import *
 
 from functions.differentiableFunction     import BaseDifferentiableFunction
-from .linkport                   import Link,Port
-from .dynamicNode                import DynamicNode
-from simulator.hamiltonian                import HamiltonianTerm
 
-from network import dynamicNetwork
+from .dynamicLink               import  DynamicLink as  Link
+from .dynamicPort               import  DynamicPort as  Port
+from .dynamicNode               import  DynamicNode as  Node
+
+from simulator.hamiltonian      import HamiltonianTerm
+
+from    network     import  dynamicNetwork
 
 __all__ = ['DynamicComponent']
 
@@ -124,7 +127,7 @@ class DynamicComponent:
     #-- .link(portName, node) - Links the port named <portName> of this
     #       component to the external node <node>.
 
-    def link(this, portName:str, node:DynamicNode):
+    def link(this, portName:str, node:Node):
 
         if doInfo:
             logger.info("Linking port '%s' of component '%s' to node '%s'..."

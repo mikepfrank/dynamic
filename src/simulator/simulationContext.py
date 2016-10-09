@@ -60,6 +60,8 @@
 
 import logmaster; from logmaster import *   # Provides logging capabilities.
 
+import time
+
 from fixed          import Fixed                # Fixed-point arithmetic.
 from network.dynamicNetwork import DynamicNetwork       # A network of dynamic nodes.
 
@@ -341,11 +343,13 @@ class SimulationContext:
 
         self.network.printDiagnostics()
         #for t in range(10):
-#        for t in range(1000):
-        for t in range(10000):
+        #for t in range(100):
+        for t in range(1000):
+        #for t in range(10000):
             self.stepForward(2)
             self.network.printDiagnostics()
             self.network.gatherStats()
+            time.sleep(0.02)
 
         self.network.printStats()
 
