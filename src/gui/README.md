@@ -51,7 +51,7 @@ variables.  These are useful for inter-thread coordination and
 are a little more flexible than Python's built-in conditions.
 The `flag` module is referenced by the `worklist` module.
 
-### 2.3. Desque module (`dynamicVariable.py`).
+### 2.3. Desque module (`desque.py`).
 
 This module defines a class for double-ended synchronous 
 queues.  These are like ordinary synchronous queues except
