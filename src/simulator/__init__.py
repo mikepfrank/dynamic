@@ -25,6 +25,7 @@ __all__ = [
     'hamiltonianVariable',
     'dynamicCoordinate',
     'simulationContext',
+	'simmor'
     ]
 
 #print("Initializing simulator package.\nPath is %s " % __path__[0])

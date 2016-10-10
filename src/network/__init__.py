@@ -17,14 +17,15 @@
 # using syntax like "from ..<package> import <module>".
 
 __all__ = [
-    'linkport',
     'dynamicNode',
+	'dynamicLink',
+	'dynamicPort',
     'dynamicComponent',
-    'dynamicNetwork',
     'dynamicOneTerminalComponent',
     'dynamicOneTerminalGate',
     'dynamicTwoTerminalGate',
     'dynamicThreeTerminalGate',
+    'dynamicNetwork'
     ]
 
 #print("__path__ is %s" % __path__)

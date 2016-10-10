@@ -43,6 +43,7 @@ The `network` package is used by the higher-level `boolean` and
 ## 2. Working modules.
 
 The following modules have been tested and are part of the current system.
+They are listed here roughly in order from lowest-level to highest-level.
 
 ### 2.1. Dynamic node module (`dynamicNode.py`).
 
@@ -53,24 +54,27 @@ or more (currently just one) dynamical state variables.
 
 This module defines a class for links between nodes and component ports in a 
 Dynamic network.  Links do not themselves have any internal state (currently).
+Depends on the `dynamicNode` module.
 
 ### 2.3. Dynamic port module (`dynamicPort.py`).
 
 This module defines a class for ports of Dynamic components which may be linked 
-to nodes.  Ports do not themselves have any internal state (currently).
+to nodes.  Ports do not themselves have any internal state (currently).  Depends
+on the `dynamicLink` module.
 
 ### 2.4. Dynamic component module (`dynamicComponent.py`).
 
 This module defines a class for components of a Dynamic network.  A component
 relates one or more nodes to each other via Hamiltonian interaction terms.  
 Generally components might also have internal state variables, but they don't 
-yet. (We can always extend the classes later for this purpose.)
+yet. (We can always extend the classes later for this purpose.)  Depends on 
+the `dynamicPort` module.
 
 ### 2.5. Dynamic one-terminal component module (`dynamicOneTerminalComponent.py`).
 
 Currently just used by the ..examples.rangeBinder module, this component
 class involves one-terminal components whose incident node is not necessarily
-to be thought of as an "output."
+to be thought of as an "output."  Depends on the `dynamicComponent` module.
 
 ### 2.6. Dynamic one-terminal gate module (`dynamicOneTerminalGate.py`).
 
@@ -82,7 +86,7 @@ The above three modules define various sizes of generic component classes
 called "gates" in which one terminal is conventionally designated as an
 "output" terminal, and the others are implicitly "input" terminals.  Thus, 
 the one-terminal "gate" has 0 inputs, the two-terminal gate has 1 input, 
-and the three-terminal gate has 2 inputs.  
+and the three-terminal gate has 2 inputs.  Depend on `dynamicComponent`.
 
 Maybe the abstraction here could be improved (e.g. have one "gate" class 
 that is parameterized by the number of terminals), but this is fine for now.
@@ -91,7 +95,7 @@ that is parameterized by the number of terminals), but this is fine for now.
 
 This module defines a class for Dynamic networks.  Essentially a network is
 just a set of nodes and a set of components, with an associated simulation
-context.
+context.  Depends on the `dynamicNode` and `dynamicComponent` modules.
 
 ### 2.10. Package initialization module (`__init__.py`).
 

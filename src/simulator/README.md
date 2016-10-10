@@ -15,29 +15,31 @@ The dependency diagram of modules within this package is roughly as follows
 	module:		|   simulator   |
 				| (__init__.py) |
 				\_______________/
-	Modules in			|
-	package:			|
-						V
-			  dynamicCoordinate.py
-						|
-						V
-			 hamiltonianVariable.py
-			 		    |
-					    V
-				 hamiltonian.py
-						|
-						V
-		differentiableDynamicFunction.py
-						|
-						V
-		     derivedDynamicFunction.py
-					    |
-					    V
-			    dynamicVariable.py
-				    |		|
-				    V		|
-	  dynamicFunction.py	|
-							V
+	Modules in		|		  |	
+	package:		|		  V 
+					|		simmor.py
+					|				\
+					V				 \
+			  dynamicCoordinate.py	  \
+						|			   \
+						V				\
+			 hamiltonianVariable.py		 \
+			 		    |				  \
+					    V				  |
+				 hamiltonian.py			  |
+						|				  |
+						V                 |
+		differentiableDynamicFunction.py  |
+						|                 /
+						V                /
+		     derivedDynamicFunction.py  /
+					    |              /
+					    V             /
+			    dynamicVariable.py   /
+				    |		|       /
+				    V		|      /
+	  dynamicFunction.py	|      |
+							V      V
 					simulationContext.py
 
 The `simulator` package uses the `functions` package, as well as the 
@@ -106,7 +108,12 @@ This module defines a class for dynamical coordinates, which means
 canonical coordinate pairs consisting of a generalized position
 coordinate and an associated generalized momentum coordinate.
 
-### 2.9. Package initialization module (`__init__.py`).
+### 2.9. Simulator object module (`simmor.py`).
+
+This module (still experimental) defines a top-level class Simmor 
+to manage the entire simulation.
+
+### 2.10. Package initialization module (`__init__.py`).
 
 This module is automatically loaded when the package is first accessed,
 and it performs initialization operations associated with the package.
