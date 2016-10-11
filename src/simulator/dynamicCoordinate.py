@@ -244,7 +244,11 @@ class DynamicCoordinate:
 
             # Generate an initial momentum value by sampling from thermal distribution.
             # Later this should be temperature-dependent, but units are arbitrary for now
-            # anyway so just assume some arbitrary fixed unit temperature.
+            # anyway so just assume some arbitrary fixed unit of temperature.  Since each 
+            # degree of freedom would by the equipartition theorem would normally have
+            # 1/2 kT of expected energy, this is equivalent to assigning our energy unit 
+            # (corresponding to the sigma value of 1 below) to be equal to kT.  (Energy 
+            # will become equally distributed between kinetic and interaction energies.)
 
         momval = random.normalvariate(0, 1)     # Normally distributed about origin, unit sigma.
 
