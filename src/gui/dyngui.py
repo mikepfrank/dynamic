@@ -15,6 +15,9 @@ __all__ = ['setLogoImage',  # used by COSMICi_server.main().
            'logoimage'      # export just in case other modules need it - of course, this is useless b/c it's not actually defined yet at import time.  :(
            ]
 
+#_splashFilename = "dynamic-logo.ppm"; _subsampleFactor = 3
+_splashFilename = "DYNAMIXXXX.ppm"; _subsampleFactor = 6
+
         #=========================================================
         #   setLogoImage()              [public module function]
         #
@@ -36,7 +39,7 @@ def setLogoImage(console):
 
         # Create the TkInter image object for our logo.
 
-    logoimage = tkinter.PhotoImage(file="images/dynamic-logo.ppm").subsample(3)
+    logoimage = tkinter.PhotoImage(file="images/"+_splashFilename).subsample(_subsampleFactor)
             # Easiest way to create .ppm (portable pixmap) files is with GIMP.
 
         # Insert the image (like a large character of text)
