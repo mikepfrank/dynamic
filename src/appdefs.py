@@ -131,7 +131,7 @@ global systemName, appName, topFile
         #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-systemName  =   "Dynamic"       # This code is part of the "COSMICi" system.
+systemName  =   "Dynamic"       # This code is part of the "Dynamic" system.
 
 
         #|----------------------------------------------------------------------
