@@ -125,15 +125,18 @@ class SimulationContext:
 
     #vvvvvvvvvvvv Begin docstring for class SimulationContext vvvvvvvvvvvvvvvvvv
     
-    """A SimulationContext tracks important overall information about
-       a simulation, such as, what dynamic network is being simulated,
-       and what are the values of general simulation parameters such
-       as the size of the time steps.
+    """simulator.simulationContext.SimulationContext              [public class]
+
+            An instance of class SimulationContext tracks important
+        overall information about a given simulation, such as, what
+        dynamic network is being simulated, and what are the values
+        of general simulation parameters such as the size of the time
+        steps.
 
             Public data-member attributes:
             ------------------------------
 
-                inst.timedelta:fixed.Fixed
+                inst.timedelta:fixed.Fixed                  [public data member]
 
                     A fixed-point number giving the magnitude of the
                     time increment between subsequent time steps.  For
@@ -213,7 +216,7 @@ class SimulationContext:
 
     def __init__(inst, timedelta:Fixed=None, network:DynamicNetwork=None):
         
-        """Initializes data members of a new object of class
+        """Initializes various data members of a new object of class
            SimulationContext upon its creation.  The initial values of
            the object's parameters can be specified as arguments, but
            this is optional.  They can also be (re)assigned at a later
@@ -264,14 +267,24 @@ class SimulationContext:
     @property                                           # Property getter.
     def network(self) -> DynamicNetwork:                
         
-        """(network.DynamicNetwork) The specific Dynamic network
-           that's being simulated in the given simulation context.
-           If no network has been assigned yet, this is None."""
+        """
+            inst.network:DynamicNetwork                      [settable property]
+
+                This property refers to the specific Dynamic network
+            that's being simulated in the given simulation context.  If
+            no network has been assigned yet, the value is None.  There
+            is a setter method, but (currently) no deleter method.
+            
+                Note that setting this property to refer to a given
+            network has the side-effect of evolving the state of that
+            network forwards or backwards in time as ineeded to be
+            consistent with the current value of the inst.timestep
+            property.                                                        """
         
-        if hasattr(self, '_network'):
-            return self._network
-        else:
-            return None
+        if hasattr(self, '_network'):   # If the underlying attribute exists,
+            return self._network        #   return its value,
+        else:                           # otherwise,
+            return None                 #   return None (instead of error).
         
     #__/ End .network getter.
 
@@ -280,58 +293,111 @@ class SimulationContext:
         
         if network is None:
             if hasattr(self,'_network'):
-                del self._network
+                del self._network           # Just remove the attribute.
         else:
+            # Really should check here to make sure network is really
+            # an instance of DynamicNetwork.
             self._network = network
             network.evolveTo(self.timestep)
             
     #__/ End .network setter.
 
 
-            #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            #-------------------------------------------------------------------
             #   inst.timestep:int                              [public property]
             #
             #       Our idea of the current "global" time-step index.
             #       However, in reality, individual pieces of the
             #       network being simulated may be ahead or behind
             #       this time by a small amount at any given moment.
-            #...................................................................      
+            #
+            #       Note that the setter method actually evolves the
+            #       state of the simulation forwards or backwards in
+            #       time as needed, as a side-effect.
+            #
+            #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv      
 
-    @property
+    @property                                               # Property getter.
     def timestep(self) -> int:
 
-        """(int) Our idea of the current "global" time-step index.
-           However, in reality, individual pieces of the network being
-           simulated may be ahead or behind this time by a small
-           amount at any given moment."""
+        """
+            inst.timestep:int                                [settable property]
+                
+                This property represents our idea of the current
+            "global" time-step index in the current state of the
+            simulation.  However, in reality, individual pieces of the
+            network being simulated may be ahead or behind this time
+            by a small amount at any given moment.
 
-            # If our timestep-number hasn't been set yet,
-            # initialize it to zero.
+                There is a setter method, but no deleter method.  This
+            property should always have an integer value when examined.
+            Its initial value will be 0 if the user did not specify
+            otherwise.  Setting this property to a non-integer value
+            may have unpredictable consequences.
+            
+                Note that assigning to this property actually evolves
+            the state of the simulation forwards or backwards in time
+            as needed to get to (roughly) the indicated point in time,
+            as a side-effect.                                                """
+
+        # If our timestep-number hasn't been set yet, initialize it to zero.
         
-        if not hasattr(self,'_timestep'):
-            self._timestep = 0
+        if not hasattr(self,'_timestep'):   self._timestep = 0
             
         return self._timestep
 
-    @timestep.setter
+    #__/ End .timestep getter.
+
+    @timestep.setter                                        # Property setter.
     def timestep(self, timestep:int):
+
+        # Really should do some error-checking here, to make sure that timestep
+        # is really an integer or can be converted to an integer.
+
         self.evolveTo(timestep)
 
+    #__/ End .timestep setter.
 
-        #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        #=======================================================================
         #   [In class SimulationContext.]
         #
         #       Public instance methods.                    [class code section]
-        #.......................................................................
+        #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+            #|------------------------------------------------------------------
+            #|  inst.evolveTo()                         [public instance method]
+            #|
+            #|      This is our core method that takes the current
+            #|      simulation to a new point in time.  (Note that
+            #|      the .timestep setter calls this, and thus the
+            #|      below stepForward() and stepBackward methods
+            #|      indirectly do as well.  However, the real work
+            #|      is done by the underlying DynamicNetwork object.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def evolveTo(self, timestep:int):
-        """Evolves the state of the simulation to the specified point
-           in time (denoted by an integer timestep index)."""
-        if timestep != self.timestep:
-            self._timestep = timestep
-            network = self.network
-            if network is not None:
-                network.evolveTo(timestep)
+        """Evolves the state of the simulation to the specified absolute
+           point in time (denoted by an integer timestep index)."""
+        if timestep != self.timestep:       # Don't do anything if no change.
+            self._timestep = timestep       # Set the underlying attribute.
+            network = self.network          # Retrieve our network property.
+            if network is not None:         # If the network is set (non-None),
+                network.evolveTo(timestep)  # evolve it to the given time-point.
+
+            #|------------------------------------------------------------------
+            #|  inst.step{Forward,Backward}()          [public instance methods]
+            #|
+            #|      These methods provide a simple interface to take
+            #|      the current simulation forwards or backwards to a
+            #|      new point in time, by specifying a number of time
+            #|      steps to go (starting from the current time).
+            #|          Note that they work by using the += and -=
+            #|      operators on the .timestep property, which call
+            #|      the .timestep setter, which in turn calls the
+            #|      .evolveTo() method, which evolves the state of the
+            #|      entre underlying Dynamic network.
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def stepForward(self, nSteps:int=1):
         """Advances the state of the simulation forwards in time by
@@ -345,29 +411,51 @@ class SimulationContext:
            <nSteps> argument is not provided, its value defaults to 1."""
         self.timestep -= nSteps
 
-        # A simple test:  Simply step the simulation forward N steps.
 
-    def test(self):
-        """Displays the states of the nodes from times 0 to 10,000,
+            #|------------------------------------------------------------------
+            #|  inst.test()                             [public instance method]
+            #|
+            #|      This method implements a simple diagnostic self-
+            #|      test, by stepping the state of the simulation
+            #|      forwards by +2 .timedelta-size steps, <nSteps>
+            #|      times in a row, displaying network diagnostics
+            #|      after each step.  The value of <nSteps> defaults
+            #|      to (currently) 1,000 if not otherwise specified.
+            #|      (This method was used to generate the data that
+            #|      was graphed in the Chaotic Logic presentation at
+            #|      ICRC 2016.)
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+    def test(self, nSteps:int=1000):
+        """Displays the states of the nodes from times 0 to 2*<nSteps>,
            stepping forward 2 time units at a time.  (This ensures
-           that both position & momentum are updated between points.)"""
+           that both position & momentum get updated between points.)"""
 
-        self.network.initStats()
+        self.network.initStats()            # Prepares to accumulate statistics.
+        self.network.printCsvHeader()       # Header for CSV-format output.
+        self.network.printDiagnostics()     # Initial state as a CSV line.
 
-        self.network.printStatsHeader()
+        for t in range(nSteps):             # We'll do <nSteps> more lines...
+            self.stepForward(2)                 # Updates both p's and q's.
+            self.network.printDiagnostics()     # Prints the new state as CSV.
+            self.network.gatherStats()          # Accumulates some stats.
 
-        self.network.printDiagnostics()
-        
-        #for t in range(10):                # Make this N a parameter
-        #for t in range(100):
-        for t in range(1000):
-        #for t in range(10000):
-            self.stepForward(2)
-            self.network.printDiagnostics()
-            self.network.gatherStats()
-            sleep(0.02)     # Temporary hack to prevent GUI locking.
+                # The following needs some discussion.  Without it, the GUI
+                # freezes up (won't respond to mouse actions on window) while
+                # this test is running.  Presumably, this is because the guibot
+                # queue gets filled up with output-related requests, and so no
+                # new window events can be serviced until the queue is emptied.
+                # The following gives time between output rows for GUI events
+                # to be handled.  However, this is an inelegant solution as it
+                # slows down the execution (perhaps substantially).  We really
+                # need a more elegant, general solution to this sort of issue.
+            
+            sleep(0.02)     # This is a temporary hack to prevent GUI locking.
 
-        self.network.printStats()
+        #__/ End for.
+            
+        self.network.printStats()   # Output accumulated statistics (averages).
 
 #__/ End class SimulationContext.
 

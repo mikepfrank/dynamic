@@ -342,7 +342,7 @@ class AndGateNet(DynamicNetwork):
         me.totalB += me.nodes['B'].coord.position()
         me.totalQ += me.nodes['Q'].coord.position()
 
-    def printStatsHeader(me):
+    def printCsvHeader(me):
         if doNorm:
             #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
             _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, Q.qt, Q.q, Q.pt, Q.p")
@@ -416,7 +416,7 @@ class HalfAdderNet(DynamicNetwork):
         me.totalS0 += me.nodes['S0'].coord.position()
         me.totalS1 += me.nodes['S1'].coord.position()
 
-    def printStatsHeader(me):
+    def printCsvHeader(me):
         if doNorm:
             #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
             _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, "
@@ -546,7 +546,7 @@ class FullAdderNet(DynamicNetwork):
         me.totalS0 += me.nodes['S0'].coord.position()
         me.totalS1 += me.nodes['S1'].coord.position()
 
-    def printStatsHeader(me):
+    def printCsvHeader(me):
         if doNorm:
             #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
             _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, C.qt, C.q, C.pt, C.p, "

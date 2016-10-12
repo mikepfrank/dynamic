@@ -36,9 +36,8 @@ def setLogoImage(console):
 
         # Create the TkInter image object for our logo.
 
-    logoimage = tkinter.PhotoImage(file="images/COSMICi-logo.ppm")
-            #-It was a real pain in the butt to create the ppm;
-            # I compiled & used libpng and libpnm on the xserve.
+    logoimage = tkinter.PhotoImage(file="images/dynamic-logo.ppm").subsample(3)
+            # Easiest way to create .ppm (portable pixmap) files is with GIMP.
 
         # Insert the image (like a large character of text)
         # on the console.

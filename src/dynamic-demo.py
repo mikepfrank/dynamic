@@ -263,7 +263,7 @@ def _initGui():
         _logger.info("Creating new GUI-based console window...")
 
     console = tikiterm.TikiTerm(title="Dynamic Demo Console",
-                                width=90, height=30)
+                                width=120, height=35)
         # Note the window size of 90x30 chars is a bit bigger than a
         # standard 80x24 console.  This is big enough to show our
         # splash logo and some text below it.

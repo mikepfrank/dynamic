@@ -92,5 +92,5 @@ class   Simmor:
             # This method exercises some basic simulation capabilities.
             # It's time-consuming, so we farm it out to the simbot worker
             # thread.
-        simbot(lambda: sc.test())
+        simbot(lambda: sc.test(10))     # Default nSteps=1000
 
