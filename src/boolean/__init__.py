@@ -28,6 +28,6 @@ __all__ = [
     # Create a logger for this package (as a software component).
 
 from logmaster import *
-_logger = getLogger(sysName + '.' + __path__[0].split('\\')[-1])
-    #   \_ This uses the package name ('boolean') as the component name.
 
+_component = __path__[0].split('\\')[-1]    # Component name = package name.
+_logger = getComponentLogger(_component)    # Create the component logger.

@@ -9,7 +9,8 @@ __all__ = ['FunctionNotDefinedError',
            'UnknownArgumentsError',
            'PartiallyEvaluatableFunction']
 
-logger = getLogger(logmaster.sysName + '.partialEval')
+_component = 'partialEval'                  # Name of this SW component.
+logger = getComponentLogger(_component)     # Get a logger for it.
 
 class FunctionNotDefinedError(Exception): pass
     # At final-evaluation time, the actual function was still not defined.

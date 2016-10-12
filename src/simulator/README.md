@@ -10,37 +10,37 @@ interaction functions and updated according to Hamilton's equations.
 The dependency diagram of modules within this package is roughly as follows
 (indirect dependencies may not all be shown):
 
-				 _______________
-	Package 	/               \
-	module:		|   simulator   |
-				| (__init__.py) |
-				\_______________/
-	Modules in		|		  |	
-	package:		|		  V 
-					|		simmor.py
-					|				\
-					V				 \
-			  dynamicCoordinate.py	  \
-						|			   \
-						V				\
-			 hamiltonianVariable.py		 \
-			 		    |				  \
-					    V				  |
-				 hamiltonian.py			  |
-						|				  |
-						V                 |
-		differentiableDynamicFunction.py  |
-						|                 /
-						V                /
-		     derivedDynamicFunction.py  /
-					    |              /
-					    V             /
-			    dynamicVariable.py   /
-				    |		|       /
-				    V		|      /
-	  dynamicFunction.py	|      |
-							V      V
-					simulationContext.py
+                 _______________
+    Package     /               \
+    module:     |   simulator   |
+                | (__init__.py) |
+                \_______________/
+    Modules in      |         | 
+    package:        |         V 
+                    |       simmor.py
+                    |               \
+                    V                \
+              dynamicCoordinate.py    \
+                        |              \
+                        V               \
+             hamiltonianVariable.py      \
+                        |                 \
+                        V                 |
+                 hamiltonian.py           |
+                        |                 |
+                        V                 |
+        differentiableDynamicFunction.py  |
+                        |                 /
+                        V                /
+             derivedDynamicFunction.py  /
+                        |              /
+                        V             /
+                dynamicVariable.py   /
+                    |       |       /
+                    V       |      /
+      dynamicFunction.py    |      |
+                            V      V
+                    simulationContext.py
 
 The `simulator` package uses the `functions` package, as well as the 
 top-level module `fixed.py`.
@@ -72,8 +72,8 @@ to arrive at that time, and then evaluating the function.
 This module defines a class for dynamic variables, which can 
 step their own value forwards or backwards in time as needed 
 by applying a time-derivative function.  The core 
-centered-difference leapfrog-style state-updating algorithm 
-for time integration is here.
+centered-difference state-updating algorithm for time 
+integration is here.
 
 ### 2.4. Derived dynamic functions module (`derivedDynamicFunction.py`).
 
@@ -106,7 +106,9 @@ associated with, and that can infer their time-derivative from it.
 
 This module defines a class for dynamical coordinates, which means
 canonical coordinate pairs consisting of a generalized position
-coordinate and an associated generalized momentum coordinate.
+coordinate and an associated generalized momentum coordinate.  The 
+'leapfrog'-style approach for time integration (alternately
+updating the position and momentum coordinates) is implemented here.
 
 ### 2.9. Simulator object module (`simmor.py`).
 

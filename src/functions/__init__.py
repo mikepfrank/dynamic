@@ -34,10 +34,10 @@ __all__ = [
     #|-----------------------------------------------------------------
     #| Create a logger for use by this package (considering the package
     #| itself to be the software component, for logging purposes).
-    #| Modules within this package can access it as functions._logger.
+    #| Modules within this package can import it to their own namepace
+    #| by doing "from . import _logger".
 
-from logmaster import getLogger, sysName
+from logmaster import getComponentLogger
 
-_logger = getLogger(sysName + '.' + __path__[0].split('\\')[-1])
-    #   \_ This uses this package's name ('functions') as the component name.
-
+_component = __path__[0].split('\\')[-1]    # Component name = package name.
+_logger = getComponentLogger(_component)    # Create the component logger.

@@ -126,7 +126,8 @@ __all__ = [                 # List of all explicitly-exported public names.
         #|  2.3.  Private globals.                      [module code subsection]
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-_logger = getLogger(sysName + '.arith')     # Module logger.
+_component = 'arith'
+_logger = getComponentLogger(_component)     # Module's logger.
 
 
     #|==========================================================================

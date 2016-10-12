@@ -111,7 +111,7 @@
             (4) At the top of other modules (after importing logmaster),
                     do something like:
 
-                        logger = logmaster.getLogger(logmaster.sysName + '.<compName>')
+                        logger = logmaster.getComponentLogger('<compName>')
 
                     where <compName> is the formal name of the software
                     component that that module is conceptually a part of.
@@ -462,8 +462,9 @@ __all__ = [
     'normal', 'debug', 'info', 'error',
     'warning', 'warn', 'error', 'exception',
     'critical', 'lvlname_to_loglevel',
-    'byname', 'getLogger', 'testLogging',
-    'updateStderr', 'setThreadRole', 'setComponent',
+    'byname', 'getLogger', 'getComponentLogger',
+    'testLogging', 'updateStderr',
+    'setThreadRole', 'setComponent',
 ]
 
 
@@ -2730,6 +2731,39 @@ def getLogger(name:str = appName):
     return  wrapped_logger      # Return that wrapped-up logger.
 
 #__/ End function getLogger().
+
+
+            #|------------------------------------------------------------------
+            #|
+            #|  getComponentLogger()                    [module public function]
+            #|
+            #|      Gets a Logger (or LoggerAdapter) for use by the named
+            #|      software or system component.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+def getComponentLogger(component:str):
+
+    """Gets a Logger (or LoggerAdapter) object specific to a given
+       software component or system component, designated by a short
+       string identifier.  For software components that correspond to
+       Python packages, normally the component name is the same as the
+       package name.  The package's __init__.py file may obtain this
+       string using the expression:
+       
+                    __path__[0].split('\\')[-1]
+                      
+       Note that the name of the logger created by this call is
+       <sysName>.<component>, which is a hierarchical logger name.
+       Thus messages sent to this logger will also be passed up to
+       the higher-level system logger, named <sysName>."""
+
+    # Could do some error checking here to make sure <component>
+    # is really a string (or convert it to a string).
+
+    return getLogger(sysName + '.' + component)
+
+#__/ End function getComponentLogger().
 
     
             #|------------------------------------------------------------------

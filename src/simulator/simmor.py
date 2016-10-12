@@ -6,7 +6,9 @@
 #   even while the simulation is running.
 
 from    logmaster   import  *
-from    simulator   import  _logger
+from    .           import  _logger
+
+#from    simulator   import  _logger
 
 from    .simulationContext          import  SimulationContext   as SimCon
     # Used for tracking global state of the simulation.

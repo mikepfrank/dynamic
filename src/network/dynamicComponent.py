@@ -1,6 +1,6 @@
 from typing                     import Iterable
 
-import logmaster; from logmaster import *
+import logmaster;   from logmaster import *
 
 from functions.differentiableFunction     import BaseDifferentiableFunction
 
@@ -10,11 +10,9 @@ from .dynamicNode               import  DynamicNode as  Node
 
 from simulator.hamiltonian      import HamiltonianTerm
 
-from    network     import  dynamicNetwork
+from    network     import  _logger, dynamicNetwork
 
 __all__ = ['DynamicComponent']
-
-logger = getLogger(logmaster.sysName + '.network')
 
 #-- This is a base class from which to derive subclasses for specific
 #   types of Dynamic components.  The general features of a component
@@ -57,7 +55,7 @@ class DynamicComponent:
         netname = dynamicNetwork.netName(network)
 
         if doDebug:        
-            logger.debug("Initializing a new DynamicComponent named '%s' in network '%s'" %
+            _logger.debug("Initializing a new DynamicComponent named '%s' in network '%s'" %
                          (str(name), netname))
         
         inst._ports = dict()        # Initially-empty dictionary mapping port name to port object.
@@ -111,7 +109,7 @@ class DynamicComponent:
     def _addPort(this, portName:str):
 
         if doDebug:
-            logger.debug("Adding a port named '%s' to component '%s'..."
+            _logger.debug("Adding a port named '%s' to component '%s'..."
                          % (portName, str(this)))
         
         this._ports[portName] = Port(this, portName)
@@ -130,7 +128,7 @@ class DynamicComponent:
     def link(this, portName:str, node:Node):
 
         if doInfo:
-            logger.info("Linking port '%s' of component '%s' to node '%s'..."
+            _logger.info("Linking port '%s' of component '%s' to node '%s'..."
                          % (portName, str(this), str(node)))
 
         Link(this.portNamed(portName), node)
@@ -189,7 +187,7 @@ class DynamicComponent:
                 varnames += ', ' + posVar.name
 
         if doDebug:
-            logger.debug("New term name for interaction %s combines %s and %s..." % (interaction, interaction.name, varnames))
+            _logger.debug("New term name for interaction %s combines %s and %s..." % (interaction, interaction.name, varnames))
         
         termname = interaction.name + '(' + varnames + ')'
 
@@ -199,7 +197,7 @@ class DynamicComponent:
         hamTerm = HamiltonianTerm(termname, varList, interaction)
 
         if doDebug:
-            logger.debug("Just created a new Hamiltonian term %s..." % str(hamTerm))
+            _logger.debug("Just created a new Hamiltonian term %s..." % str(hamTerm))
 
         return hamTerm
 
@@ -210,7 +208,7 @@ class DynamicComponent:
     def _addInteraction(this, potential:BaseDifferentiableFunction):
 
         if doDebug:
-            logger.debug("Adding interaction function %s to component %s..." %
+            _logger.debug("Adding interaction function %s to component %s..." %
                          (str(potential), this.name))
 
         interactionIndex = len(this._interactions)
@@ -227,7 +225,7 @@ class DynamicComponent:
         if this.interactionPortsLinked(interactionIndex):
 
             if doDebug:
-                logger.debug("Interaction ports are linked; adding term to network's Hamiltonian...")
+                _logger.debug("Interaction ports are linked; adding term to network's Hamiltonian...")
 
                 # This returns the Hamiltonian term for this interaction if we haven't
                 # previously constructed it.
@@ -240,13 +238,13 @@ class DynamicComponent:
 
         else:
             if doWarn:
-                logger.warn("Interaction ports not yet linked; can't create Hamiltonian term yet...")
+                _logger.warn("Interaction ports not yet linked; can't create Hamiltonian term yet...")
 
     # Removes a given interaction function from this component's list of interactions functions.
 
     def _removeInteraction(this, potential:BaseDifferentiableFunction):
 
-        logger.fatal("DynamicComponent._removeInteraction is not yet implemented!")
+        _logger.fatal("DynamicComponent._removeInteraction is not yet implemented!")
 
         # Be sure to remove the corresponding Hamiltonian term (if any) as well.
         
