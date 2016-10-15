@@ -16,7 +16,8 @@ __all__ = ['setLogoImage',  # used by COSMICi_server.main().
            ]
 
 #_splashFilename = "dynamic-logo.ppm"; _subsampleFactor = 3
-_splashFilename = "DYNAMIXXXX.ppm"; _subsampleFactor = 6
+#_splashFilename = "DYNAMIXXXX.ppm"; _subsampleFactor = 6
+_splashFilename = "dynamic-splash-subtitled.ppm"; _subsampleFactor = 4
 
         #=========================================================
         #   setLogoImage()              [public module function]
