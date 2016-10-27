@@ -19,6 +19,7 @@ from    examples.exampleNetworks    import  FullAdderNet
     # the one that we will use here for our demo.
 
 from    gui.worklist                import  *
+from    gui.networkVisualizer       import  NetworkVisualizer
 
 __all__ = ['simbot', 'initSimbot', 'Simmor']
 
@@ -82,6 +83,12 @@ class   Simmor:
 
         ##    _logger.debug("Initial node X momentum is: %f" % 
         ##                  net.node('X').coord.momentum.value)
+
+
+            # Create a new NetworkVisualizer window to display
+            # an animated graphical visualization of the network.
+
+        me.netVis = netVis = NetworkVisualizer(network=net)        
 
             #---------------------------------------------------------
             # Run the built-in .test() method of the example network.

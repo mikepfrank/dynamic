@@ -136,8 +136,8 @@ from simulator.simmor               import  Simmor
     #--------------------------------------
     # Import GUI modules we're using here.
 
-from    gui         import guiapp, tikiterm, dyngui, worklist
-
+from    gui         import      guiapp, tikiterm, dyngui, worklist
+from    gui.dyngui  import      *       # initGui(), waitGuiEnd()
 
     #|==========================================================================
     #|
@@ -232,96 +232,6 @@ def _initLogging():
     _logger = appLogger  # Get our application logger.
 
 
-def _initGui():
-    global _guibot
-    
-            #|====================================================
-            #|  The following code initializes the GUI framework.
-
-        #-------------------------------------------------------------
-        # Declares (in the log file) that we are now working on behalf
-        # of the GUI component.
-
-    setComponent('GUI')
-
-        #-------------------------------------------------------------
-        # Create & start the guiapp module's guibot worker thread.
-        # (This is done after the above b/c it may produce debug log
-        # messages.)
-
-    if doInfo:
-        _logger.info("Starting the GUI application's worker thread...")
-
-    guiapp.initGuiApp()         # This creates the guibot, in guiapp.guibot.
-    _guibot = guiapp.guibot     # Private global copy in this module.
-
-        #-------------------------------------------------------------    
-        # Create our main terminal window for interactive standard I/O
-        # to user.  This must be done after the call to initGuiApp().
-
-    if doInfo:
-        _logger.info("Creating new GUI-based console window...")
-
-    console = tikiterm.TikiTerm(title="Dynamic Demo Console",
-                                width=120, height=35)
-        # Note the window size of 90x30 chars is a bit bigger than a
-        # standard 80x24 console.  This is big enough to show our
-        # splash logo and some text below it.
-
-    if doInfo:
-        _logger.info("Redirecting stdout & stderr streams to "
-                     "GUI-based console...")
-
-        #|--------------------------------------------------------------------------
-        #|  Display a message in the default console window to explain to the
-        #|  user the status of this now mostly-superfluous window.  Note this
-        #|  is the last thing that is done before stdout is redirected.
-
-    if doNorm:        
-        print("\n"
-              "You may now minimize this console window; "
-              "it's no longer needed.\n"
-              "NOTE: Closing this window will kill the %s application.\n"
-              % appName)
-
-        #-------------------------------------------------------------
-        # Before we actually reassign stdin/stdout/stderr streams to 
-        # use our new console, we first make sure we have a record of
-        # our original stdin/stdout/stderr streams (if any), so we can
-        # restore them later if/when the console window closes.
-
-    # If the default stdout is not already set (e.g. we're running under IDLE),
-    if sys.__stdout__ == None:   
-        sys.__stdout__ = sys.stdout     # Set it to our actual current stdout.
-        
-    if sys.__stderr__ == None:          # Likewise with stderr.
-        sys.__stderr__ = sys.stderr
-        
-    if sys.__stdin__  == None:          # And also stdin.
-        sys.__stdin__  = sys.stdin
-
-
-        #-------------------------------------------------------------
-        # Have our new console take over the stdin, stdout and stderr
-        # stream functions.       
-
-    console.grab_stdio()
-    updateStderr()  # Tells logmaster we have a new stderr now.
-        # ^- Without this, we could not see abnormal log messages on
-        #    our new console.
-
-        #----------------------------------------------
-        # Display splash logo image in console window.
-        
-    _guibot(lambda:dyngui.setLogoImage(console))
-    print() # This just ends the line that the image is on.
-
-        # OK, GUI-related initial setup is done.  
-
-def _waitGuiEnd():      # Wait for the user to exit the GUI.
-    _guibot.join()
-
-
         #|----------------------------------------------------------------------
         #|
         #|   _main()                                [module private function]
@@ -364,7 +274,7 @@ def _main():
         print()
 
 
-    _initGui()  # Initialize the graphical user interface.
+    initGui()  # Initialize the graphical user interface.
     
             #=====================================================
             # Below follows the main code of the demo application.
@@ -379,7 +289,7 @@ def _main():
         # Tell the simmor to do a simple default demonstration of the
         # simulator's capabilities.
 
-    simmor.doDemo()
+    simmor.doDemo()     # Need to modify this method to pop up visualization window
     
     setComponent('appName')
 
@@ -390,7 +300,7 @@ def _main():
         # user commands from stdin.
 
     setThreadRole('waiting')
-    _waitGuiEnd()
+    waitGuiEnd()
 
     setThreadRole('shutdown')
 

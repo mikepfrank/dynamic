@@ -538,6 +538,9 @@ class TikiTerm(Terminal, ScrolledText):
             #---------------------------------------------------------------------------
             # Locate the global guibot object.
             #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+        # Wait, is the below even necessary?  We already imported * from guiapp above
+        # Yes, because it's changed since we imported it?
         
         global guibot               # Reference the global guibot object defined in class guiapp.
         guibot = guiapp.guibot      # Make sure value of this global
@@ -592,7 +595,7 @@ class TikiTerm(Terminal, ScrolledText):
                 # for ourselves as a new toplevel window.  Give it the provided
                 # title, or a default title specific to TikiTerm.
 
-            master = TopWin(title=title)
+            if master is None:  master = TopWin(title=title)
 
                 #-----------------------------------------------------------------
                 # Initialize our underlying ScrolledText widget, using the master
@@ -818,7 +821,7 @@ class TikiTerm(Terminal, ScrolledText):
 
     def  grab_stdin(this):
         sys.stdin = this.instream
-        this.has_stdin = True
+        this.has_stdin = True              # Remember that we've grabbed stdin.
 
     def  grab_stdio(this):
         this.grab_stdout(); this.grab_stderr(); this.grab_stdin()
@@ -939,7 +942,7 @@ class TikiTerm(Terminal, ScrolledText):
         #       and 161-255 are not standard 7-bit ASCII, but they do cause
         #       unique glyphs to be rendered in our TkInter environment.
         #       Thus the only truly unprintable characters are in our
-        #       environment are code points 0, 1, 28-31, and 127-159.  (We
+        #       environment are code points 0, 1, 28-31, and 127-160.  (We
         #       ignore the possibility that we may be running in a Unicode
         #       environment.)
         #

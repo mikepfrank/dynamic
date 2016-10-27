@@ -1,0 +1,29 @@
+Some notes on the GUI.
+
+* For each network being simulated, have a window titled: "Network Visualizer for network '<netName>'".
+* The window contains a Canvas.
+* Gates appear as boxes.  (Later icons.)
+* Links are lines from gate ports to nodes.
+* Nodes appear as gray dots with a white crosshairs over the.
+* Phase portrait tangle is superimposed over the crosshairs.
+* Trail that gradually fades out to black as you go back in time, over, say, 100 or 1000 time-steps.
+
+Future improvements (lower priority):
+
+* Make the link a spline
+* Create another simulation to allow the visual elements of the network to move around dynamically, within limits
+	- Splines coming out of gates try not to get too sharply bent
+	- Links try to stay close to some desired length
+	- Motion is damped (unlike in the underlying dynamical system)
+
+Some classes:
+-------------
+
+* Viewable - Base class for model objects with attached views.  Some methods:
+	- registerView() - Registers a new view of this object.
+	- updateViews() - Updates all registered views (because the object has changed).
+
+* BaseView - Base class for views.
+	- update() - Updates this view.
+
+* NetworkVisualizer - View for networks.
