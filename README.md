@@ -57,40 +57,45 @@ For notes on the software architecture of Dynamic, see the docs/Notes.txt file.
 
 Contents of the 'dynamic' repository are as follows:
 
-### 7.1. Batch subdirectory (`batch/`).
+### 7.1. Artwork subdirectory (`artwork/`).
+
+Contains source files and high-resolution reference versions of graphic artwork
+for the Dynamic system (splash pages, logos, etc.).
+
+### 7.2. Batch subdirectory (`batch/`).
 
 Contains MS-DOS style batch (.BAT) files to facilitate working with the source tree
 in Windows environments.
 
-### 7.2. Data subdirectory (`data/`).
+### 7.3. Data subdirectory (`data/`).
 
 Contains various raw output data from the simulation as well as Excel workbooks.
 
-### 7.3. Documentation subdirectory (`docs/`).
+### 7.4. Documentation subdirectory (`docs/`).
 
 Contains miscellaneous notes and other documentation.
 
-### 7.4. Log subdirectory (`log/`).
+### 7.5. Log subdirectory (`log/`).
 
 This directory is initially empty and exists solely to be the location
 where log files will be written.
 
-### 7.5. Old source subdirectory (`old/`).
+### 7.6. Old source subdirectory (`old/`).
 
 Old source files; no longer used.  Deprecated; to be deleted.
 
-### 7.6. Old logs subdirectory (`old-logs/`).
+### 7.7. Old logs subdirectory (`old-logs/`).
 
 Old log files from test runs; no longer needed.  Can be deleted.
 
-### 7.7. Main source file hierarchy (`src/`).
+### 7.8. Main source file hierarchy (`src/`).
 
 Current source file tree.
 
-### 7.8. Test directory (`test/`).
+### 7.9. Test directory (`test/`).
 
 Auxilliary source files for testing.
 
-### 7.9. README file (`README.md`).
+### 7.10. README file (`README.md`).
 
 This file.
