@@ -96,8 +96,11 @@ class   Simmor:
         if doNorm:
             _logger.normal("Requesting simulator to run a simple test...")
         
-            # This method exercises some basic simulation capabilities.
-            # It's time-consuming, so we farm it out to the simbot worker
-            # thread.
-        simbot(lambda: sc.test(10))     # Default nSteps=1000
+            # Call the test() method, which exercises some basic
+            # simulation capabilities.  It's time-consuming, so we
+            # farm it out to the simbot worker thread.
 
+        #simbot(lambda: sc.test(10))    # Default nSteps=1000
+        #simbot(lambda: sc.test(100))   # Default nSteps=1000
+        simbot(lambda: sc.test())       # Default nSteps=1000
+        #simbot(lambda: sc.test(10000)) # Default nSteps=1000
