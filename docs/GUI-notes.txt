@@ -4,8 +4,9 @@ Some notes on the GUI.
 * The window contains a Canvas.
 * Gates appear as boxes.  (Later icons.)
 * Links are lines from gate ports to nodes.
-* Nodes appear as gray dots with a white crosshairs over the.
+* Nodes appear as gray dots with a white crosshairs over them (origin for phase diagram).
 * Phase portrait tangle is superimposed over the crosshairs.
+* Maybe also superimpose average/deviation crosshairs
 * Trail that gradually fades out to black as you go back in time, over, say, 100 or 1000 time-steps.
 
 Future improvements (lower priority):

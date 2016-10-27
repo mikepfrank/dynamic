@@ -37,8 +37,10 @@ for this may include:
 
  * Plot position/velocity (phase portrait) of each coordinate on 
 		a 2D plane.  Animate fading trails showing coordinate history.
+          Plot mean/deviation of coordinate values.
 
- * Plot circuit diagram color-coding node values.
+ * Plot circuit diagram color-coding node values.  Overlay inferred 
+          digital values?
 
 ## 5. Statistics
 
