@@ -2,9 +2,9 @@ Status of Code Cleanup:
 
 [/]   dynamic/README.md
 [/]        artwork/README.md
-[]        batch/README.md
-[]        data/README.md
-[]        docs/README.md
+[/]        batch/README.md
+[.]        data/README.md          - Individual data files not yet documented.  Also to go through data files deleting old/obsolete ones.
+[/]        docs/README.md          - Directory just contains a few text files so far.  More documentation is needed.
 []        log/README.md
 []        old/README.md
 []        old-logs/README.md
