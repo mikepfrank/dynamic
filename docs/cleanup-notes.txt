@@ -3,22 +3,22 @@ Dynamic system
     Status of Code Cleanup:
     =======================
 
-[/]   dynamic/README.md
-[/]        artwork/README.md        - Done.
-[/]        batch/README.md          - Done.
-[.]        data/README.md           - Individual data files not yet documented.  Also to go through data files deleting old/obsolete ones.
-[/]        docs/README.md           - Directory just contains a few text files so far.  More documentation is needed.
-[/]        log/README.md            - Empty directory (except for the README) to store log files.
-[/]        old/README.md            - This whole directory is just deprecated code.  It should be deleted (or not included on GitHub).
-[/]        old-logs/README.md       - There's a README, but this whole directory is in .gitignore and should be excluded from the GitHub repo.
-[/]        src/README.md                    - This one is solid as of 10/27/16.
-[/]             boolean/README.md			- This is fine.            
-[/]                  __init__.py			- Fully cleaned-up.
-[/]                  dynamicANDGate.py		- Fully cleaned-up, all docstrings written.
-[/]                  dynamicNOTGate.py		- Fully cleaned-up, all docstrings written.
-[]                  dynamicORGate.py        - Check this one next, and continue down the list.
-[]                  dynamicXORGate.py
-[]             examples/README.md
+1. [/]  dynamic/README.md
+2. [/]      artwork/README.md        - Done.
+3. [/]      batch/README.md          - Done.
+4. [.]      data/README.md           - Individual data files not yet documented.  Also to go through data files deleting old/obsolete ones.
+5. [/]      docs/README.md           - Directory just contains a few text files so far.  More documentation is needed.
+6. [/]      log/README.md            - Empty directory (except for the README) to store log files.
+7. [/]      old/README.md            - This whole directory is just deprecated code.  It should be deleted (or not included on GitHub).
+8. [/]      old-logs/README.md       - There's a README, but this whole directory is in .gitignore and should be excluded from the GitHub repo.
+9. [/]      src/README.md                    - This one is solid as of 10/27/16.
+10. [/]     boolean/README.md			- This is fine.            
+11. [/]         __init__.py			- Fully cleaned-up.
+12. [/]         dynamicANDGate.py		- Fully cleaned-up, all docstrings written.
+13. [/]         dynamicNOTGate.py		- Fully cleaned-up, all docstrings written.
+14. []          dynamicORGate.py        - Check this one next, and continue down the list.
+15. []          dynamicXORGate.py
+[]          examples/README.md
 []                  __init__.py
 []                  dynamicMemCell.py
 []                  exampleNetworks.py
