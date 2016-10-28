@@ -59,13 +59,13 @@ files provided in `..\bat\` to work with the application script.)
 
 This is the main application provided for demonstration and testing purposes.
 Currently, this just creates an example network (full adder) and simulates
-it for 20,000 time steps, producing diagnostic output to the text console.
-It depends on the `logmaster`, `gui` and `simulation` packages.
+it for a fixed number of time steps, producing diagnostic output to the text 
+console.  It depends on the `logmaster`, `gui` and `simulation` packages.
 
 ## 3. Package subdirectories.
 
 All of these packages depend on the `logmaster` top-level module.  They are 
-listed here roughly in order from higheset-level to lowest-level.
+listed here roughly in order from highest-level to lowest-level.
 
 ### 3.1. Examples package (`examples/`).
 

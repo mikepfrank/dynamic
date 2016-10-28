@@ -362,7 +362,7 @@ def _main():
     if RAW_DEBUG:
         print("__main__._main(): Exiting from _main()...", file=stderr)
 
-#--/ End function main().
+#--/ End function _main().
 
 
     #|==========================================================================
