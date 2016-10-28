@@ -52,7 +52,7 @@ Dynamic system
 []             images/README.md
 []             network/README.md
 []                  __init__.py
-[]                  dynamicComponent.py
+[]                  dynamicComponent.py					- This one can't even be parsed by PyDoc for some reason
 []                  dynamicLink.py
 []                  dynamicNetwork.py
 []                  dynamicNode.py

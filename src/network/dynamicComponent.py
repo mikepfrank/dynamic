@@ -10,7 +10,7 @@ from .dynamicNode               import  DynamicNode as  Node
 
 from simulator.hamiltonian      import HamiltonianTerm
 
-from    network     import  _logger, dynamicNetwork
+from    .     import  _logger, dynamicNetwork
 
 __all__ = ['DynamicComponent']
 
