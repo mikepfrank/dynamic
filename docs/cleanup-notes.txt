@@ -1,14 +1,14 @@
 Status of Code Cleanup:
 
 [/]   dynamic/README.md
-[/]        artwork/README.md
+[/]        artwork/README.md       - Done.
 [/]        batch/README.md
 [.]        data/README.md          - Individual data files not yet documented.  Also to go through data files deleting old/obsolete ones.
 [/]        docs/README.md          - Directory just contains a few text files so far.  More documentation is needed.
-[]        log/README.md
-[]        old/README.md
-[]        old-logs/README.md
-[]        src/README.md
+[/]        log/README.md           - Empty directory (except for the README)to store log files.
+[/]        old/README.md           - This whole directory is just deprecated code.  It should be deleted (or not included on GitHub).
+[/]        old-logs/README.md      - There's a README, but this whole directory is in .gitignore and should be excluded from the GitHub repo.
+[/]        src/README.md
 []             boolean/README.md
 []                  __init__.py
 []                  dynamicANDGate.py
@@ -36,7 +36,7 @@ Status of Code Cleanup:
 []                  unaryDifferentiableFunction.py
 []             gui/README.md
 []                  __init__.py
-[]                  circuitViewer.py    - Obsolete file, to be deleted?
+[]                  circuitViewer.py                        - Obsolete file, to be deleted?
 []                  desque.py
 []                  dyngui.py
 []                  flag.py
@@ -71,7 +71,7 @@ Status of Code Cleanup:
 []                  simulationContext.py
 []        test/README.md
 []        appdefs.py
-[]        dynamic-demo.py
+[/]        dynamic-demo.py                                  - Fully cleaned-up, all docstrings written.
 []        fixed.py
 []        logmaster.py
 []        partialEvalFunc.py
