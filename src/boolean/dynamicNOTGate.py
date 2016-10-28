@@ -237,9 +237,9 @@ class DynamicNOTGate(DynamicTwoTerminalGate):
        gates, represents NOT gates implemented using the interaction
        function
        
-                                1               2
-                               --- k (x + y - 1),
-                                2
+                             1               2
+                            --- k (x + y - 1),
+                             2
        
        where k is any real-valued constant (normally positive)
        representing the overall energy scale or "stiffness" of the

@@ -1,3 +1,5 @@
+from numbers import Real
+
 import logmaster
 _logger = logmaster.getLogger(logmaster.sysName + '.simulator')
 
