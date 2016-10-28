@@ -1,13 +1,16 @@
+print("In dynamicNode.py")
+
 import logmaster; from logmaster import *
 logger = getLogger(logmaster.sysName + '.network')
 
 from simulator.dynamicCoordinate import DynamicCoordinate
 
-    # Forward declarations to avoid circularity
+class DynamicNode: pass     # Forward declaration
 
-class   Network:    pass    # Real definition is in dynamicNetwork.DynamicNetwork  
-class   Link:       pass    # Real definition is in dynamicLink.DynamicLink  
+from .dynamicNetwork import DynamicNetwork as Network
+from .dynamicLink import DynamicLink as Link
 
+__all__ = ['DynamicNode']
 
 class NodeNameCollision(Exception): pass
 

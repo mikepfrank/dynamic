@@ -1,12 +1,37 @@
+#|==============================================================================
+#|                      TOP OF FILE:    dynamicComponent.py
+#|------------------------------------------------------------------------------
+#|   The below module documentation string will be displayed by pydoc3.
+#|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+"""
+    FILE NAME:          dynamicComponent.py        [Python 3 module source file]
+
+    FILE PATH:          $GIT_ROOT/dynamic/src/network/dynamicComponent.py
+
+    MODULE NAME:        network.dynamicComponent
+
+    IN COMPONENT:       Dynamic.network     (dynamical network model)
+
+                                                                             """
+#|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#| End of module documentation string.
+#|------------------------------------------------------------------------------
+
+print("In dynamicComponent.py")
+
 from typing                     import Iterable
 
 import logmaster;   from logmaster import *
 
 from functions.differentiableFunction     import BaseDifferentiableFunction
 
+class DynamicComponent: pass
+
+from . import dynamicLink, dynamicPort
+
+from .dynamicNode               import  DynamicNode as  Node
 from .dynamicLink               import  DynamicLink as  Link
 from .dynamicPort               import  DynamicPort as  Port
-from .dynamicNode               import  DynamicNode as  Node
 
 from simulator.hamiltonian      import HamiltonianTerm
 
@@ -115,7 +140,7 @@ class DynamicComponent:
             _logger.debug("Adding a port named '%s' to component '%s'..."
                          % (portName, str(this)))
         
-        this._ports[portName] = Port(this, portName)
+        this._ports[portName] = dynamicPort.DynamicPort(this, portName)
 
     #-- inst._addPorts(nameList) - Creates new ports of this component
     #       with the names in <nameList>, which should be a list of strings.
@@ -134,7 +159,7 @@ class DynamicComponent:
             _logger.info("Linking port '%s' of component '%s' to node '%s'..."
                          % (portName, str(this), str(node)))
 
-        Link(this.portNamed(portName), node)
+        dynamicLink.DynamicLink(this.portNamed(portName), node)
 
     #-- inst.portLinked(portName) - Returns True if our port named 'portName' is linked
     #       to some node currently; returns False otherwise (including if we have no such port).
@@ -252,3 +277,6 @@ class DynamicComponent:
         # Be sure to remove the corresponding Hamiltonian term (if any) as well.
         
 
+#|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#|                      END OF FILE:    dynamicComponent.py
+#|==============================================================================

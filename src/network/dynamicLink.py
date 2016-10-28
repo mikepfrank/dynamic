@@ -1,4 +1,6 @@
 
+print("In dynamicLink.py")
+
     # Note that the formal module dependence chain for the basic
     # network classes is as follows:
     #
@@ -25,7 +27,11 @@ from network    import _logger
 #import logmaster; from logmaster import *
 #_logger = getLogger(logmaster.sysName + '.network')
 
+class DynamicLink: pass
+
 from .dynamicNode    import DynamicNode     as Node
+
+from . import dynamicPort
 
 __all__ = ['DynamicLink']
 

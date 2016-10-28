@@ -1,3 +1,5 @@
+print("In dynamicNetwork.py")
+
 from numbers            import Real    # Used by DynamicNetwork.thermalize().
 
 import logmaster
@@ -5,6 +7,23 @@ from   logmaster          import *      # ErrorException
 
 global logger
 logger = logmaster.getLogger(logmaster.sysName + '.network')
+
+    #|--------------------------------------------------------------
+    #| Here we forward-declare the main class DynamicNetwork that
+    #| we're going to be defining later.  This allows the lower-
+    #| level modules that we're about to import, to themselves
+    #| recursively import this name from here, to use for type
+    #| declaration purposes only.  Note that constructor calls and
+    #| isinstance() shouldn't be done using this dummy version of
+    #| the class, since it is not the real class.
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+class DynamicNetwork: pass
+
+    #|-------------------------------------------------------------
+    #| Import the following names, to be used as type names only.
+    #| (We can't assume they're fully-defined yet at import time.)
+    #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 from .dynamicNode       import  DynamicNode         as Node
 from .dynamicLink       import  DynamicLink         as Link
