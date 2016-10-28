@@ -1,4 +1,4 @@
-print("In dynamicNetwork.py")
+#print("In dynamicNetwork.py")
 
 from numbers            import Real    # Used by DynamicNetwork.thermalize().
 

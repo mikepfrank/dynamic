@@ -1,4 +1,4 @@
-print("In dynamicPort.py")
+#print("In dynamicPort.py")
 
 from logmaster  import *
 from network    import _logger
@@ -23,7 +23,7 @@ __all__ = ['DynamicPort']
 #   We call this a "DynamicPort," but in and of itself,
 #   it isn't anything very dynamic.
 
-print("Defining DynamicPort")
+#print("Defining DynamicPort")
 class DynamicPort:
 
     #-- Instance public data members:

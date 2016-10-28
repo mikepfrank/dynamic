@@ -17,7 +17,7 @@
 #| End of module documentation string.
 #|------------------------------------------------------------------------------
 
-print("In dynamicComponent.py")
+#print("In dynamicComponent.py")
 
 from typing                     import Iterable
 
