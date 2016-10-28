@@ -395,3 +395,8 @@ class DynamicNOTGate(DynamicTwoTerminalGate):
     #__/ End DynamicNOTGate.__init__().
 
 #__/ End class DynamicNOTGate.
+
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#                   BOTTOM OF FILE:    dynamicNOTGate.py
+#===============================================================================
