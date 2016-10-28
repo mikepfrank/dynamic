@@ -392,7 +392,6 @@ class DynamicNOTGate(DynamicTwoTerminalGate):
 
         inst.interaction = notFunc
         
-    #__/
+    #__/ End DynamicNOTGate.__init__().
 
-#__/
-        
+#__/ End class DynamicNOTGate.
