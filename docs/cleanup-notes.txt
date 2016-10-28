@@ -12,10 +12,10 @@ Dynamic system
 [/]        old/README.md            - This whole directory is just deprecated code.  It should be deleted (or not included on GitHub).
 [/]        old-logs/README.md       - There's a README, but this whole directory is in .gitignore and should be excluded from the GitHub repo.
 [/]        src/README.md                    - This one is solid as of 10/27/16.
-[]             boolean/README.md            - Check this one next, and continue down the list.
-[]                  __init__.py
-[]                  dynamicANDGate.py
-[]                  dynamicNOTGate.py
+[/]             boolean/README.md			- This is fine.            
+[/]                  __init__.py			- Fully cleaned-up.
+[/]                  dynamicANDGate.py		- Fully cleaned-up, all docstrings written.
+[]                  dynamicNOTGate.py		- Check this one next, and continue down the list.
 []                  dynamicORGate.py
 []                  dynamicXORGate.py
 []             examples/README.md

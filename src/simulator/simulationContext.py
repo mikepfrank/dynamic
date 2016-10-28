@@ -62,13 +62,13 @@
     #|   1. Module imports.                                [module code section]
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-    #------------------------------------
-    # Imports of standard Python modules.
+        #------------------------------------
+        # Imports of standard Python modules.
 
 from time import sleep      # Used in a temporary hack to prevent GUI locking.
 
-    #----------------------------------------------------------------------
-    # Logging-related imports.  Do these early in case we need to use them.
+        #----------------------------------------------------------------------
+        # Logging-related imports.  Do these early in case we need to use them.
 
 from logmaster import *     # Provides a range of logging capabilities.
 from . import _logger       # Use simulator component logger in this module.

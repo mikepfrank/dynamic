@@ -19,9 +19,11 @@
     -----------------
 
         This Python file is the package-initialization module for
-        the 'simulator' package.  For general background on Python
-        packages, see the comments within this file, or the doc
-        https://docs.python.org/3/tutorial/modules.html#packages.
+        the 'simulator' package within the Dynamic software system.
+        
+        For general background on Python packages, see the comments
+        within this file, or the online documentation at:
+        [https://docs.python.org/3/tutorial/modules.html#packages].
 
 
     PACKAGE DESCRIPTION:

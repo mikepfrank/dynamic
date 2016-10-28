@@ -52,6 +52,9 @@ class DynamicComponent:
         if name != None: inst.name = name
         if network != None: inst._network = network
 
+            # Need some error-checking here.  What happens if no
+            # network was specified?
+
         netname = dynamicNetwork.netName(network)
 
         if doDebug:        

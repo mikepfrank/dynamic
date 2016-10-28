@@ -306,7 +306,7 @@ def netName(obj):
     if obj == None:
         netname = '(no network)'
     elif not isinstance(obj,DynamicNetwork):
-        netname = '[ERROR: NOT A NETWORK!]'
+        netname = '[ERROR: NOT A NETWORK!]'     # Should we throw an exception here?
     elif not hasattr(obj, 'name'):
         netname = '(unnamed network)'
     else:

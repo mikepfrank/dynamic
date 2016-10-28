@@ -2,7 +2,7 @@
 
 This directory defines the `boolean` package of the Dynamic system, which
 provides Dynamic-style implementations of standard Boolean logic gates.
-It depends on the `..network` and `..function` packages.
+It depends on the `network` and `function` packages.
 
 ## 1. Module hierarchy.
 
@@ -16,12 +16,12 @@ The dependency diagram of modules within this package is as follows:
 	Modules in			|
 	package:			|
 						V
-				dynamicXORGate.py
+				dynamicXORGate.py	(all parallel)
 				dynamicORGate.py
 				dynamicANDGate.py
 				dynamicNOTGate.py
 
-Overall the `boolean` package uses the `network` package.
+Overall the `boolean` package uses the `network` and `function` packages.
 				
 The `boolean` package is used by the `examples` package.
 
