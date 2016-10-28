@@ -372,7 +372,7 @@ class DynamicNOTGate(DynamicTwoTerminalGate):
 
 
             #-----------------------------------------------------------
-            # Do generic initialization for dynamic 3-terminal gates.
+            # Do generic initialization for dynamic 2-terminal gates.
             # (Create ports & output node, link it to our output port.)
 
         DynamicTwoTerminalGate.__init__(inst, inputNode, name=name,
