@@ -28,6 +28,8 @@
         position) coordinate of the input node, and y is the
         the coordinate of the output node.
 
+            Note that the energy is minimized when y = 1 - x.
+
 
     BASIC MODULE USAGE:
     -------------------
@@ -397,6 +399,6 @@ class DynamicNOTGate(DynamicTwoTerminalGate):
 #__/ End class DynamicNOTGate.
 
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#                   BOTTOM OF FILE:    dynamicNOTGate.py
-#===============================================================================
+#|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#|                  BOTTOM OF FILE:    dynamicNOTGate.py
+#|==============================================================================
