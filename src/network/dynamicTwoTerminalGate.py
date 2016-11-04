@@ -1,3 +1,5 @@
+from numbers import Real
+
 import logmaster
 _logger = logmaster.getLogger(logmaster.sysName + '.simulator')
 
@@ -29,7 +31,7 @@ class DynamicTwoTerminalGate(DynamicComponent):
                  network:DynamicNetwork=None, inPortName:str='input',
                  outPortName:str='output',
                  interaction:BinaryDifferentiableFunction=None,
-                 outNodeName:str=None):
+                 outNodeName:str=None, initOutPos:Real=None):
 
             # First do generic initialization for dynamic components.
 
@@ -73,6 +75,9 @@ class DynamicTwoTerminalGate(DynamicComponent):
                        "node initially named %s..." % initialOutputNodeName)
         
         inst.outputNode = DynamicNode(network, name=initialOutputNodeName)
+
+        if initOutPos is not None:
+            inst.outputNode.coord.position.value = Fixed(initOutPos)
 
         _logger.normal("DynamicTwoTerminalGate.__init__(): Linking new "
                        "output node %s to our port named %s..." %

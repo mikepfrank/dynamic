@@ -4,7 +4,7 @@
 #|   The below module documentation string will be displayed by pydoc3.
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 """
-    FILE NAME:      dynamic-demo.py         [Python application source code]
+    FILE NAME:      dynamic-demo.py                  [Python application script]
 
     FULL PATH:      $GIT_ROOT/dynamic/dynamic-demo.py
 

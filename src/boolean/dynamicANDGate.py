@@ -28,6 +28,8 @@
         position) coordinate of the output node, and x and y are
         the coordinates of the two input nodes.
 
+            Note that the energy is minimized when z = xy.
+
 
     BASIC MODULE USAGE:
     -------------------

@@ -61,6 +61,13 @@
         and N-input (for any N>2) versions of all of the gate types.
     
 
+    PACKAGE DEPENDENCIES:
+    ---------------------
+
+        The boolean package uses the network and function packages, and
+        is used by the examples package.
+        
+    
     MODULE HIERARCHY:
     -----------------
 
