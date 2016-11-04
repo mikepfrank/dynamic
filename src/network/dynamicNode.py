@@ -1,4 +1,4 @@
-print("In dynamicNode.py")
+#print("In dynamicNode.py")
 
 import logmaster; from logmaster import *
 logger = getLogger(logmaster.sysName + '.network')

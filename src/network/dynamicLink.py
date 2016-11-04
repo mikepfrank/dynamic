@@ -1,5 +1,5 @@
 
-print("In dynamicLink.py")
+#print("In dynamicLink.py")
 
     # Note that the formal module dependence chain for the basic
     # network classes is as follows:

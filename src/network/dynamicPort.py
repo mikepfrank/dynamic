@@ -1,4 +1,4 @@
-print("In dynamicPort.py")
+#print("In dynamicPort.py")
 
 from logmaster  import *
 from network    import _logger
