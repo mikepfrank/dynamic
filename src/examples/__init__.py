@@ -91,35 +91,85 @@
 #| End of module documentation string for examples/__init__.py.
 #|------------------------------------------------------------------------------
 
-# examples/__init__.py - Initialization for the examples package.
+    #/--------------------------------------------------------------------------
+    #|
+    #|  GENERAL COMMENTS ON PYTHON PACKAGE INITIALIZATION FILES:
+    #|
+    #|          A package in Python is defined by a subdirectory of the
+    #|      Python program's top-level directory, whose name is the package
+    #|      name, and which contains an __init__.py file, like this one.
+    #|      That file defines a module named <package>, which is the package.
+    #|      Any other .py files in the directory are modules in the package.
+    #|      Packages may also contain nested sub-packages in subdirectories.
+    #|
+    #|          When a package's __init__.py file is loaded, the namespace
+    #|      gets pre-loaded with the attribute __path__, which contains
+    #|      the full filesystem path to the package's directory, which (in
+    #|      this case) is the "simulator/" subdirectory of the top-level
+    #|      source directory for the Dynamic system.
+    #|
+    #|          Then, the package may define __all__, which is a list of
+    #|      the module names that would be automatically imported if the
+    #|      user of the package did "from <package> import *".
+    #|
+    #|          However, the stylistically-preferred way to import modules
+    #|      from a package is one at a time, as in the syntax
+    #|
+    #|                  from <package> import <module>                  ,
+    #|
+    #|      or you can also import specific module attributes like this:
+    #|
+    #|                  from <package>.<module> import <attr>           .
+    #|
+    #|          Modules in packages can import other "sibling" modules
+    #|      residing in the same ("parent") package as themselves using
+    #|      the abbreviated syntax,
+    #|
+    #|                  from .<siblingModule> import <attr>             ,
+    #|
+    #|      and from other "cousin" modules residing in "uncle" packages
+    #|      (i.e., packages that are siblings of the module's parent
+    #|      package) using syntax like
+    #|
+    #|                  from ..<unclePackage> import <cousinModule>     .
+    #|
+    #|      However, that syntax is not advantageous except from within
+    #|      nested packages, because otherwise the '..' can be omitted.
+    #|
+    #\--------------------------------------------------------------------------
 
-# When a package's __init__.py file is loaded, the namespace is pre-loaded
-# with the attribute __path__ which contains the full filesystem path to the 
-# package's directory, which in this case the the "examples/" subdirectory
-# of the top-level source directory for the Dynamic system.
-
-# Then the package may define __all__, which is a list of the module names
-# that would be imported if the user did "from <package> import *".
-
-# However, the preferred way to import modules from a package is one at a
-# time, as in "from <package> import <module>", or you can also import
-# specific module attributes like "from <package>.<module> import <attr>".
-
-# Modules can import other modules in the same package using the syntax,
-# "from .<module> import <attr>" and from other modules in sibling packages
-# using syntax like "from ..<package> import <module>".
+        #/----------------------------------------------------------------------
+        #|
+        #|      __all__                                 [special package global]
+        #|
+        #|              Within the __init__ file of a package, the
+        #|              __all__ global defines the list of module
+        #|              names that will be automatically imported
+        #|              if the user does "from <package> import *".
+        #|              These can be considered to be the "public"
+        #|              modules of the package.  A package may also
+        #|              include private modules (whose names would
+        #|              conventionally start with underscores).
+        #|              Those modules would not be listed here.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 __all__ = [
-    'dynamicMemCell',
-    'rangeBinder',
-    'exampleNetworks'   # split out halfadder, fulladder etc.
+        # Example devices.
+    'dynamicMemCell',   # Quadratic-potential ROM cell,
+    'rangeBinder',      # and quartic bistable well.
+        # Example networks.
+    'exampleNetworks'   # Still need to split out halfadder, fulladder etc.
     ]
 
-#print("__path__ is %s" % __path__)
 
-    # Create a logger for this package (as a software component).
+    #---------------------------------------------------------------------------
+    #   Consider this package to be a software component, and create a
+    #   logger for it.  Child modules may access this logger using the
+    #   syntax "from . import _logger" rather than calling getLogger().
+    #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-from logmaster import *
+from logmaster import getComponentLogger    # Function we use to get logger.
 
 _component = __path__[0].split('\\')[-1]    # Component name = package name.
 _logger = getComponentLogger(_component)    # Create the component logger.
