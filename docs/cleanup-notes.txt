@@ -18,9 +18,9 @@ Dynamic system
 13. [/]         dynamicNOTGate.py       - Fully cleaned-up, all docstrings written.
 14. [/]         dynamicORGate.py        - Fully cleaned-up, all docstrings written.
 15. [/]         dynamicXORGate.py       - Fully cleaned-up, all docstrings written.
-16. []      examples/README.md      - Check this one next, and continue down the list.
-[]                  __init__.py
-[]                  dynamicMemCell.py
+16. [/]      examples/README.md      
+17. [.]             __init__.py         - In middle of cleaning up this one.
+18. []              dynamicMemCell.py   - Check this one next, and continue down the list.
 []                  exampleNetworks.py
 []                  fullAdder.py
 []                  halfAdder.py
