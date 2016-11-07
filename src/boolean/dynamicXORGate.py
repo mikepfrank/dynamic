@@ -313,7 +313,7 @@ class DynamicXORGate(DynamicThreeTerminalGate):
 
     def __init__(me, inputNodeA:DynamicNode, inputNodeB:DynamicNode,
                  name:str=None, network:DynamicNetwork=None,
-                 stiffness:Real = 1.0, outNodeName:str=None,
+                 stiffness:Real=1, outNodeName:str=None,
                  initOutPos:Real=None):
 
         """This instance initializer (constructor) for the
