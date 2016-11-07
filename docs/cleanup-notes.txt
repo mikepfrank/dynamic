@@ -12,69 +12,69 @@ Dynamic system
 7. [/]      old/README.md           - This whole directory is just deprecated code.  It should be deleted (or not included on GitHub).
 8. [/]      old-logs/README.md      - There's a README, but this whole directory is in .gitignore and should be excluded from the GitHub repo.
 9. [/]      src/README.md           - This one is solid as of 10/27/16.
-10. [/]     boolean/README.md       - This is fine.            
-11. [/]         __init__.py             - Fully cleaned-up.
-12. [/]         dynamicANDGate.py       - Fully cleaned-up, all docstrings written.
-13. [/]         dynamicNOTGate.py       - Fully cleaned-up, all docstrings written.
-14. [/]         dynamicORGate.py        - Fully cleaned-up, all docstrings written.
-15. [/]         dynamicXORGate.py       - Fully cleaned-up, all docstrings written.
-16. [/]     examples/README.md      - Done.
-17. [/]         __init__.py             - Fully cleaned-up, all docstrings written.
-18. [/]         dynamicMemCell.py       - Fully cleaned-up, all docstrings written.
-19. []          exampleNetworks.py      - Check this one next, and continue down the list.
-[]                  fullAdder.py
-[]                  halfAdder.py
-[]                  rangeBinder.py
-[]             functions/README.md
-[]                  __init__.py
-[]                  binaryDifferentiableFunction.py
-[]                  differentiableFunction.py
-[]                  doubleWellFunction.py
-[]                  dynamicBiasFunction.py
-[]                  kineticEnergyFunction.py
-[]                  linearFunction.py
-[]                  quadraticFunction.py
-[]                  quarticFunction.py
-[]                  ternaryDifferentiableFunction.py
-[]                  unaryDifferentiableFunction.py
-[]             gui/README.md
-[]                  __init__.py
-[]                  circuitViewer.py                        - Obsolete file, to be deleted?
-[]                  desque.py
-[]                  dyngui.py
-[]                  flag.py
-[]                  guiapp.py
-[]                  networkVisualizer.py
-[]                  terminal.py
-[]                  tikiterm.py
-[]                  utils.py
-[]                  worklist.py
-[]             images/README.md
-[]             network/README.md
-[]                  __init__.py
-[]                  dynamicComponent.py             
-[]                  dynamicLink.py
-[]                  dynamicNetwork.py
-[]                  dynamicNode.py
-[]                  dynamicOneTerminalComponent.py
-[]                  dynamicOneTerminalGate.py
-[]                  dynamicPort.py
-[]                  dynamicThreeTerminalGate.py
-[]                  dynamicTwoTerminalGate.py
-[]             simulator/README.md
-[]                  __init__.py
-[]                  derivedDynamicFunction.py
-[]                  differentiableDynamicFunction.py
-[]                  dynamicCoordinate.py
-[]                  dynamicFunction.py
-[]                  dynamicVariable.py
-[]                  hamiltonian.py
-[]                  hamiltonianVariable.py
-[]                  simmor.py
-[]                  simulationContext.py
-[]        test/README.md
-[]        appdefs.py
-[/]        dynamic-demo.py                                  - Fully cleaned-up, all docstrings written.
-[]        fixed.py
-[]        logmaster.py
-[]        partialEvalFunc.py
+10. [/]         boolean/README.md       - This is fine.            
+11. [/]             __init__.py             - Fully cleaned-up.
+12. [/]             dynamicANDGate.py       - Fully cleaned-up, all docstrings written.
+13. [/]             dynamicNOTGate.py       - Fully cleaned-up, all docstrings written.
+14. [/]             dynamicORGate.py        - Fully cleaned-up, all docstrings written.
+15. [/]             dynamicXORGate.py       - Fully cleaned-up, all docstrings written.
+16. [/]         examples/README.md      - Done.
+17. [/]             __init__.py             - Fully cleaned-up, all docstrings written.
+18. [/]             dynamicMemCell.py       - Fully cleaned-up, all docstrings written.
+19. []              exampleNetworks.py      - Check this one next, and continue down the list.
+20. []              fullAdder.py
+21. []              halfAdder.py
+22. []              rangeBinder.py
+23. []          functions/README.md
+24. []                  __init__.py
+25. []                  binaryDifferentiableFunction.py
+26. []                  differentiableFunction.py
+27. []                  doubleWellFunction.py
+28. []                  dynamicBiasFunction.py
+29. []                  kineticEnergyFunction.py
+30. []                  linearFunction.py
+31. []                  quadraticFunction.py
+32. []                  quarticFunction.py
+33. []                  ternaryDifferentiableFunction.py
+34. []                  unaryDifferentiableFunction.py
+35. []             gui/README.md
+36. []                  __init__.py
+37. []                  circuitViewer.py                        - Obsolete file, to be deleted?
+38. []                  desque.py
+39. []                  dyngui.py
+40. []                  flag.py
+41. []                  guiapp.py
+42. []                  networkVisualizer.py
+43. []                  terminal.py
+44. []                  tikiterm.py
+45. []                  utils.py
+46. []                  worklist.py
+47. []             images/README.md
+48. []             network/README.md
+49. []                  __init__.py
+50. []                  dynamicComponent.py             
+51. []                  dynamicLink.py
+52. []                  dynamicNetwork.py
+53. []                  dynamicNode.py
+54. []                  dynamicOneTerminalComponent.py
+55. []                  dynamicOneTerminalGate.py
+56. []                  dynamicPort.py
+57. []                  dynamicThreeTerminalGate.py
+58. []                  dynamicTwoTerminalGate.py
+59. []             simulator/README.md
+60. []                  __init__.py
+61. []                  derivedDynamicFunction.py
+62. []                  differentiableDynamicFunction.py
+63. []                  dynamicCoordinate.py
+64. []                  dynamicFunction.py
+65. []                  dynamicVariable.py
+66. []                  hamiltonian.py
+67. []                  hamiltonianVariable.py
+68. []                  simmor.py
+69. []                  simulationContext.py
+70. []        test/README.md
+71. []        appdefs.py
+72. [/]        dynamic-demo.py                              - Fully cleaned-up, all docstrings written.
+73. []        fixed.py
+74. []        logmaster.py
+75. []        partialEvalFunc.py
