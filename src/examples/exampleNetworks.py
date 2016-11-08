@@ -4,10 +4,11 @@
 #|   The below module documentation string will be displayed by pydoc3.
 #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 """
+    FILE NAME:              exampleNetworks.py       [Python module source code]
 
-    FILE NAME:              exampleNetworks.py     [Python 3 module source code]
+    FILE PATH:              $GIT_ROOT/dynamic/src/examples/exampleNetworks.py
 
-    MODULE NAME:            exampleNetworks
+    MODULE NAME:            examples.exampleNetworks
 
     SOFTWARE SYSTEM:        Dynamic (simulator for dynamic networks)
 
@@ -21,20 +22,22 @@
         Dynamic networks, for testing purposes.
 
 
-    MODULE USAGE:
-    -------------
+    BASIC MODULE USAGE:
+    -------------------
 
         First, create a simulation context for the simulator:
 
             sc = SimulationContext()
 
         Next, instantiate one of the example network classes,
-        passing it the simulation context:
+        passing it that simulation context.  The new network
+        will be created within that context.
 
-            net = exampleNetworks.MemCellNet(context=sc)
+            net = exampleNetworks.FullAdderNet(context=sc)
 
         At this point, you can tell the simulation context
-        to run a self-test:
+        to run a self-test, which will simulate the given
+        network for a number of steps:
 
             sc.test()
 
@@ -42,64 +45,92 @@
     PUBLIC CLASSES:
     ---------------
 
-        exampleNetworks.MemCellNet                         [module public class]
+        See the classes' docstrings for details.
 
-            (The following still need to be implemented)
+            exampleNetworks.MemCellNet                     [module public class]
 
-        exampleNetworks.NotGateNet                         [module public class]
+                A network consisting of a single memory cell.
 
-        exampleNetworks.AndGateNet                         [module public class]
+            exampleNetworks.NotGateNet                     [module public class]
 
-        exampleNetworks.HalfAdderNet                       [module public class]
+                A network consisting of a memory cell feeding a NOT
+                gate.
 
-            (The following still needs to be tested)
+            exampleNetworks.AndGateNet                     [module public class]
 
-        exampleNetworks.FullAdderNet                       [module public class]
+                A network consisting of two memory cells feeding a 2-
+                input AND gate.
 
+            exampleNetworks.HalfAdderNet                   [module public class]
+
+                A network consisting of two memory cells feeding a
+                half adder circuit (an AND gate and an XOR gate in
+                parallel).
+
+            exampleNetworks.FullAdderNet                   [module public class]
+
+                A network consisting of three memory cells feeding a
+                5-gate full adder circuit.
+
+
+    Module dependencies:
+    --------------------
+
+        This module depends on the following other Dynamic modules:
+
+            logmaster               - Logging facility
+            fixed                   - Fixed-point arithmetic
+            examples                - Parent package
+            network.dynamicNetwork  - Dynamic networks
+            examples.dynamicMemCell - Read-only memory cells
+            boolean.dynamicNOTGate  - Inverter components
+            boolean.dynamicANDGate  - AND gate components
+            boolean.dynamicORGate   - OR gate components
+            boolean.dynamicXORGate  - XOR gate components
+            
 
     Module revision history:
     ------------------------
 
         v0.1 (2016-07) [mpf] - Initial revision; MemCellNet tested.
+        v0.2 (2016-10) [mpf] - Examples through FullAdderNet built & work.
 
 
     Work to do/in progress:
     -----------------------
 
-        [ ] Implement and test larger networks. (>1 node)
+        [/] Implement and test larger networks. (>1 node)
+        [ ] Create and test alternative implementations of some functions.
                                                                              """
 #|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#| End of module documentation string.
+#| End of module documentation string for exampleNetworks.py.
 #|------------------------------------------------------------------------------
 
     #|==========================================================================
     #|   1. Module imports.                                [module code section]
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        #|======================================================================
-        #|  1.1. Imports of custom application modules. [module code subsection]
-        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #------------------------------------------
+        # Imports from our parent module (package).
 
-    #-----------------------------------------------------------------
-    # Import our logging facility, and create a logger for the present
-    # software component (Dynamic.examples), which we will use.
-
-import logmaster; from logmaster import *
-_logger = getLogger(logmaster.sysName + '.examples')
+from . import _logger       # Our component logger.
 
 
-from fixed import Fixed
+        #-----------------------------------------------------------
+        # Imports some names we'll reference from custom modules in
+        # this package and other, lower-level packages within the
+        # Dynamic system.
 
-    #------------------------------------------------------------------
-    # Import some names we'll reference from various simulator modules.
+from    logmaster   import  doDebug, doNorm   # Whether to show debug/normal output.
+from    fixed       import  Fixed     # Our custom class for fixed-point numbers.
 
-from network.dynamicNetwork     import  DynamicNetwork, netName     # Dynamic networks.
-from .dynamicMemCell     import  DynamicMemCell              # Memory-cell component.
-from boolean.dynamicNOTGate     import  DynamicNOTGate              # Inverter component.
-from boolean.dynamicANDGate     import  DynamicANDGate              # AND gate component.
-from boolean.dynamicORGate      import  DynamicORGate               # OR gate component.
-from boolean.dynamicXORGate     import  DynamicXORGate              # XOR gate component.
-from simulator.simulationContext  import  SimulationContext           # Context for simulation.
+from    network.dynamicNetwork      import  DynamicNetwork, netName     # Dynamic networks.
+from    .dynamicMemCell             import  DynamicMemCell              # Memory-cell component.
+from    boolean.dynamicNOTGate      import  DynamicNOTGate              # Inverter component.
+from    boolean.dynamicANDGate      import  DynamicANDGate              # AND gate component.
+from    boolean.dynamicORGate       import  DynamicORGate               # OR gate component.
+from    boolean.dynamicXORGate      import  DynamicXORGate              # XOR gate component.
+from    simulator.simulationContext import  SimulationContext           # Context for simulation.
 
 
     #|==========================================================================
@@ -118,6 +149,8 @@ from simulator.simulationContext  import  SimulationContext           # Context 
             #|
             #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
+global __all__          # List of public symbols exported by this module.
+
 __all__ = [
     'MemCellNet',       # A single memory cell, one output node.
     'NotGateNet',       # A memory cell feeding a NOT gate.  Two nodes.
@@ -128,18 +161,14 @@ __all__ = [
     
 
     #|==========================================================================
-    #|
     #|  3.  Class definitions.                             [module code section]
-    #|
     #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
         #|======================================================================
-        #|
         #|   3.1.  Normal public classes.               [module code subsection]
         #|
         #|      In this code section, we define our public classes
         #|      (other than exception classes).
-        #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
             #|------------------------------------------------------------------
@@ -209,21 +238,25 @@ class MemCellNet(DynamicNetwork):
                                 title="Example network: Dynamic memory cell",
                                 context=context)
 
-        netname = netName(inst)     # Should retrieve name set above.
-
             #---------------------------------------------------------
             # Next, go ahead and create our single dynamic memory cell
             # and add it to the network.
 
         if doDebug:
+            
+            netname = netName(inst)     # Should retrieve name set above.
+
             _logger.debug("Creating a new DynamicMemCell in network "
                           "'%s'..." % netname)
+            
+        #__/ End if doDebug.
         
         inst._memCell = DynamicMemCell('memcell', network=inst)
 
     #__/ End method MemCellNet.__init__().
         
 #__/ End class MemCellNet.
+
 
             #|------------------------------------------------------------------
             #|

@@ -21,8 +21,8 @@ Dynamic system
 16. [/]         examples/README.md      - Done.
 17. [/]             __init__.py             - Fully cleaned-up, all docstrings written.
 18. [/]             dynamicMemCell.py       - Fully cleaned-up, all docstrings written.
-19. []              exampleNetworks.py      - Check this one next, and continue down the list.
-20. []              fullAdder.py
+19. [.]              exampleNetworks.py     - Partway through this one.
+20. []              fullAdder.py            - Check this one next, and continue down the list.
 21. []              halfAdder.py
 22. []              rangeBinder.py
 23. []          functions/README.md
