@@ -186,41 +186,68 @@ __all__ = [
 
 class MemCellNet(DynamicNetwork):
     
-    """This specialized subclass of DynamicNetwork creates a very
-       simple dynamic network, pretty much the simplest possible
-       non-empty network.  It includes just a single dynamic memory
-       cell with a single output node.  This is mainly only useful
-       for testing during initial development.
+    """
+        This specialized subclass of DynamicNetwork creates a very
+        simple dynamic network, pretty much the simplest possible
+        non-empty network.  It includes just a single dynamic memory
+        cell with a single output node.  This is mainly only useful
+        for testing during initial development.
 
-            USAGE:
-            ------
+            Network diagram:
+            ----------------       
+                 _________        
+                |         |    inst._outNode
+                | memcell |-->@
+                |_________|      
+       
+
+            Basic class usage:
+            ------------------
+
+                from simulator.simulationContext import SimulationContext
+                from examples.exampleNetworks import MemCellNet
             
-                sc = simulationContext.SimulationContext()
-                net = exampleNetworks.MemCellNet(sc)
+                sc = SimulationContext()
+                net = MemCellNet(sc)
                 sc.test()
                                                                              """
 
-        #|----------------------------------------------------------------------
-        #|(in class MemCellNet)
-        #|
-        #|      Private instance attributes.          [class code documentation]
-        #|      ----------------------------
-        #|
-        #|          inst._memCell [DynamicMemCell]      [private object attrib.]
-        #|
-        #|              This private attribute allows remembering and
-        #|              easily accessing the DynamicMemCell object
-        #|              that is the single component within this
-        #|              network.
-        #|
-        #|----------------------------------------------------------------------
+    #|--------------------------------------------------------------------------
+    #|(in class MemCellNet)
+    #|
+    #|      Private instance attributes.              [class code documentation]
+    #|      ----------------------------
+    #|
+    #|          inst._memCell : DynamicMemCell          [private object attrib.]
+    #|
+    #|              This private attribute allows remembering and
+    #|              easily accessing the DynamicMemCell object
+    #|              that is the single component within this
+    #|              network.
+    #|
+    #|          inst._outNode : DynamicNode             [private object attrib.]
+    #|
+    #|              The node that is the output of the memory cell.
+    #|
+    #|--------------------------------------------------------------------------
     
+        #|----------------------------------------------------------------------
+        #|
+        #|  inst.__init__()                            [special instance method]
+        #|
+        #|      This initializer takes one optional argument, a
+        #|      simulation context, and it creates a new dynamic
+        #|      memory cell "network" (consisting of a single cell
+        #|      with a single output node) in that context.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def __init__(inst, context:SimulationContext=None):
         
-        """This initializer contains just one argument, a simulation
+        """This initializer takes one optional argument, a simulation
            context, and it creates a new dynamic memory cell "network"
-           (a single cell with a single output node) in that context."""
+           (consisting of a single cell with a single output node) in
+           that context."""
 
             # Verbose diagnostics (entering this initializer).
 
@@ -242,7 +269,7 @@ class MemCellNet(DynamicNetwork):
             # Next, go ahead and create our single dynamic memory cell
             # and add it to the network.
 
-        if doDebug:
+        if doDebug:     # Maybe do diagnostics.
             
             netname = netName(inst)     # Should retrieve name set above.
 
@@ -251,7 +278,9 @@ class MemCellNet(DynamicNetwork):
             
         #__/ End if doDebug.
         
-        inst._memCell = DynamicMemCell('memcell', network=inst)
+        inst._memCell = memCell = DynamicMemCell('memcell', network=inst)
+
+        inst._outNode = memCell.outputNode
 
     #__/ End method MemCellNet.__init__().
         
@@ -271,55 +300,157 @@ class MemCellNet(DynamicNetwork):
             #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class InverterNet(DynamicNetwork):
+
+    """
+        This specialized subclass of DynamicNetwork creates a simple
+        dynamic network which contains just a single dynamic memory
+        cell feeding a single dynamic NOT gate.  This is mainly only
+        useful for testing during initial development.
+
+            Network diagram:
+            ----------------       
+                 _________         _________
+                |         |   X   |         |   Y
+                | memcell |-->@-->| notgate |-->@-->
+                |_________|       |_________|
+       
+                                                                      """
+
+    #|--------------------------------------------------------------------------
+    #|[In class InverterNet]
+    #|
+    #|  Private instance attributes:
+    #|  ----------------------------
+    #|
+    #|  Maybe later we will make some of these public.
+    #|
+    #|      inst._memCell : DynamicMemCell            [private object attribute]
+    #|
+    #|          The memory cell component that feeds the inverter input.
+    #|
+    #|      inst._notGate : DynamicNOTGate
+    #|
+    #|          The inverter component.
+    #|
+    #|      inst._inNode : DynamicNode
+    #|
+    #|          The input node to the inverter.
+    #|
+    #|      inst._outNode : DynamicNode
+    #|
+    #|          The output node from the inverter.
+    #|
+    #|--------------------------------------------------------------------------
     
     def __init__(inst, context:SimulationContext=None):
         
+        """This initializer takes one optional argument, a simulation
+           context, and it creates a new dynamic memory cell "network"
+           (consisting of a single cell with a single output node) in
+           that context."""
+
+            #--------------------------------------------------------
+            # First, do generic initialization for dynamic networks.
+            # This sets a default short name and long title for the
+            # network, and initializes internal data structures.
+
         DynamicNetwork.__init__(inst, name='exampleNet_inverter',
                                 title="Example network: Inverter",
                                 context=context)
+
+            #---------------------------------------------------------
+            # Create and remember the dynamic memory cell component.
+            # Also remember its output node.
         
-        netname = netName(inst)     # Should retrieve name set above.
+        inst._memCell = memCell = DynamicMemCell('memcell', network=inst)
 
-        inst._memCell = DynamicMemCell('memcell', network=inst)
+        inst._inNode = inNode = memCell.outputNode     # Output node of memcell = input to inverter.
 
-        inNode = inst._memCell.outputNode     # Output node of memcell = input to inverter.
+            #----------------------------
+            # Maybe do some diagnostics.
 
-        if doNorm:
-            _logger.normal("Before creating NOT gate, input node details are:")
+        if doDebug:
+            _logger.debug("Before creating NOT gate, input node details are:")
             inNode.printInfo()  # Temporary diagnostic for debugging.
+        #__/ End if doDebug.
+
+            #------------------------------
+            # Rename the input node to "X".
 
         inNode.renameTo('X')    # Call the inverter's input node 'X'.
 
-        if doNorm:
-            _logger.normal("Renamed input node from q to X; now its details are:")
+        if doDebug:
+            _logger.debug("Renamed input node from q to X; now its details are:")
             inNode.printInfo()
+        #__/ End if doDebug.
 
-        inst._notGate = DynamicNOTGate(inNode, 'notgate', network=inst, outNodeName='Y')
-        outNode = inst._notGate.outputNode
+            #----------------------------------------------------
+            # Create the NOT gate, without output node named "Y".
+            # Remember the gate and its output node.
+
+        inst._notGate = notGate = DynamicNOTGate(inNode, 'notgate',
+                                                 network=inst, outNodeName='Y')
+        
+        inst._outNode = outNode = notGate.outputNode
+
+            # Set the initial position of the output node
+            # appropriately (assuming an input of 0).
+        
         outNode.coord.position.value = Fixed(1)
 
-        if doNorm:
-            _logger.normal("Finished creating %s.  Now input node details are:" % netname)        
+            #---------------------------
+            # Maybe do some diagnostics.
+
+        if doDebug:
+            
+            netname = netName(inst)     # Should get network name set above.
+
+            _logger.debug("Finished creating %s.  Now input node details are:" % netname)        
             inNode.printInfo()  # Temporary diagnostic for debugging.
 
-            _logger.normal("Meanwhile, output node details are:")    
+            _logger.debug("Meanwhile, output node details are:")    
             outNode.printInfo()  # Temporary diagnostic for debugging.
+
+        #__/ End if doNorm.
 
     #__/ End method InverterNet.__init__().
 
+
+        #|----------------------------------------------------------------------
+        #| inst.printDiagnostics()                      [public instance method]
+        #|
+        #|      Displays some network diagnostics to standard output
+        #|      as a CSV format row.  Column order is
+        #|
+        #|          Xqt,Xq,Xpt,Xp,Yqt,Yq,Ypt,Yp
+        #|
+        #|      where
+        #|
+        #|          X = input node, Y = output node;
+        #|          q = position, p = momentum;
+        #|          t = timestep number.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
     def printDiagnostics(me):
+        
+        """Output network diagnostics as a CSV row. Timestep and
+           value of position and momentum coordinates of X and Y
+           (input and output) nodes."""
+
+        inCoords  = me._inNode.coord    # Generalized coordinates of input.
+        outCoords = me._outNode.coord   # Generalized coordinates of output.
+        
         if doNorm:
             _logger.normal("%d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f" %
-                          (me.nodes['X'].coord.position.time,
-                           me.nodes['X'].coord.position(),
-                           me.nodes['X'].coord.momentum.time,
-                           me.nodes['X'].coord.momentum(),
-                           me.nodes['Y'].coord.position.time,
-                           me.nodes['Y'].coord.position(),
-                           me.nodes['Y'].coord.momentum.time,
-                           me.nodes['Y'].coord.momentum()
-                           ))
+                           (inCoords.position.time,  inCoords.position(),
+                            inCoords.momentum.time,  inCoords.momentum(),
+                            outCoords.position.time, outCoords.position(),
+                            outCoords.momentum.time, outCoords.momentum()))
+            
+        #__/ End if doNorm.
         
+    #__/ End method printDiagnostics().
 
 #__/ End class InverterNet.
 
