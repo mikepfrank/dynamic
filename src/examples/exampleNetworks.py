@@ -345,9 +345,9 @@ class InverterNet(DynamicNetwork):
     def __init__(inst, context:SimulationContext=None):
         
         """This initializer takes one optional argument, a simulation
-           context, and it creates a new dynamic memory cell "network"
-           (consisting of a single cell with a single output node) in
-           that context."""
+           context, and it creates a new dynamic inverter "network"
+           (consisting of a memory cell feeding an inverter) in that
+           context."""
 
             #--------------------------------------------------------
             # First, do generic initialization for dynamic networks.
@@ -509,9 +509,20 @@ class AndGateNet(DynamicNetwork):
     
     def __init__(me, context:SimulationContext=None):
 
+        """This initializer takes one optional argument, a simulation
+           context, and it creates a new dynamic AND gate "network"
+           (consisting of 2 memory cells feeding an AND gate) in that
+           context."""
+
+            #--------------------------------------------------------
+            # First, do generic initialization for dynamic networks.
+            
         DynamicNetwork.__init__(me, name='exampleNet_andGate',
                                 title="Example network: AND gate",
                                 context=context)
+
+            #-----------------------------------------------------------
+            # Create the two dynamic memory cells feeding the AND gate.
 
         me._memCellA = memCellA = DynamicMemCell('memcellA', network=me,
                                                  biasval=0, outNodeName='A')
@@ -521,52 +532,159 @@ class AndGateNet(DynamicNetwork):
                                                  biasval=1, outNodeName='B')
         me._nodeB = nodeB = memCellB.outputNode
 
+            #-----------------------------
+            # Create the AND gate itself.
+
         me._andGate = andGate = DynamicANDGate(nodeA, nodeB, 'andgate',
                                                network=me, outNodeName='Q')
         me._nodeQ = nodeQ = andGate.nodeC
 
+    #__/ End AndGateNet.__init__().
+
+        #|----------------------------------------------------------------------
+        #| inst.printDiagnostics()                      [public instance method]
+        #|
+        #|      Displays some network diagnostics to standard output
+        #|      as a CSV format row.  Column order is
+        #|
+        #|          Aqt,Aq,Apt,Ap,Bqt,Bq,Bpt,Bp,Qqt,Qq,Qpt,Qp
+        #|
+        #|      where
+        #|
+        #|          A,B = input nodes, Q = output node;
+        #|          q = position, p = momentum;
+        #|          t = timestep number.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
     def printDiagnostics(me):
+        
+        """Output network diagnostics as a CSV row. Timestep and value
+           of position and momentum coordinates of the three nodes A,
+           B (inputs) and Q (output)."""
+
+        Acoords = me._nodeA.coord
+        Bcoords = me._nodeB.coord
+        Qcoords = me._nodeQ.coord
+
         if doNorm:
             _logger.normal("%d, %.9f, %d, %.9f, "
                            "%d, %.9f, %d, %.9f, "
                            "%d, %.9f, %d, %.9f" %
-                           (me.nodes['A'].coord.position.time,
-                            me.nodes['A'].coord.position(),
-                            me.nodes['A'].coord.momentum.time,
-                            me.nodes['A'].coord.momentum(),
-                            me.nodes['B'].coord.position.time,
-                            me.nodes['B'].coord.position(),
-                            me.nodes['B'].coord.momentum.time,
-                            me.nodes['B'].coord.momentum(),
-                            me.nodes['Q'].coord.position.time,
-                            me.nodes['Q'].coord.position(),
-                            me.nodes['Q'].coord.momentum.time,
-                            me.nodes['Q'].coord.momentum()
-                            ))
+                           
+                           (Acoords.position.time, Acoords.position(),
+                            Acoords.momentum.time, Acoords.momentum(),
+                            
+                            Bcoords.position.time, Bcoords.position(),
+                            Bcoords.momentum.time, Bcoords.momentum(),
+                            
+                            Qcoords.position.time, Qcoords.position(),
+                            Qcoords.momentum.time, Qcoords.momentum()))
+            #______________/ End _logger.normal() call.
+            
+        #__/ End if doNorm.
+            
+    #__/ End AndGateNet.printDiagnostics()
+
+
+        #|----------------------------------------------------------------------
+        #|  inst.initStats()                            [public instance method]
+        #|
+        #|      Initialize statistics accumulators for this instance
+        #|      of class AndGateNet.  Initializes position integration
+        #|      accumulators for the three nodes A,B,Q.  These will be
+        #|      used later to compute their average position values. A
+        #|      sample counter is also initialized.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def initStats(me):
+
+        """ Initializes statistics accumulators for this instance of
+            class AndGateNet.  Initializes position integration accum-
+            ulators for the three nodes A,B,Q.  These will be used
+            later to compute their average position values. A sample
+            counter is also initialized.
+                                                                      """
+        
         me.nSamples = 0
-        me.totalA = Fixed(0)
+        me.totalA = Fixed(0)    # These are fixed-point to ensure exactness.
         me.totalB = Fixed(0)
         me.totalQ = Fixed(0)
+        
+    #__/ End AndGateNet.initStats().
+
+    
+        #|----------------------------------------------------------------------
+        #|  inst.gatherStats()                          [public instance method]
+        #|
+        #|      Gathers one sample's worth of data for statistics
+        #|      collection purposes.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def gatherStats(me):
+        
+        """ Gathers one sample's worth of data for statistics
+            calculation purposes.  Updates accumulators.              """
+        
         me.nSamples += 1
-        me.totalA += me.nodes['A'].coord.position()
-        me.totalB += me.nodes['B'].coord.position()
-        me.totalQ += me.nodes['Q'].coord.position()
+        me.totalA += me._nodeA.coord.position()
+        me.totalB += me._nodeB.coord.position()
+        me.totalQ += me._nodeQ.coord.position()
+
+    #__/ End AndGateNet.gatherStats().
+        
+
+        #|----------------------------------------------------------------------
+        #|  inst.printCsvHeader()                       [public instance method]
+        #|
+        #|      Prints to standard output one CSV row, which is the
+        #|      header row for the data rows that are generated by
+        #|      the printDiagnostics() method.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def printCsvHeader(me):
+
+        """ Prints to standard output one CSV row, which is the
+            header row for the data rows that are generated by
+            the printDiagnostics() method.                            """
+        
         if doNorm:
-            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
-            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, Q.qt, Q.q, Q.pt, Q.p")
+            _logger.normal("A.qt, A.q, A.pt, A.p, "
+                           "B.qt, B.q, B.pt, B.p, "
+                           "Q.qt, Q.q, Q.pt, Q.p")
+
+    #__/ End AndGateNet.printCsvHeader().
+            
+
+        #|----------------------------------------------------------------------
+        #|  inst.printStats()                           [public instance method]
+        #|
+        #|      Calculate and print to standard output the statistics
+        #|      (average position) of the three nodes in the network.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def printStats(me):
+
+        """Calculate and print to standard output the statistics
+           (average position) of the three nodes in the network.       """
+        
         if doNorm:
             _logger.normal("Average positions:  A = %f, B = %f, Q = %f" %
                            ((me.totalA / me.nSamples),
                             (me.totalB / me.nSamples),
                             (me.totalQ / me.nSamples)))
+
+    #__/ End AndGateNet.printStats().
+
+#__/ End class AndGateNet.
+
+
+        # Continue cleanup below here
+
 
 class HalfAdderNet(DynamicNetwork):
 
@@ -665,7 +783,7 @@ class FullAdderNet(DynamicNetwork):
 
         logicA = False;  logicB = True;  logicC = True
 
-            # Calculate what logic values of computed bits should be.
+            # Calculate what the logic values of the computed bits should be.
 
         logicA1 = logicA and logicB
         logicX  = (logicA or logicB) and not logicA1
@@ -776,32 +894,6 @@ class FullAdderNet(DynamicNetwork):
                             ))
 
 
-       
-
-##        # ***** CONTINUE CLEANUP BELOW HERE *****
-##        
-##
-###-- This example network includes a full adder whose
-###   input nodes are output by memory cells.  NOT YET TESTED.
-##
-##class FullAdderNet(DynamicNetwork):
-##
-##    def __init__(inst):
-##
-##        # First do generic initialization for dynamic networks.
-##        DynamicNetwork.__init__(inst)
-##
-##        #-- Create 3 dynamic memory cells to hold the network's input.
-##        Ma = DynamicMemCell(inst)
-##        Mb = DynamicMemCell(inst)
-##        Mc = DynamicMemCell(inst)
-##
-##        #-- Get our 3 input nodes (which are output nodes of those cells).
-##        a = Ma.outputNode
-##        b = Mb.outputNode
-##        c = Mc.outputNode
-##
-##        #-- Create a full-adder operating on those nodes.        
-##        FA = FullAdder(inst,a,b,c)
-##        
-        
+#|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#|                  BOTTOM OF FILE:    exampleNetworks.py
+#|==============================================================================
