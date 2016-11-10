@@ -328,15 +328,15 @@ class InverterNet(DynamicNetwork):
     #|
     #|          The memory cell component that feeds the inverter input.
     #|
-    #|      inst._notGate : DynamicNOTGate
+    #|      inst._notGate : DynamicNOTGate            [private object attribute]
     #|
     #|          The inverter component.
     #|
-    #|      inst._inNode : DynamicNode
+    #|      inst._inNode : DynamicNode                [private object attribute]
     #|
     #|          The input node to the inverter.
     #|
-    #|      inst._outNode : DynamicNode
+    #|      inst._outNode : DynamicNode               [private object attribute]
     #|
     #|          The output node from the inverter.
     #|
@@ -455,7 +455,57 @@ class InverterNet(DynamicNetwork):
 #__/ End class InverterNet.
 
 
+            #|------------------------------------------------------------------
+            #|
+            #|  AndGateNet(DynamicNetwork)                        [public class]
+            #|                                                  
+            #|      This specialized subclass of DynamicNetwork
+            #|      creates a simple dynamic network which contains
+            #|      two dynamic memory cells feeding the inputs of
+            #|      a two-input AND gate.
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
 class AndGateNet(DynamicNetwork):
+
+    """
+        This specialized subclass of DynamicNetwork creates a simple
+        dynamic network which contains two dynamic memory cells
+        feeding the inputs of a two-input AND gate.
+
+            Network diagram:
+            ----------------       
+                 __________         
+                |          |   A   
+                | memcellA |-->@--+    _________
+                |__________|      +-->|         |   Q
+                 __________           | andgate |-->@-->
+                |          |   B  +-->|_________|       
+                | memcellB |-->@--+
+                |__________|       
+                                                                      """
+
+    #|--------------------------------------------------------------------------
+    #|[In class AndGateNet]
+    #|
+    #|  Private instance attributes:
+    #|  ----------------------------
+    #|
+    #|      Maybe later we will make some of these public.
+    #|
+    #|          inst.{_memCellA,_memCellB}:DynamicMemCell  [priv. inst. attrib.]
+    #|
+    #|              The memory cells that feed the AND gate inputs.
+    #|
+    #|          inst.{_nodeA,_nodeB,_nodeQ}:DynamicNode    [priv. inst. attrib.]
+    #|
+    #|              The two input nodes and the output node.
+    #|
+    #|          inst._andGate:DynamicANDGate               [priv. inst. attrib.]
+    #|
+    #|              The AND gate.
+    #|
+    #|--------------------------------------------------------------------------
     
     def __init__(me, context:SimulationContext=None):
 
@@ -463,14 +513,12 @@ class AndGateNet(DynamicNetwork):
                                 title="Example network: AND gate",
                                 context=context)
 
-        netname = netName(me)   # Should retrieve name set above.
-
         me._memCellA = memCellA = DynamicMemCell('memcellA', network=me,
-                                                 biasval=0.0, outNodeName='A')
+                                                 biasval=0, outNodeName='A')
         me._nodeA = nodeA = memCellA.outputNode
         
         me._memCellB = memCellB = DynamicMemCell('memcellB', network=me,
-                                                 biasval=1.0, outNodeName='B')
+                                                 biasval=1, outNodeName='B')
         me._nodeB = nodeB = memCellB.outputNode
 
         me._andGate = andGate = DynamicANDGate(nodeA, nodeB, 'andgate',
@@ -479,7 +527,9 @@ class AndGateNet(DynamicNetwork):
 
     def printDiagnostics(me):
         if doNorm:
-            _logger.normal("%d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f, %d, %.9f" %
+            _logger.normal("%d, %.9f, %d, %.9f, "
+                           "%d, %.9f, %d, %.9f, "
+                           "%d, %.9f, %d, %.9f" %
                            (me.nodes['A'].coord.position.time,
                             me.nodes['A'].coord.position(),
                             me.nodes['A'].coord.momentum.time,
@@ -525,8 +575,6 @@ class HalfAdderNet(DynamicNetwork):
         DynamicNetwork.__init__(me, name='exampleNet_halfAdder',
                                 title="Example network: half adder",
                                 context=context)
-
-        netname = netName(me)   # Should retrieve name set above.
 
             # In the below, input bits are A, B.
             # Output bits are S0 and S1.
