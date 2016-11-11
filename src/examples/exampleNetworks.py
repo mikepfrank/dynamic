@@ -171,7 +171,7 @@ __all__ = [
         #|      (other than exception classes).
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-            #|------------------------------------------------------------------
+            #|==================================================================
             #|
             #|  MemCellNet(dynamicNetwork.DynamicNetwork)         [public class]
             #|                                                  
@@ -287,7 +287,7 @@ class MemCellNet(DynamicNetwork):
 #__/ End class MemCellNet.
 
 
-            #|------------------------------------------------------------------
+            #|==================================================================
             #|
             #|  InverterNet(dynamicNetwork.DynamicNetwork)        [public class]
             #|                                                  
@@ -455,7 +455,7 @@ class InverterNet(DynamicNetwork):
 #__/ End class InverterNet.
 
 
-            #|------------------------------------------------------------------
+            #|==================================================================
             #|
             #|  AndGateNet(DynamicNetwork)                        [public class]
             #|                                                  
@@ -604,8 +604,7 @@ class AndGateNet(DynamicNetwork):
             class AndGateNet.  Initializes position integration accum-
             ulators for the three nodes A,B,Q.  These will be used
             later to compute their average position values. A sample
-            counter is also initialized.
-                                                                      """
+            counter is also initialized.                              """
         
         me.nSamples = 0
         me.totalA = Fixed(0)    # These are fixed-point to ensure exactness.
@@ -655,7 +654,8 @@ class AndGateNet(DynamicNetwork):
             _logger.normal("A.qt, A.q, A.pt, A.p, "
                            "B.qt, B.q, B.pt, B.p, "
                            "Q.qt, Q.q, Q.pt, Q.p")
-
+            #______________/ End _logger.normal() call.            
+        #__/ End if doNorm.
     #__/ End AndGateNet.printCsvHeader().
             
 
@@ -677,13 +677,14 @@ class AndGateNet(DynamicNetwork):
                            ((me.totalA / me.nSamples),
                             (me.totalB / me.nSamples),
                             (me.totalQ / me.nSamples)))
-
+            #______________/ End _logger.normal() call.
+        #__/ End if doNorm.
     #__/ End AndGateNet.printStats().
 
 #__/ End class AndGateNet.
 
 
-            #|------------------------------------------------------------------
+            #|==================================================================
             #|
             #|  HalfAdderNet(DynamicNetwork)                      [public class]
             #|                                                  
@@ -804,17 +805,34 @@ class HalfAdderNet(DynamicNetwork):
         me._nodeS1 = nodeS1 = AND.nodeC
 
     #__/ End HalfAdderNet.__init__().
-        
+
+        #|----------------------------------------------------------------------
+        #| inst.printDiagnostics()                      [public instance method]
+        #|
+        #|      Displays some network diagnostics to standard output
+        #|      as a CSV format row.  Column order is
+        #|
+        #|          Aqt,Aq,Apt,Ap,Bqt,Bq,Bpt,Bp,
+        #|              S1qt,S1q,S1pt,S1p,S0qt,S0q,S0pt,S0p
+        #|
+        #|      where
+        #|
+        #|          A,B = input nodes, S1,S0 = output nodes;
+        #|          q = position, p = momentum;
+        #|          t = timestep number.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv     
 
     def printDiagnostics(me):
+
+        """Output network diagnostics as a CSV row. Timestep and value
+           of position and momentum coordinates of the four nodes A,
+           B (inputs) and S1, S0 (output)."""
+
         if doNorm:
             
-            nodes = me.nodes
-            
-            nodeA_c = nodes['A'].coord
-            nodeB_c = nodes['B'].coord
-            nodeS0_c = nodes['S0'].coord
-            nodeS1_c = nodes['S1'].coord
+            nodeA_c = me._nodeA.coord;  nodeS1_c = me._nodeS1.coord
+            nodeB_c = me._nodeB.coord;  nodeS0_c = me._nodeS0.coord
             
             _logger.normal(("%d, %.9f, "*7 + "%d, %.9f") %
                            (nodeA_c.position.time, nodeA_c.position(),
@@ -826,37 +844,114 @@ class HalfAdderNet(DynamicNetwork):
                             nodeS0_c.position.time, nodeS0_c.position(),
                             nodeS0_c.momentum.time, nodeS0_c.momentum()
                             ))
+            #______________/ End _logger.normal() call.
+            
+        #__/ End if doNorm.
+            
+    #__/ End HalfAdderNet.printDiagnostics()
+
+
+        #|----------------------------------------------------------------------
+        #|  inst.initStats()                            [public instance method]
+        #|
+        #|      Initialize statistics accumulators for this instance
+        #|      of class AndGateNet.  Initializes position integration
+        #|      accumulators for the four nodes A,B,S1,S0.  These will be
+        #|      used later to compute their average position values. A
+        #|      sample counter is also initialized.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def initStats(me):
+
+        """ Initializes statistics accumulators for this instance of
+            class HalfAdderNet.  Initializes position integration ac-
+            cumulators for the four nodes A,B,S1,S0.  These will be
+            used later to compute their average position values. A
+            sample counter is also initialized.                       """
+        
         me.nSamples = 0
-        me.totalA = Fixed(0)
+        me.totalA = Fixed(0)    # These are fixed-point to ensure exactness.
         me.totalB = Fixed(0)
         me.totalS0 = Fixed(0)
         me.totalS1 = Fixed(0)
 
+    #__/ End HalfAdderNet.initStats().
+
+
+        #|----------------------------------------------------------------------
+        #|  inst.gatherStats()                          [public instance method]
+        #|
+        #|      Gathers one sample's worth of data for statistics
+        #|      collection purposes.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
     def gatherStats(me):
+        
+        """ Gathers one sample's worth of data for statistics
+            calculation purposes.  Updates accumulators.              """
+        
         me.nSamples += 1
         me.totalA += me.nodes['A'].coord.position()
         me.totalB += me.nodes['B'].coord.position()
         me.totalS0 += me.nodes['S0'].coord.position()
         me.totalS1 += me.nodes['S1'].coord.position()
 
-    def printCsvHeader(me):
-        if doNorm:
-            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
-            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, "
-                           "S1.qt, S1.q, S1.pt, S1.p, S0.qt, S0.q, S0.pt, S0.p")
+    #__/ End HalfAdderNet.gatherStats().
 
+
+        #|----------------------------------------------------------------------
+        #|  inst.printCsvHeader()                       [public instance method]
+        #|
+        #|      Prints to standard output one CSV row, which is the
+        #|      header row for the data rows that are generated by
+        #|      the printDiagnostics() method.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv        
+
+    def printCsvHeader(me):
+
+        """ Prints to standard output one CSV row, which is the
+            header row for the data rows that are generated by
+            the printDiagnostics() method.                            """
+        
+        if doNorm:
+            _logger.normal("A.qt, A.q, A.pt, A.p, "
+                           "B.qt, B.q, B.pt, B.p, "
+                           "S1.qt, S1.q, S1.pt, S1.p, "
+                           "S0.qt, S0.q, S0.pt, S0.p")
+            #______________/ End _logger.normal() call.            
+        #__/ End if doNorm.
+    #__/ End HalfAdderNet.printCsvHeader().
+
+
+        #|----------------------------------------------------------------------
+        #|  inst.printStats()                           [public instance method]
+        #|
+        #|      Calculate and print to standard output the statistics
+        #|      (average position) of the four nodes in the network.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def printStats(me):
+
+        """Calculate and print to standard output the statistics
+           (average position) of the four nodes in the network.       """
+        
         if doNorm:
-            _logger.normal("Average positions:  A = %f, B = %f, S1 = %f, S0 = %f" %
+            _logger.normal("Average positions:  "
+                           "A = %f, B = %f, S1 = %f, S0 = %f" %
                            ((me.totalA / me.nSamples),
                             (me.totalB / me.nSamples),
                             (me.totalS1 / me.nSamples),
                             (me.totalS0 / me.nSamples)
                             ))
+            #______________/ End _logger.normal() call.
+        #__/ End if doNorm.
+    #__/ End AndGateNet.printStats().
 
+#__/ End class HalfAdderNet.
 
 
 class FullAdderNet(DynamicNetwork):
