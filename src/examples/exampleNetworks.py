@@ -683,19 +683,105 @@ class AndGateNet(DynamicNetwork):
 #__/ End class AndGateNet.
 
 
-        # Continue cleanup below here
-
+            #|------------------------------------------------------------------
+            #|
+            #|  HalfAdderNet(DynamicNetwork)                      [public class]
+            #|                                                  
+            #|      This specialized subclass of DynamicNetwork
+            #|      instantiates as a simple dynamic network which
+            #|      contains two dynamic memory cells feeding the
+            #|      inputs of a half-adder network (consisting of
+            #|      an AND gate and an XOR gate).
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 class HalfAdderNet(DynamicNetwork):
 
+    """
+        This specialized subclass of DynamicNetwork creates a 
+        dynamic network which contains two dynamic memory cells
+        feeding the inputs of a half adder network, comprised of
+        a two-input XOR gate and a two-input AND gate.
+
+            Network diagram:
+            ----------------       
+                 __________             _____
+                |          |      +--->|     |   S1
+                | memcellA |----->A    | and |-->@-->
+                |__________|   +---)-->|_____|        
+                 __________    |  |     _____
+                |          |   |  +--->|     |   S0
+                | memcellB |-->B       | xor |-->@-->
+                |__________|   +------>|_____|        
+                                                                      """
+
+    #|--------------------------------------------------------------------------
+    #|[In class HalfAdderNet]
+    #|
+    #|  Private instance attributes:               [class documentation section]
+    #|  ----------------------------
+    #|
+    #|      Maybe later we will make some of these public.
+    #|
+    #|          inst.{_memCellA,_memCellB}:DynamicMemCell  [priv. inst. attrib.]
+    #|
+    #|              The memory cells that feed the half adder inputs.
+    #|
+    #|          inst.{_nodeA,_nodeB}:DynamicNode           [priv. inst. attrib.]
+    #|
+    #|              The nodes representing the two bits to be added.
+    #|
+    #|          inst._AND:DynamicANDGate                   [priv. inst. attrib.]
+    #|
+    #|              The AND gate.
+    #|
+    #|          inst._XOR:DynamicANDGate                   [priv. inst. attrib.]
+    #|
+    #|              The XOR gate.
+    #|
+    #|          inst.{_nodeS1,_nodeS0}:DynamicNode         [priv. inst. attrib.]
+    #|
+    #|              The output nodes representing the most-significant
+    #|              and least significant bits of the sum, respectively.
+    #|
+    #|--------------------------------------------------------------------------
+
+        #|----------------------------------------------------------------------
+        #|[In class HalfAdderNet.]
+        #|
+        #|  inst.__init__()                            [special instance method]
+        #|
+        #|      This initializer takes one optional argument, a
+        #|      simulation context, and it creates a new half-adder
+        #|      network (consisting of 2 memory cells feeding an AND
+        #|      gate and an XOR gate) in that context.
+        #|
+        #|      Note that this works by explicitly constructing the
+        #|      individual gates making up the half-adder.  Later we
+        #|      want to abstract it by creating a half-adder module
+        |#      that will do that for us, and instantiating it.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    
     def __init__(me, context:SimulationContext=None):
 
+        """This initializer takes one optional argument, a simulation
+           context, and it creates a new half-adder network (consist-
+           ing of 2 memory cells feeding an AND gate and an XOR gate)
+           in that context."""
+
+            # First, do generic initialization for dynamic networks.
+            
         DynamicNetwork.__init__(me, name='exampleNet_halfAdder',
                                 title="Example network: half adder",
                                 context=context)
 
-            # In the below, input bits are A, B.
-            # Output bits are S0 and S1.
+            #--------------------------------------------------------
+            # Construct the half-adder network.  Note that in the
+            #   below, the input bits are A, B.  The output bits are
+            #   S0 (ones place) and S1 (twos place).
+
+                # Create & remember the memory cells and their output nodes.
 
         me._memCellA = memCellA = DynamicMemCell('memcellA', network=me,
                                                  biasval=1.0, outNodeName='A')
@@ -705,11 +791,20 @@ class HalfAdderNet(DynamicNetwork):
                                                  biasval=1.0, outNodeName='B')
         me._nodeB = nodeB = memCellB.outputNode
 
-        me._XOR = XOR = DynamicXORGate(nodeA, nodeB, 'xor', network=me, outNodeName='S0')
-        me._nodeS0 = nodeS0 = XOR.nodeC
+                # Create & remember the XOR gate and the AND gate & outputs.
 
-        me._AND = AND = DynamicANDGate(nodeA, nodeB, 'and', network=me, outNodeName='S1')
+        me._XOR = XOR = DynamicXORGate(nodeA, nodeB, 'xor', network=me,
+                                       outNodeName='S0')
+        
+        me._nodeS0 = nodeS0 = XOR.nodeC     # Node C is the output node.
+
+        me._AND = AND = DynamicANDGate(nodeA, nodeB, 'and', network=me,
+                                       outNodeName='S1')
+        
         me._nodeS1 = nodeS1 = AND.nodeC
+
+    #__/ End HalfAdderNet.__init__().
+        
 
     def printDiagnostics(me):
         if doNorm:
