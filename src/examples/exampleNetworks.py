@@ -94,6 +94,7 @@
 
         v0.1 (2016-07) [mpf] - Initial revision; MemCellNet tested.
         v0.2 (2016-10) [mpf] - Examples through FullAdderNet built & work.
+        v0.3 (2016-11) [mpf] - Cleaned up file, added comments/docstrings.
 
 
     Work to do/in progress:
@@ -628,6 +629,7 @@ class AndGateNet(DynamicNetwork):
             calculation purposes.  Updates accumulators.              """
         
         me.nSamples += 1
+        
         me.totalA += me._nodeA.coord.position()
         me.totalB += me._nodeB.coord.position()
         me.totalQ += me._nodeQ.coord.position()
@@ -760,7 +762,7 @@ class HalfAdderNet(DynamicNetwork):
         #|      Note that this works by explicitly constructing the
         #|      individual gates making up the half-adder.  Later we
         #|      want to abstract it by creating a half-adder module
-        |#      that will do that for us, and instantiating it.
+        #|      that will do that for us, and instantiating it.
         #|
         #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     
@@ -871,8 +873,9 @@ class HalfAdderNet(DynamicNetwork):
             sample counter is also initialized.                       """
         
         me.nSamples = 0
-        me.totalA = Fixed(0)    # These are fixed-point to ensure exactness.
-        me.totalB = Fixed(0)
+        
+        me.totalA  = Fixed(0)   # These are fixed-point to ensure exactness.
+        me.totalB  = Fixed(0)
         me.totalS0 = Fixed(0)
         me.totalS1 = Fixed(0)
 
@@ -893,10 +896,11 @@ class HalfAdderNet(DynamicNetwork):
             calculation purposes.  Updates accumulators.              """
         
         me.nSamples += 1
-        me.totalA += me.nodes['A'].coord.position()
-        me.totalB += me.nodes['B'].coord.position()
-        me.totalS0 += me.nodes['S0'].coord.position()
-        me.totalS1 += me.nodes['S1'].coord.position()
+        
+        me.totalA  += me._nodeA.coord.position()
+        me.totalB  += me._nodeB.coord.position()
+        me.totalS0 += me._nodeS0.coord.position()
+        me.totalS1 += me._nodeS1.coord.position()
 
     #__/ End HalfAdderNet.gatherStats().
 
@@ -949,20 +953,99 @@ class HalfAdderNet(DynamicNetwork):
                             ))
             #______________/ End _logger.normal() call.
         #__/ End if doNorm.
-    #__/ End AndGateNet.printStats().
+    #__/ End HalfAdderNet.printStats().
 
 #__/ End class HalfAdderNet.
 
 
+            #|==================================================================
+            #|
+            #|  FullAdderNet(DynamicNetwork)                      [public class]
+            #|                                                  
+            #|      This specialized subclass of DynamicNetwork
+            #|      instantiates as a simple dynamic network which
+            #|      contains three dynamic memory cells feeding the
+            #|      inputs of a full-adder network (consisting of
+            #|      two XOR gates, two AND gates and an OR gate).
+            #|
+            #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
 class FullAdderNet(DynamicNetwork):
 
-    def __init__(me, context:SimulationContext=None):
+    """
+        This specialized subclass of DynamicNetwork instantiates as a
+        simple dynamic network which contains three dynamic memory
+        cells feeding the inputs of a full-adder network (consisting
+        of two XOR gates, two AND gates and an OR gate).              """
 
+    #|--------------------------------------------------------------------------
+    #|[In class FullAdderNet]
+    #|
+    #|  Private instance attributes:               [class documentation section]
+    #|  ----------------------------
+    #|
+    #|      Maybe later we will make some of these public.
+    #|
+    #|          inst._memCell{A,B,C}:DynamicMemCell        [priv. inst. attrib.]
+    #|
+    #|              The memory cells that feed the full adder inputs.
+    #|
+    #|          inst._node{A,B,C}:DynamicNode              [priv. inst. attrib.]
+    #|
+    #|              The nodes representing the three input bits to be added.
+    #|
+    #|          inst._AND{1,2}:DynamicANDGate              [priv. inst. attrib.]
+    #|
+    #|              The two AND gates
+    #|
+    #|          inst._XOR{1,2}:DynamicANDGate              [priv. inst. attrib.]
+    #|
+    #|              The XOR gate.
+    #|
+    #|          inst._OR:DynamicORGate                     [priv. inst. attrib.]
+    #|
+    #|              The OR gate.
+    #|
+    #|          inst._node{X,A1}:DynamicNode               [priv. inst. attrib.]
+    #|
+    #|              Intermediate nodes.
+    #|
+    #|          inst.{_nodeS1,_nodeS0}:DynamicNode         [priv. inst. attrib.]
+    #|
+    #|              The output nodes representing the most-significant
+    #|              and least significant bits of the sum, respectively.
+    #|
+    #|--------------------------------------------------------------------------
+
+        #|----------------------------------------------------------------------
+        #|[In class FullAdderNet.]
+        #|
+        #|  inst.__init__()                            [special instance method]
+        #|
+        #|      This initializer takes one optional argument, a
+        #|      simulation context, and it creates a new full-adder
+        #|      network (consisting of 3 memory cells feeding several
+        #|      dynamic logic gates) in that context.
+        #|
+        #|      Note that this works by explicitly constructing the
+        #|      individual gates making up the full-adder.  Later we
+        #|      want to abstract it by creating a full-adder module
+        #|      that will do that for us, and instantiating it.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    
+    def __init__(me, context:SimulationContext=None):
+        
+        """This initializer takes one optional argument, a simulation
+           context, and it creates a new full-adder network (consist-
+           ing of 3 memory cells feeding several logic gates) in that
+           context."""
+
+            # First, do generic initialization for dynamic networks.
+            
         DynamicNetwork.__init__(me, name='exampleNet_fullAdder',
                                 title="Example network: full adder",
                                 context=context)
-
-        netname = netName(me)   # Should retrieve name set above.
 
             #|========================================================
             #|  In the below, input bits are A, B, C.  Output bits are
@@ -1025,17 +1108,40 @@ class FullAdderNet(DynamicNetwork):
 
         me._OR = OR = DynamicORGate(nodeA1, nodeA2, 'or', network=me, outNodeName='S1', initOutPos=S1val)
         me._nodeS1 = nodeS1 = OR.nodeC
+        
+    #__/ End FullAdderNet.__init__().
+
+
+        #|----------------------------------------------------------------------
+        #| inst.printDiagnostics()                      [public instance method]
+        #|
+        #|      Displays some network diagnostics to standard output
+        #|      as a CSV format row.  Column order is
+        #|
+        #|          Aqt,Aq,Apt,Ap,Bqt,Bq,Bpt,Bp,Cqt,Cq,Cpt,Cp,
+        #|              S1qt,S1q,S1pt,S1p,S0qt,S0q,S0pt,S0p
+        #|
+        #|      where
+        #|
+        #|          A,B,C = input nodes, S1,S0 = output nodes;
+        #|          q = position, p = momentum;
+        #|          t = timestep number.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv     
 
     def printDiagnostics(me):
+
+        """Output network diagnostics as a CSV row. Timestep and value
+           of position and momentum coordinates of the four nodes A,
+           B, C (inputs) and S1, S0 (output)."""
+
         if doNorm:
             
-            nodes = me.nodes
-            
-            nodeA_c = nodes['A'].coord
-            nodeB_c = nodes['B'].coord
-            nodeC_c = nodes['C'].coord
-            nodeS0_c = nodes['S0'].coord
-            nodeS1_c = nodes['S1'].coord
+            nodeA_c = me._nodeA.coord
+            nodeB_c = me._nodeB.coord
+            nodeC_c = me._nodeC.coord
+            nodeS0_c = me._nodeS0.coord
+            nodeS1_c = me._nodeS1.coord
             
             _logger.normal(("%d, %.9f, "*9 + "%d, %.9f") %
                            (nodeA_c.position.time, nodeA_c.position(),
@@ -1047,41 +1153,116 @@ class FullAdderNet(DynamicNetwork):
                             nodeS1_c.position.time, nodeS1_c.position(),
                             nodeS1_c.momentum.time, nodeS1_c.momentum(),
                             nodeS0_c.position.time, nodeS0_c.position(),
-                            nodeS0_c.momentum.time, nodeS0_c.momentum()
-                            ))
+                            nodeS0_c.momentum.time, nodeS0_c.momentum()))
+            #______________/ End _logger.normal() call.            
+        #__/ End if doNorm.
+    #__/ End FullAdderNet.printDiagnostics()
+
+
+        #|----------------------------------------------------------------------
+        #|  inst.initStats()                            [public instance method]
+        #|
+        #|      Initialize statistics accumulators for this instance
+        #|      of class AndGateNet.  Initializes position integration
+        #|      accumulators for the four nodes A,B,S1,S0.  These will be
+        #|      used later to compute their average position values. A
+        #|      sample counter is also initialized.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def initStats(me):
+        
+        """ Initializes statistics accumulators for this instance of
+            class HalfAdderNet.  Initializes position integration ac-
+            cumulators for the five nodes A,B,C,S1,S0.  These will be
+            used later to compute their average position values. A
+            sample counter is also initialized.                       """
+        
         me.nSamples = 0
-        me.totalA = Fixed(0)
-        me.totalB = Fixed(0)
-        me.totalC = Fixed(0)
+        
+        me.totalA  = Fixed(0)   # These are fixed-point to ensure exactness.
+        me.totalB  = Fixed(0)
+        me.totalC  = Fixed(0)
         me.totalS0 = Fixed(0)
         me.totalS1 = Fixed(0)
+        
+    #__/ End FullAdderNet.initStats().
+        
+
+        #|----------------------------------------------------------------------
+        #|  inst.gatherStats()                          [public instance method]
+        #|
+        #|      Gathers one sample's worth of data for statistics
+        #|      collection purposes.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def gatherStats(me):
+        
+        """ Gathers one sample's worth of data for statistics
+            calculation purposes.  Updates accumulators.              """
+        
         me.nSamples += 1
-        me.totalA += me.nodes['A'].coord.position()
-        me.totalB += me.nodes['B'].coord.position()
-        me.totalC += me.nodes['C'].coord.position()
-        me.totalS0 += me.nodes['S0'].coord.position()
-        me.totalS1 += me.nodes['S1'].coord.position()
+        
+        me.totalA  += me._nodeA.coord.position()
+        me.totalB  += me._nodeB.coord.position()
+        me.totalC  += me._nodeC.coord.position()
+        me.totalS0 += me._nodeS0.coord.position()
+        me.totalS1 += me._nodeS1.coord.position()
+
+    #__/ End FullAdderNet.gatherStats().
+
+
+        #|----------------------------------------------------------------------
+        #|  inst.printCsvHeader()                       [public instance method]
+        #|
+        #|      Prints to standard output one CSV row, which is the
+        #|      header row for the data rows that are generated by
+        #|      the printDiagnostics() method.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv        
 
     def printCsvHeader(me):
-        if doNorm:
-            #_logger.normal("in.qt, in.q, in.pt, in.p, out.qt, out.q, out.pt, out.p")
-            _logger.normal("A.qt, A.q, A.pt, A.p, B.qt, B.q, B.pt, B.p, C.qt, C.q, C.pt, C.p, "
-                           "S1.qt, S1.q, S1.pt, S1.p, S0.qt, S0.q, S0.pt, S0.p")
 
+        """ Prints to standard output one CSV row, which is the
+            header row for the data rows that are generated by
+            the printDiagnostics() method.                            """
+        
+        if doNorm:
+            _logger.normal("A.qt, A.q, A.pt, A.p, "
+                           "B.qt, B.q, B.pt, B.p, "
+                           "C.qt, C.q, C.pt, C.p, "
+                           "S1.qt, S1.q, S1.pt, S1.p, "
+                           "S0.qt, S0.q, S0.pt, S0.p")
+
+
+        #|----------------------------------------------------------------------
+        #|  inst.printStats()                           [public instance method]
+        #|
+        #|      Calculate and print to standard output the statistics
+        #|      (average position) of the five input & output nodes.
+        #|
+        #|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
     def printStats(me):
+
+        """Calculate and print to standard output the statistics
+           (average position) of the five input & output nodes.       """
+        
         if doNorm:
-            _logger.normal("Average positions:  A = %f, B = %f, C = %f, S1 = %f, S0 = %f" %
+            _logger.normal("Average positions:  "
+                           "A = %f, B = %f, C = %f, S1 = %f, S0 = %f" %
                            ((me.totalA / me.nSamples),
                             (me.totalB / me.nSamples),
                             (me.totalC / me.nSamples),
                             (me.totalS1 / me.nSamples),
                             (me.totalS0 / me.nSamples)
                             ))
+            #______________/ End _logger.normal() call.
+        #__/ End if doNorm.
+    #__/ End FullAdderNet.printStats().
+
+#__/ End class FullAdderNet.
 
 
 #|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
