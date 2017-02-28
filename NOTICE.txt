@@ -1,10 +1,10 @@
-|============================= Top of File ==============================|
-|  File name:  NOTICE.txt                             [plain text file]  |
-|                                                                        |
-|               NOTICE OF THIRD-PARTY SOFTWARE INCLUSION                 |
-|                     AND COPYRIGHT/LICENSING TERMS                      |
-|                                                                        |
-|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
+|================================ Top of File =================================|
+|  File name:  NOTICE.txt                                   [plain text file]  |
+|                                                                              |
+|  Title:           NOTICE OF THIRD-PARTY SOFTWARE INCLUSION                   |
+|                         AND COPYRIGHT/LICENSING TERMS                        |
+|                                                                              |
+|vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
 
 The following source code modules within the Dynamic system were derived 
 from the third-party software package COSMICi; the third-party copyright
