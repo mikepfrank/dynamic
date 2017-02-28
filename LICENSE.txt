@@ -1,8 +1,7 @@
-1_3_5_7_9_1_3_5_7_9_1_3_5_7_9_1_3_5_7_9__9_7_5_3_1_9_7_5_3_1_9_7_5_3_1_9_7_5_3_1
 |================================ Top of File =================================|
 |   File name:  LICENSE.txt                                 [plain text file]  |
 |                                                                              |
-|   Title:	          COPYRIGHT NOTICE AND LICENSING TERMS                     |
+|   Title:            COPYRIGHT NOTICE AND LICENSING TERMS                     |
 |                     ====================================                     |
 |                                                                              |
 |   Scope of applicability:                                                    |
