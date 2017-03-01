@@ -2,7 +2,7 @@
 
 Dynamic is a simple simulator for dynamical systems construed as 
 computations.  See the [project homepage](https://cfwebprod.sandia.gov/cfdocs/CompResearch/templates/insert/softwre.cfm?sw=56 "Dynamic homepage")
-for details.
+for links to related publications.
 
 ## 1.  Purpose
 
