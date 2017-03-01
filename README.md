@@ -4,10 +4,10 @@ Dynamic is a simple simulator for dynamical systems construed as computations.
 
 ## 1.  Purpose
 
-Dynamic is a framework for simulating simple models of (nonlinear, 
-generally chaotic) dynamical systems, for the purpose of investigating 
-to what extent such models can be used as the foundation for new 
-computational paradigms.
+Dynamic is a framework for simulating simple models of (conservative, 
+nonlinear, generally chaotic) dynamical systems, for the purpose of 
+investigating to what extent such models can be used as the 
+foundation for new computational paradigms.
 
 ## 2.  Approach
 
