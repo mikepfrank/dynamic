@@ -80,27 +80,19 @@ Contains miscellaneous notes and other documentation.
 This directory is initially empty and exists solely to be the location
 where log files will be written.
 
-### 7.6.  Old source subdirectory (`old/`).
-
-Old source files; no longer used.  Deprecated; to be deleted.
-
-### 7.7.  Old logs subdirectory (`old-logs/`).
-
-Old log files from test runs; no longer needed.  Can be deleted.
-
-### 7.8.  Main source file hierarchy (`src/`).
+### 7.6.  Main source file hierarchy (`src/`).
 
 Current source file tree.
 
-### 7.9.  Test directory (`test/`).
+### 7.7.  Test directory (`test/`).
 
 Auxilliary source files for testing.
 
-### 7.10.  Copyright/license information (`LICENSE.txt`, `NOTICE.txt`)
+### 7.8.  Copyright/license files (`LICENSE.txt`, `NOTICE.txt`).
 
 The main copyright/license file is `LICENSE.txt`.  An additional 
 notice relevant to incorporated third-party software is in `NOTICE.txt`.
 
-### 7.11. README file (`README.md`).
+### 7.9. README file (`README.md`).
 
 This file.
