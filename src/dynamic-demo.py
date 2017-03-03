@@ -33,12 +33,13 @@
           * Processor:    Intel Xeon E5-2620 (64-bit)
 
 
-    Copyright Notice    [Needs updating]
+    Copyright Notice
     ----------------
 
-          This file, and all other files in this repository, are
-          copyright (C) 2016 by Michael P. Frank.  All Rights
-          Reserved until further notice.
+          This file, and all other files in this repository,
+          except as specified in the NOTICE.txt file, are
+          Copyright (C) 2017 by Sandia Corporation.  See the
+          LICENSE.txt file for open-source licensing terms.
 
 
     Revision history:
@@ -306,13 +307,10 @@ def _main():
 
     if doInfo: _logger.info("Dynamic demo application is starting up...")
 
-            # NOTE: This copyright notice needs to be changed at some
-            # point (upon release) to an official Sandia one.
-
     if doNorm:
         print() # Just visual whitespace; no need to log it.
         _logger.normal("Welcome to the Dynamic demo program, v0.1.")
-        _logger.normal("Copyright ©2017 Sandia Corporation.")
+        _logger.normal("Copyright (C) 2017 Sandia Corporation.")
         _logger.normal("See the LICENSE.txt file for terms of use.")
         print()
 
