@@ -112,33 +112,33 @@ Contents of the '`dynamic/`' repository are as follows:
 Contains source files and high-resolution reference versions of graphic artwork
 for the Dynamic system (splash pages, logos, etc.).
 
-### 9.2.  Batch subdirectory (`batch/`).
+### 9.2.  Batch subdirectory ([`batch/`](batch "batch/ subdirectory")).
 
 Contains MS-DOS style batch (.BAT) files to facilitate working with the source tree
 in Windows environments.
 
-### 9.3.  Data subdirectory (`data/`).
+### 9.3.  Data subdirectory ([`data/`](data "data/ subdirectory")).
 
 Contains various raw output data from the simulation as well as Excel workbooks.
 
-### 9.4.  Documentation subdirectory (`docs/`).
+### 9.4.  Documentation subdirectory ([`docs/`](docs "docs/ subdirectory")).
 
 Contains miscellaneous notes and other documentation.
 
-### 9.5.  Log subdirectory (`log/`).
+### 9.5.  Log subdirectory ([`log/`](log "log/ subdirectory")).
 
 This directory is initially empty and exists solely to be the location
 where log files will be written.
 
-### 9.6.  Main source file hierarchy (`src/`).
+### 9.6.  Main source file hierarchy ([`src/`](src "src/ subdirectory")).
 
 Current source file tree.
 
-### 9.7.  Test directory (`test/`).
+### 9.7.  Test directory ([`test/`](test "test/ subdirectory")).
 
 Auxilliary source files for testing.
 
-### 9.8.  Copyright/license files (`LICENSE.txt`, `NOTICE.txt`).
+### 9.8.  Copyright/license files ([`LICENSE.txt`](LICENSE.txt "LICENSE.txt file"), [`NOTICE.txt`](NOTICE.txt "NOTICE.txt file")).
 
 The main copyright/license file is `LICENSE.txt`.  An additional 
 notice relevant to incorporated third-party software is in `NOTICE.txt`.
