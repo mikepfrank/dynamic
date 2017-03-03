@@ -32,10 +32,10 @@ Window dump (screenshot) showing how the splash page image looks in the main con
 
 An alternate, higher-resolution, artistically-complex version of the logo.
 
-## 8. Smaller version of alternate logo (`dynamix2.jpg`).
+## 8. Smaller version of alternate logo ([`dynamix2.jpg`](dynamix2.jpg "dynamix2.jpg file")).
 
 Compressed, lower-resolution version of alternate logo.
 
-## 9. README file (`README.md`).
+## 9. README file ([`README.md`](README.md "README.md file")).
 
 This file.
