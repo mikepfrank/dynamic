@@ -15,11 +15,11 @@ Main version of the logo image, composed for the splash page.
 
 Just the main text-box part of the logo, for use in other contexts.
 
-## 4. Faded logo (`dynamic-splash-faded.png`).
+## 4. Faded logo ([`dynamic-splash-faded.png`](dynamic-splash-faded.png "dynamic-splash-faded.png")).
 
 Faded-to-white version of the logo, for use as a slide background.
 
-## 5. Subtitled logo (`dynamic-splash-subtitled.{png,ppm}`).
+## 5. Subtitled logo ([`dynamic-splash-subtitled.png`](dynamic-splash-subtitled.png "dynamic-splash-subtitled.png file"), [dynamic-splash-subtitled.ppm](dynamic-splash-subtitled.ppm "dynamic-splash-subtitled.ppm file")`).
 
 A version of the main logo that also includes the 
 subtitle "The Nonlinear Dynamical Network Simulator."
