@@ -7,7 +7,7 @@ associated with the Dynamic application.
 
 Contains several slides used to compose different verisons of the Dynamic logo.
 
-## 2. Dynamic logo (`dynamic-logo.{gif,png}`).
+## 2. Dynamic logo ([`dynamic-logo.gif`](dynamic-logo.gif "dynamic-logo.gif file"), [`dynamic-logo.png`](dynamic-logo.png "dynamic-logo.png file")).
 
 Main version of the logo image, composed for the splash page.
 
