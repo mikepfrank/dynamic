@@ -59,7 +59,7 @@ For notes on the software architecture of Dynamic, see the docs/Notes.txt file.
 
 ## 7.  File Hierarchy
 
-Contents of the 'dynamic' repository are as follows:
+Contents of the '`dynamic/`' repository are as follows:
 
 ### 7.1.  Artwork subdirectory (`artwork/`).
 
