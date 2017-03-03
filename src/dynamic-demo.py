@@ -8,7 +8,7 @@
 
     FULL PATH:      $GIT_ROOT/dynamic/dynamic-demo.py
 
-    MASTER REPO:    git@gitlab.sandia.gov:mpfrank/dynamic.git
+    MASTER REPO:    https://github.com/mikepfrank/dynamic.git
 
     SYSTEM NAME:    Dynamic (simulator for dynamic networks)
 
