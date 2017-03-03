@@ -3,7 +3,7 @@
 Source files and for-reference images for graphic artwork 
 associated with the Dynamic application.
 
-## 1. PowerPoint for logo assembly (`Dynamic-logo.pptx`).
+## 1. PowerPoint for logo assembly ([`Dynamic-logo.pptx`](Dynamic-logo.pptx "Dynamic-logo.pptx file")).
 
 Contains several slides used to compose different verisons of the Dynamic logo.
 
