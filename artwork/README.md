@@ -19,7 +19,7 @@ Just the main text-box part of the logo, for use in other contexts.
 
 Faded-to-white version of the logo, for use as a slide background.
 
-## 5. Subtitled logo ([`dynamic-splash-subtitled.png`](dynamic-splash-subtitled.png "dynamic-splash-subtitled.png file"), [dynamic-splash-subtitled.ppm](dynamic-splash-subtitled.ppm "dynamic-splash-subtitled.ppm file")).
+## 5. Subtitled logo ([`dynamic-splash-subtitled.png`](dynamic-splash-subtitled.png "dynamic-splash-subtitled.png file"), [`dynamic-splash-subtitled.ppm`](dynamic-splash-subtitled.ppm "dynamic-splash-subtitled.ppm file")).
 
 A version of the main logo that also includes the 
 subtitle "The Nonlinear Dynamical Network Simulator."
