@@ -11,7 +11,7 @@ Contains several slides used to compose different verisons of the Dynamic logo.
 
 Main version of the logo image, composed for the splash page.
 
-## 3. Simplified logo (`dynamic-logo-nosplash.png`).
+## 3. Simplified logo ([`dynamic-logo-nosplash.png`](dynamic-logo-nosplash.png "dynamic-logo-nosplash.png file")).
 
 Just the main text-box part of the logo, for use in other contexts.
 
