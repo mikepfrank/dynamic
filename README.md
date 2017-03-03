@@ -6,7 +6,7 @@ Dynamic is a simple simulator for dynamical systems construed as
 computations.  See the [project homepage](https://cfwebprod.sandia.gov/cfdocs/CompResearch/templates/insert/softwre.cfm?sw=56 "Dynamic homepage")
 for links to related publications.
 
-## 1.  Copyright notice and licensing terms
+## 1.  Copyright Notice and Licensing Terms
 
 The following information may also be found in the file LICENSE.txt.
 
