@@ -46,6 +46,10 @@ for this may include:
  * Plot circuit diagram color-coding node values.  Overlay inferred 
           digital values?
 
+The present status of the development of the visualization 
+capabilities is:  A window is created for visualization purposes,
+but nothing is displayed in it yet.  More work is needed...
+          
 ## 5.  Statistics
 
 Dynamic will be able to be configured to connect important statistics 
