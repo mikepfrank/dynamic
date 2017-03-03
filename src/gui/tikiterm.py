@@ -1426,7 +1426,7 @@ class TikiTerm(Terminal, ScrolledText):
         logger.debug("TikiTerm.closewin(): We're returning, trusting in the guibot to do its job...")           
 
     def _break(this, event):
-        this.destroy()
+        this.closewin()
 
         #--------------------------------------------------------------------------------
         #

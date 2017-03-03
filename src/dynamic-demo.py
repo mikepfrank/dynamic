@@ -312,8 +312,8 @@ def _main():
     if doNorm:
         print() # Just visual whitespace; no need to log it.
         _logger.normal("Welcome to the Dynamic demo program, v0.1.")
-        _logger.normal("Copyright (c)2016 by Michael P. Frank.")
-        _logger.normal("All Rights Reserved.")
+        _logger.normal("Copyright ©2017 Sandia Corporation.")
+        _logger.normal("See the LICENSE.txt file for terms of use.")
         print()
 
     initGui()  # Initialize the graphical user interface.
