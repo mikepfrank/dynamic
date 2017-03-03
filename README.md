@@ -1,4 +1,4 @@
-![Dynamic logo](/artwork/dynamix2.jpg "Dynamic logo")
+![Dynamic logo, fractal version](/artwork/dynamix2.jpg "Dynamic logo - fractal version")
 
 # Dynamic repository (`dynamic/`).
 
