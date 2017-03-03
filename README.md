@@ -143,6 +143,6 @@ Auxilliary source files for testing.
 The main copyright/license file is `LICENSE.txt`.  An additional 
 notice relevant to incorporated third-party software is in `NOTICE.txt`.
 
-### 9.9. README file (`README.md`).
+### 9.9. README file ([`README.md`](README.md "README.md file")).
 
 This file.
