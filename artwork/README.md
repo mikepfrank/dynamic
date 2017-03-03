@@ -24,7 +24,7 @@ Faded-to-white version of the logo, for use as a slide background.
 A version of the main logo that also includes the 
 subtitle "The Nonlinear Dynamical Network Simulator."
 
-## 6. Window dump (`dynamic-window.png`).
+## 6. Window dump ([`dynamic-window.png`](dynamic-window.png "dynamic-window.png file")).
 
 Window dump (screenshot) showing how the splash page image looks in the main console window.
 
