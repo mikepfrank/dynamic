@@ -107,7 +107,7 @@ For notes on the software architecture of Dynamic, see the docs/Notes.txt file.
 
 Contents of the '`dynamic/`' repository are as follows:
 
-### 9.1.  Artwork subdirectory (`artwork/`).
+### 9.1.  Artwork subdirectory ([`artwork/`](artwork "artwork/ subdirectory")).
 
 Contains source files and high-resolution reference versions of graphic artwork
 for the Dynamic system (splash pages, logos, etc.).
