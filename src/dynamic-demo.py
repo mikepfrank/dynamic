@@ -309,7 +309,7 @@ def _main():
 
     if doNorm:
         print() # Just visual whitespace; no need to log it.
-        _logger.normal("Welcome to the Dynamic demo program, v0.1.")
+        _logger.normal("Welcome to the Dynamic demo program, v0.1 (alpha).")
         _logger.normal("Copyright (C) 2017 Sandia Corporation.")
         _logger.normal("See the LICENSE.txt file for terms of use.")
         print()

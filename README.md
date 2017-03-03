@@ -57,6 +57,9 @@ about the trajectories of coordinates of interest in the system,
 for purposes of analyzing whether computationally meaningful 
 information is contained in the trajectory.
 
+Presently, the demo applications calculates and displays mean values 
+of the generalized position coordinate of each node.
+
 ## 6.  Software Architecture
 
 For notes on the software architecture of Dynamic, see the docs/Notes.txt file.
