@@ -1,3 +1,5 @@
+![Dynamic logo](/artwork/dynamix2.jpg "Dynamic logo")
+
 # Dynamic repository (`dynamic/`).
 
 Dynamic is a simple simulator for dynamical systems construed as 
