@@ -41,9 +41,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ## 2.  Version and Status
 
 The present version number designation of Dynamic is 0.1 (alpha).
-This software should be considered PRE-RELEASE.  It is still in 
-early development.  User-friendly visualization and configuration 
-features have still not been implemented.
+The status of this software should be considered PRE-RELEASE.  It 
+is still in early development.  User-friendly visualization and 
+configuration features have still not been implemented.
 
 ## 3.  Purpose
 
