@@ -28,7 +28,7 @@ subtitle "The Nonlinear Dynamical Network Simulator."
 
 Window dump (screenshot) showing how the splash page image looks in the main console window.
 
-## 7. Alternate logo (`DYNAMIXXXX.{jpg,ppm}`).
+## 7. Alternate logo ([`DYNAMIXXXX.jpg`](DYNAMIXXXX.jpg "DYNAMIXXXX.jpg file"), [`DYNAMIXXXX.ppm`](DYNAMIXXXX.ppm "DYNAMIXXXX.ppm file")).
 
 An alternate, higher-resolution, artistically-complex version of the logo.
 
