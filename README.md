@@ -10,9 +10,10 @@ for links to related publications.
 
 The following information may also be found in the file LICENSE.txt.
 
-Copyright ©2017 Sandia Corporation.  Under the terms of Contract
-DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-certain rights in this software.
+Except as stated below, all files in this repository are Copyright 
+©2017 Sandia Corporation.  Under the terms of Contract 
+DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government 
+retains certain rights in this software.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated  documentation  files  (the
