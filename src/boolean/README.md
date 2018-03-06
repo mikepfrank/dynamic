@@ -8,21 +8,21 @@ It depends on the `network` and `function` packages.
 
 The dependency diagram of modules within this package is as follows:
 
-				 _______________
-	Package 	/               \
-	module:		|    boolean    |
-				| (__init__.py) |
-				\_______________/
-	Modules in			|
-	package:			|
-						V
-				dynamicXORGate.py	(all parallel)
-				dynamicORGate.py
-				dynamicANDGate.py
-				dynamicNOTGate.py
+                 _______________
+    Package     /               \
+    module:     |    boolean    |
+                | (__init__.py) |
+                \_______________/
+    Modules in          |
+    package:            |
+                        V
+                dynamicXORGate.py   (all parallel)
+                dynamicORGate.py
+                dynamicANDGate.py
+                dynamicNOTGate.py
 
 Overall the `boolean` package uses the `network` and `function` packages.
-				
+                
 The `boolean` package is used by the `examples` package.
 
 ## 2. Working modules.

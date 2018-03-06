@@ -11,28 +11,28 @@ part of the simulator package.
 
 The dependency diagram of modules within this package is as follows.
 
-					 _______________
-	Package 		/               \
-	module:		 	|   functions   |
-					| (__init__.py) |
-					\_______________/
-	Modules in			|		  |
-	package:			|		  |
-						V		  V
-		doubleWellFunction.py	dynamicBiasFunction.py 
-						|		kineticEnergyFunction.py 
-						|			|
-						V			V
-			quarticFunction.py 	quadraticFunction.py 
-						|			|
-						V			V
-				unaryDifferentiableFunction.py
-										|
-	binaryDifferentiableFunction.py		|
-	ternaryDifferentiableFunction.py	|
-						|				|
-						V				V
-					differentiableFunction.py
+                     _______________
+    Package         /               \
+    module:         |   functions   |
+                    | (__init__.py) |
+                    \_______________/
+    Modules in          |         |
+    package:            |         |
+                        V         V
+        doubleWellFunction.py   dynamicBiasFunction.py 
+                        |       kineticEnergyFunction.py 
+                        |           |
+                        V           V
+            quarticFunction.py  quadraticFunction.py 
+                        |           |
+                        V           V
+                unaryDifferentiableFunction.py
+                                        |
+    binaryDifferentiableFunction.py     |
+    ternaryDifferentiableFunction.py    |
+                        |               |
+                        V               V
+                    differentiableFunction.py
 
 Besides standard Python libraries, the `functions` only uses the 
 top-level `logmaster.py` module.

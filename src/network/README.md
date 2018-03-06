@@ -9,31 +9,31 @@ It depends on the `..simulator` package.
 The dependency diagram of modules within this package is roughly as follows
 (indirect dependencies may not all be shown):
 
-				 _______________
-	Package 	/               \
-	module:		|    network    |
-				| (__init__.py) |
-				\_______________/
-	Modules in		|		  |
-	package:		|		  |
-					V		  |
-		dynamicNetwork.py	  V
-					|		dynamicThreeTerminalGate.py
-					|		dynamicTwoTerminalGate.py
-					|		dynamicOneTerminalGate.py
-					|		dynamicOneTerminalComponent.py
-					|		  |
-					V		  V
-				dynamicComponent.py
-					    |
-						V
-				  dynamicPort.py
-						|
-						V
-				  dynamicLink.py
-						|
-						V
-				  dynamicNode.py
+                 _______________
+    Package     /               \
+    module:     |    network    |
+                | (__init__.py) |
+                \_______________/
+    Modules in      |         |
+    package:        |         |
+                    V         |
+        dynamicNetwork.py     V
+                    |       dynamicThreeTerminalGate.py
+                    |       dynamicTwoTerminalGate.py
+                    |       dynamicOneTerminalGate.py
+                    |       dynamicOneTerminalComponent.py
+                    |         |
+                    V         V
+                dynamicComponent.py
+                        |
+                        V
+                  dynamicPort.py
+                        |
+                        V
+                  dynamicLink.py
+                        |
+                        V
+                  dynamicNode.py
 
 The `network` package uses the `simulator` package.
 

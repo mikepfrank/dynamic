@@ -9,23 +9,23 @@ is still experimental and very much under construction.
 The dependency diagram of modules within this package is roughly as follows
 (indirect dependencies may not all be shown):
 
-				 _______________
-	Package 	/               \
-	module:		|      gui      |
-				| (__init__.py) |
-				\_______________/
-	Modules in		|		|	
-	package:		V		V 
-			  dyngui.py   tikiterm.py
-				  	 |	   |	|	|
-				  	 V	   V	|	V
-			        guiapp.py	|  terminal.py
-						|		|
-						V		V
-					+--worklist.py--+	
-			 		| 		|	    |
-					V		V       V
-			  desque.py  flag.py  utils.py
+                 _______________
+    Package     /               \
+    module:     |      gui      |
+                | (__init__.py) |
+                \_______________/
+    Modules in      |       |   
+    package:        V       V 
+              dyngui.py   tikiterm.py
+                     |     |    |   |
+                     V     V    |   V
+                    guiapp.py   |  terminal.py
+                        |       |
+                        V       V
+                    +--worklist.py--+   
+                    |       |       |
+                    V       V       V
+              desque.py  flag.py  utils.py
 
 The `gui` package uses the top-level module `logmaster.py`.
 

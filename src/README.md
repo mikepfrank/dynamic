@@ -10,43 +10,43 @@ A rough picture of the software architecture is shown below (not including stand
 Python modules used).  Subsequent sections of this file describe the parts of this
 diagram.  See the `README.md` files within individual packages for further detail.
 
-		
-	Application script:		   dynamic-demo.py
-								 |	       |
-							   __/         \______
-	Packages:				  / 	              \
-							 /	 ___________       \
-							/	/			\       \
-							|	| examples  |<--+    \
-							|	\___________/   |     \
-							|		  |			|      \
-							|	 _____V_____ 	|	   |
-							|	/			\	|	   |
-							|	|  boolean  |	|	   |
-							|	\___________/	|	   |
-							|		  |			|	   |
-							|	 _____V_____ 	|	   |
-							|	/			\	/	   |
-							|	|  network  |  /	   |
-							|	\___________/ /		   |
-							|		  |      /		   |
-							|	 _____V_____/ 		   |
-							|	/			\		   |
-							+-->| simulator |          |
-								\___________/		   |
-								/	  |		\		   |
-							   / _____V_____ \		 __V__
-							  /	/			\ \		/	  \
-							  |	| functions | |		| gui |
-							  |	\___________/ |		\_____/
-							  V				  V
-	Top-level			   fixed.py   partialEvalFunc.py
-		modules:			  	  |        |
-								  V        V
-							     logmaster.py
-									  |
-									  V
-								  appdefs.py 
+        
+    Application script:        dynamic-demo.py
+                                 |         |
+                               __/         \______
+    Packages:                 /                   \
+                             /   ___________       \
+                            /   /           \       \
+                            |   | examples  |<--+    \
+                            |   \___________/   |     \
+                            |         |         |      \
+                            |    _____V_____    |      |
+                            |   /           \   |      |
+                            |   |  boolean  |   |      |
+                            |   \___________/   |      |
+                            |         |         |      |
+                            |    _____V_____    |      |
+                            |   /           \   /      |
+                            |   |  network  |  /       |
+                            |   \___________/ /        |
+                            |         |      /         |
+                            |    _____V_____/          |
+                            |   /           \          |
+                            +-->| simulator |          |
+                                \___________/          |
+                                /     |     \          |
+                               / _____V_____ \       __V__
+                              / /           \ \     /     \
+                              | | functions | |     | gui |
+                              | \___________/ |     \_____/
+                              V               V
+    Top-level              fixed.py   partialEvalFunc.py
+        modules:                  |        |
+                                  V        V
+                                 logmaster.py
+                                      |
+                                      V
+                                  appdefs.py 
 
 ## 2. Application scripts.
 
